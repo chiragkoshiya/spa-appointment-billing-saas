@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Appointment;
 use Illuminate\Support\ServiceProvider;
 use App\Observers\AppointmentObserver;
+use Illuminate\Support\Facades\Schema;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -21,6 +22,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+            Schema::defaultStringLength(191);
         Appointment::observe(AppointmentObserver::class);
     }
 }
