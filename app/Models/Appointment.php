@@ -9,7 +9,30 @@ class Appointment extends Model
 {
     Use SoftDeletes;
 
-    protected $fillable = ['customer_id','staff_id','room_id','appointment_date','start_time','end_time','status','created_by','updated_by'];
+    protected $fillable = [
+        'customer_id', 
+        'phone',
+        'staff_id', 
+        'room_id', 
+        'service_id',
+        'appointment_date', 
+        'start_time', 
+        'end_time', 
+        'duration',
+        'is_member',
+        'payment_method',
+        'amount',
+        'payment_status',
+        'sleep',
+        'status', 
+        'created_by', 
+        'updated_by'
+    ];
+
+    public function service()
+    {
+        return $this->belongsTo(Service::class);
+    }
 
     public function customer()
     {
