@@ -4,7 +4,7 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>Sign In | Velzon - Admin & Dashboard Template</title>
+    <title>Sign In</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
     <meta content="Themesbrand" name="author" />
@@ -12,15 +12,15 @@
     <link rel="shortcut icon" href="assets/images/favicon.ico">
 
     <!-- Layout config Js -->
-    <script src="assets/js/layout.js"></script>
+    <script src="{{ asset('assets/js/layout.js') }}"></script>
     <!-- Bootstrap Css -->
-    <link href="assets/css/bootstrap.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/bootstrap.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- Icons Css -->
-    <link href="assets/css/icons.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/icons.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- App Css-->
-    <link href="assets/css/app.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- custom Css-->
-    <link href="assets/css/custom.min.css" rel="stylesheet" type="text/css" />
+    <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
 
 </head>
 
@@ -41,8 +41,8 @@
                                         <div class="bg-overlay"></div>
                                         <div class="position-relative h-100 d-flex flex-column">
                                             <div class="mb-4">
-                                                <a href="index.html" class="d-block">
-                                                    <img src="assets/images/logo-light.png" alt="" height="18">
+                                                <a href="{{ url('/') }}" class="d-block">
+                                                    <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="18">
                                                 </a>
                                             </div>
                                             <div class="mt-auto">
@@ -83,26 +83,33 @@
                                         </div>
 
                                         <div class="mt-4">
-                                            <form action="https://themesbrand.com/velzon/html/master/index.html">
+                                            <form action="{{ route('login') }}" method="POST">
+                                                @csrf
 
                                                 <div class="mb-3">
-                                                    <label for="username" class="form-label">Username</label>
-                                                    <input type="text" class="form-control" id="username" placeholder="Enter username">
+                                                    <label for="email" class="form-label">Email <span class="text-danger">*</span></label>
+                                                    <input type="email" class="form-control @error('email') is-invalid @enderror" id="email" name="email" value="{{ old('email') }}" placeholder="Enter email">
+                                                    @error('email')
+                                                        <div class="invalid-feedback">{{ $message }}</div>
+                                                    @enderror
                                                 </div>
 
                                                 <div class="mb-3">
                                                     <div class="float-end">
                                                         <a href="auth-pass-reset-cover.html" class="text-muted">Forgot password?</a>
                                                     </div>
-                                                    <label class="form-label" for="password-input">Password</label>
+                                                    <label class="form-label" for="password-input">Password <span class="text-danger">*</span></label>
                                                     <div class="position-relative auth-pass-inputgroup mb-3">
-                                                        <input type="password" class="form-control pe-5 password-input" placeholder="Enter password" id="password-input">
+                                                        <input type="password" class="form-control pe-5 password-input @error('password') is-invalid @enderror" placeholder="Enter password" id="password-input" name="password">
                                                         <button class="btn btn-link position-absolute end-0 top-0 text-decoration-none text-muted password-addon material-shadow-none" type="button" id="password-addon"><i class="ri-eye-fill align-middle"></i></button>
+                                                        @error('password')
+                                                            <div class="invalid-feedback">{{ $message }}</div>
+                                                        @enderror
                                                     </div>
                                                 </div>
 
                                                 <div class="form-check">
-                                                    <input class="form-check-input" type="checkbox" value="" id="auth-remember-check">
+                                                    <input class="form-check-input" type="checkbox" name="remember" id="auth-remember-check">
                                                     <label class="form-check-label" for="auth-remember-check">Remember me</label>
                                                 </div>
 
@@ -136,7 +143,7 @@
                     <div class="col-lg-12">
                         <div class="text-center">
                             <p class="mb-0">&copy;
-                                <script>document.write(new Date().getFullYear())</script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+                                <script>document.write(new Date().getFullYear())</script>
                             </p>
                         </div>
                     </div>
@@ -148,17 +155,49 @@
     <!-- end auth-page-wrapper -->
 
     <!-- JAVASCRIPT -->
-    <script src="assets/libs/bootstrap/js/bootstrap.bundle.min.js"></script>
-    <script src="assets/libs/simplebar/simplebar.min.js"></script>
-    <script src="assets/libs/node-waves/waves.min.js"></script>
-    <script src="assets/libs/feather-icons/feather.min.js"></script>
-    <script src="assets/js/pages/plugins/lord-icon-2.1.0.js"></script>
-    <script src="assets/js/plugins.js"></script>
+    <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/simplebar/simplebar.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/node-waves/waves.min.js') }}"></script>
+    <script src="{{ asset('assets/libs/feather-icons/feather.min.js') }}"></script>
+    <script src="{{ asset('assets/js/pages/plugins/lord-icon-2.1.0.js') }}"></script>
+    <script src="{{ asset('assets/js/plugins.js') }}"></script>
 
     <!-- password-addon init -->
-    <script src="assets/js/pages/password-addon.init.js"></script>
+    <script src="{{ asset('assets/js/pages/password-addon.init.js') }}"></script>
+
+    <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
+
+    <script>
+        @if(session('success'))
+            Toastify({
+                text: "{{ session('success') }}",
+                duration: 3000,
+                close: true,
+                gravity: "top", // `top` or `bottom`
+                position: "right", // `left`, `center` or `right`
+                stopOnFocus: true, // Prevents dismissing of toast on hover
+                style: {
+                    background: "linear-gradient(to right, #0ab39c, #405189)",
+                },
+                onClick: function(){} // Callback after click
+            }).showToast();
+        @endif
+
+        @if($errors->any())
+            @foreach($errors->all() as $error)
+                Toastify({
+                    text: "{{ $error }}",
+                    duration: 3000,
+                    close: true,
+                    gravity: "top",
+                    position: "right",
+                    stopOnFocus: true,
+                    style: {
+                        background: "linear-gradient(to right, #f06548, #f7b84b)",
+                    },
+                }).showToast();
+            @endforeach
+        @endif
+    </script>
 </body>
-
-
-<!-- Mirrored from themesbrand.com/velzon/html/master/auth-signin-cover.html by HTTrack Website Copier/3.x [XR&CO'2014], Mon, 03 Nov 2025 09:18:12 GMT -->
 </html>
