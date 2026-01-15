@@ -29,56 +29,35 @@
 
 <body>
 
-    <!-- Begin page -->
-    <div id="layout-wrapper">
+    <!-- auth-page wrapper -->
+    <div class="auth-page-wrapper auth-bg-cover py-5 d-flex justify-content-center align-items-center min-vh-100">
+        <div class="bg-overlay"></div>
+        <!-- auth-page content -->
+        <div class="auth-page-content overflow-hidden pt-lg-5">
+            <div class="container">
+                @yield('content')
+            </div>
+            <!-- end container -->
+        </div>
+        <!-- end auth page content -->
 
-        @include('module.layout.header')
-
-        @include('module.layout.notification-modal')
-
-
-        @include('module.layout.sidebar')
-
-        <!-- ============================================================== -->
-        <!-- Start right Content here -->
-        <!-- ============================================================== -->
-        <div class="main-content">
-
-            <div class="page-content">
-                <div class="container-fluid">
-
-                    @yield('content')
-
+        <!-- footer -->
+        <footer class="footer galaxy-border-none">
+            <div class="container">
+                <div class="row">
+                    <div class="col-lg-12">
+                        <div class="text-center">
+                            <p class="mb-0">&copy;
+                                <script>document.write(new Date().getFullYear())</script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i> by Themesbrand
+                            </p>
+                        </div>
+                    </div>
                 </div>
-                <!-- container-fluid -->
             </div>
-            <!-- End Page-content -->
-
-            @include('module.layout.footer')
-        </div>
-        <!-- end main content-->
-
+        </footer>
+        <!-- end Footer -->
     </div>
-    <!-- END layout-wrapper -->
-
-
-
-    <!--start back-to-top-->
-    <button onclick="topFunction()" class="btn btn-danger btn-icon" id="back-to-top">
-        <i class="ri-arrow-up-line"></i>
-    </button>
-    <!--end back-to-top-->
-
-    <!--preloader-->
-    <div id="preloader">
-        <div id="status">
-            <div class="spinner-border text-primary avatar-sm" role="status">
-                <span class="visually-hidden">Loading...</span>
-            </div>
-        </div>
-    </div>
-
-    @include('module.layout.customizer')
+    <!-- end auth-page-wrapper -->
 
     <!-- JAVASCRIPT -->
     <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>
@@ -120,8 +99,6 @@
 
     @stack('scripts')
 
-    <!-- App js -->
-    <script src="{{ asset('assets/js/app.js') }}"></script>
 </body>
 
 </html>
