@@ -35,6 +35,7 @@
         @include('module.layout.header')
 
         @include('module.layout.notification-modal')
+        @include('module.layout.delete-modal')
 
 
         @include('module.layout.sidebar')
@@ -116,6 +117,47 @@
                 onClick: function(){}
             }).showToast();
         }
+
+        // Handle Session Messages
+        @if(session('success'))
+            showToast('success', "{{ session('success') }}");
+        @endif
+
+        @if(session('error'))
+            showToast('error', "{{ session('error') }}");
+        @endif
+
+        @if(session('warning'))
+            showToast('warning', "{{ session('warning') }}");
+        @endif
+
+        @if(session('info'))
+            showToast('info', "{{ session('info') }}");
+        @endif
+
+        @if($errors->any())
+            @foreach($errors->all() as $error)
+                showToast('error', "{{ $error }}");
+            @endforeach
+        @endif
+
+        // Global Delete Modal Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const deleteModal = document.getElementById('deleteRecordModal');
+            if (deleteModal) {
+                deleteModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const action = button.getAttribute('data-action');
+                    const message = button.getAttribute('data-message');
+                    
+                    const form = deleteModal.querySelector('#delete-form');
+                    const messageContainer = deleteModal.querySelector('#delete-message');
+                    
+                    if (form) form.action = action;
+                    if (messageContainer && message) messageContainer.textContent = message;
+                });
+            }
+        });
     </script>
 
     @stack('scripts')

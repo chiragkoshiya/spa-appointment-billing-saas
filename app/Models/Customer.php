@@ -10,7 +10,7 @@ class Customer extends Model
     use SoftDeletes;
 
     protected $fillable = [
-        'name','phone','email','customer_type','created_at','updated_at'
+        'name', 'phone', 'email', 'customer_type', 'created_by', 'updated_by'
     ];
 
     public function wallet()

@@ -6,6 +6,7 @@ use App\Models\Appointment;
 use App\Models\Invoice;
 use App\Models\InvoiceItem;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Auth;
 
 class AppointmentObserver
 {
@@ -95,6 +96,8 @@ class AppointmentObserver
                 'wallet_deduction' => $walletDeduction,
                 'payable_amount'   => $payableAmount,
                 'payment_mode'     => 'cash',
+                'created_by'       => Auth::id() ?? $appointment->created_by,
+                'updated_by'       => Auth::id() ?? $appointment->updated_by,
             ]);
 
             // Invoice items
@@ -103,6 +106,8 @@ class AppointmentObserver
                     'invoice_id'  => $invoice->id,
                     'description' => $service->service->name,
                     'amount'      => $service->price,
+                    'created_by' => Auth::id() ?? $appointment->created_by,
+                    'updated_by' => Auth::id() ?? $appointment->updated_by,
                 ]);
             }
         });

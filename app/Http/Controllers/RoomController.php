@@ -13,7 +13,7 @@ class RoomController extends Controller
      */
     public function index()
     {
-        $rooms = Room::latest()->paginate(10);
+        $rooms = Room::latest('created_at')->paginate(10);
         return view('module.rooms.index', compact('rooms'));
     }
 
@@ -23,16 +23,19 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:100|unique:rooms,name',
+            'is_active' => 'boolean'
         ]);
 
-        $data = $request->all();
-        $data['created_by'] = Auth::id();
-        $data['updated_by'] = Auth::id();
+        $room = new Room();
+        $room->name = $request->name;
+        $room->slug = \Illuminate\Support\Str::slug($request->name);
+        $room->is_active = $request->has('is_active');
+        $room->created_by = Auth::id();
+        $room->updated_by = Auth::id();
+        $room->save();
 
-        Room::create($data);
-
-        return redirect()->back()->with('success', 'Room created successfully.');
+        return redirect()->back()->with('success', 'Room "' . $room->name . '" created successfully.');
     }
 
     /**
@@ -41,15 +44,17 @@ class RoomController extends Controller
     public function update(Request $request, Room $room)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
+            'name' => 'required|string|max:100|unique:rooms,name,' . $room->id,
+            'is_active' => 'boolean'
         ]);
 
-        $data = $request->all();
-        $data['updated_by'] = Auth::id();
+        $room->name = $request->name;
+        $room->slug = \Illuminate\Support\Str::slug($request->name);
+        $room->is_active = $request->has('is_active');
+        $room->updated_by = Auth::id();
+        $room->save();
 
-        $room->update($data);
-
-        return redirect()->back()->with('success', 'Room updated successfully.');
+        return redirect()->back()->with('success', 'Room "' . $room->name . '" updated successfully.');
     }
 
     /**
@@ -57,7 +62,8 @@ class RoomController extends Controller
      */
     public function destroy(Room $room)
     {
+        $name = $room->name;
         $room->delete();
-        return redirect()->back()->with('success', 'Room deleted successfully.');
+        return redirect()->back()->with('success', 'Room "' . $name . '" deleted successfully.');
     }
 }

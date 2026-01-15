@@ -45,6 +45,10 @@ class CustomerController extends Controller
             'wallet_balance' => 'nullable|numeric|min:0',
         ]);
 
+        if ($request->customer_type == 'normal') {
+            return redirect()->back()->with('error', 'Normal customers can only be created via the Appointment module.');
+        }
+
         $data = $request->all();
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
@@ -60,7 +64,7 @@ class CustomerController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Customer created successfully.');
+        return redirect()->back()->with('success', 'Customer "' . $customer->name . '" created successfully.');
     }
 
     /**
@@ -91,7 +95,7 @@ class CustomerController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Customer updated successfully.');
+        return redirect()->back()->with('success', 'Customer "' . $customer->name . '" updated successfully.');
     }
 
     /**
@@ -99,7 +103,8 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
+        $name = $customer->name;
         $customer->delete();
-        return redirect()->back()->with('success', 'Customer deleted successfully.');
+        return redirect()->back()->with('success', 'Customer "' . $name . '" deleted successfully.');
     }
 }

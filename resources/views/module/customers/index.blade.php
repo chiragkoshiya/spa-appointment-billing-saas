@@ -95,13 +95,13 @@
                                             </a>
                                         </li>
                                         <li class="list-inline-item">
-                                            <form action="{{ route('customers.destroy', $customer->id) }}" method="POST" onsubmit="return confirm('Are you sure?')">
-                                                @csrf
-                                                @method('DELETE')
-                                                <button type="submit" class="btn btn-link p-0">
-                                                    <i class="ri-delete-bin-fill align-bottom text-muted"></i>
-                                                </button>
-                                            </form>
+                                            <a class="btn btn-link p-0 remove-item-btn" 
+                                               data-bs-toggle="modal" 
+                                               data-bs-target="#deleteRecordModal" 
+                                               data-action="{{ route('customers.destroy', $customer->id) }}"
+                                               data-message="Are you sure you want to remove customer: {{ $customer->name }}?">
+                                                <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                            </a>
                                         </li>
                                     </ul>
                                 </td>

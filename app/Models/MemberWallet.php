@@ -9,7 +9,7 @@ class MemberWallet extends Model
 {
     use SoftDeletes;
 
-    protected $fillable = ['customer_id','balance','created_at','updated_at'];
+    protected $fillable = ['customer_id', 'balance', 'created_by', 'updated_by'];
 
     public function customer()
     {

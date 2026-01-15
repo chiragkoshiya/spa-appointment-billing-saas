@@ -13,7 +13,7 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        $services = Service::latest()->paginate(10);
+        $services = Service::latest('created_at')->paginate(10);
         return view('module.services.index', compact('services'));
     }
 
@@ -24,17 +24,19 @@ class ServiceController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'duration_minutes' => 'nullable|integer',
+            'price' => 'required|numeric|min:0',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'is_active' => 'nullable|boolean',
         ]);
 
         $data = $request->all();
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
+        $data['is_active'] = $request->has('is_active') ? true : false;
 
         Service::create($data);
 
-        return redirect()->back()->with('success', 'Service created successfully.');
+        return redirect()->back()->with('success', 'Service "' . $data['name'] . '" created successfully.');
     }
 
     /**
@@ -44,16 +46,18 @@ class ServiceController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'price' => 'required|numeric',
-            'duration_minutes' => 'nullable|integer',
+            'price' => 'required|numeric|min:0',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'is_active' => 'nullable|boolean',
         ]);
 
         $data = $request->all();
         $data['updated_by'] = Auth::id();
+        $data['is_active'] = $request->has('is_active') ? true : false;
 
         $service->update($data);
 
-        return redirect()->back()->with('success', 'Service updated successfully.');
+        return redirect()->back()->with('success', 'Service "' . $service->name . '" updated successfully.');
     }
 
     /**
@@ -61,7 +65,17 @@ class ServiceController extends Controller
      */
     public function destroy(Service $service)
     {
-        $service->delete();
-        return redirect()->back()->with('success', 'Service deleted successfully.');
+        try {
+            // Check if service is being used in appointments
+            if ($service->appointments()->exists()) {
+                return redirect()->back()->with('error', 'Cannot delete service. It is being used in appointments.');
+            }
+
+            $name = $service->name;
+            $service->delete();
+            return redirect()->back()->with('success', 'Service "' . $name . '" deleted successfully.');
+        } catch (\Exception $e) {
+            return redirect()->back()->with('error', 'Error deleting service: ' . $e->getMessage());
+        }
     }
 }
