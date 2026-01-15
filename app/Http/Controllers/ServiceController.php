@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Service;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class ServiceController extends Controller
 {
@@ -12,15 +13,8 @@ class ServiceController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $services = Service::latest()->paginate(10);
+        return view('module.services.index', compact('services'));
     }
 
     /**
@@ -28,23 +22,19 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'duration_minutes' => 'nullable|integer',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Service $service)
-    {
-        //
-    }
+        $data = $request->all();
+        $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Service $service)
-    {
-        //
+        Service::create($data);
+
+        return redirect()->back()->with('success', 'Service created successfully.');
     }
 
     /**
@@ -52,7 +42,18 @@ class ServiceController extends Controller
      */
     public function update(Request $request, Service $service)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'price' => 'required|numeric',
+            'duration_minutes' => 'nullable|integer',
+        ]);
+
+        $data = $request->all();
+        $data['updated_by'] = Auth::id();
+
+        $service->update($data);
+
+        return redirect()->back()->with('success', 'Service updated successfully.');
     }
 
     /**
@@ -60,6 +61,7 @@ class ServiceController extends Controller
      */
     public function destroy(Service $service)
     {
-        //
+        $service->delete();
+        return redirect()->back()->with('success', 'Service deleted successfully.');
     }
 }

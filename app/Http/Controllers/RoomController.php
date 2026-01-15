@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Room;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class RoomController extends Controller
 {
@@ -12,15 +13,8 @@ class RoomController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $rooms = Room::latest()->paginate(10);
+        return view('module.rooms.index', compact('rooms'));
     }
 
     /**
@@ -28,23 +22,17 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Room $room)
-    {
-        //
-    }
+        $data = $request->all();
+        $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Room $room)
-    {
-        //
+        Room::create($data);
+
+        return redirect()->back()->with('success', 'Room created successfully.');
     }
 
     /**
@@ -52,7 +40,16 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+        ]);
+
+        $data = $request->all();
+        $data['updated_by'] = Auth::id();
+
+        $room->update($data);
+
+        return redirect()->back()->with('success', 'Room updated successfully.');
     }
 
     /**
@@ -60,6 +57,7 @@ class RoomController extends Controller
      */
     public function destroy(Room $room)
     {
-        //
+        $room->delete();
+        return redirect()->back()->with('success', 'Room deleted successfully.');
     }
 }

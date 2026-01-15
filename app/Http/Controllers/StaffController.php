@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Staff;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 
 class StaffController extends Controller
 {
@@ -12,15 +13,8 @@ class StaffController extends Controller
      */
     public function index()
     {
-        //
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     */
-    public function create()
-    {
-        //
+        $staff = Staff::latest()->paginate(10);
+        return view('module.staff.index', compact('staff'));
     }
 
     /**
@@ -28,23 +22,19 @@ class StaffController extends Controller
      */
     public function store(Request $request)
     {
-        //
-    }
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+        ]);
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Staff $staff)
-    {
-        //
-    }
+        $data = $request->all();
+        $data['created_by'] = Auth::id();
+        $data['updated_by'] = Auth::id();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Staff $staff)
-    {
-        //
+        Staff::create($data);
+
+        return redirect()->back()->with('success', 'Staff created successfully.');
     }
 
     /**
@@ -52,7 +42,18 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
-        //
+        $request->validate([
+            'name' => 'required|string|max:255',
+            'phone' => 'required|string|max:20',
+            'email' => 'nullable|email|max:255',
+        ]);
+
+        $data = $request->all();
+        $data['updated_by'] = Auth::id();
+
+        $staff->update($data);
+
+        return redirect()->back()->with('success', 'Staff updated successfully.');
     }
 
     /**
@@ -60,6 +61,7 @@ class StaffController extends Controller
      */
     public function destroy(Staff $staff)
     {
-        //
+        $staff->delete();
+        return redirect()->back()->with('success', 'Staff deleted successfully.');
     }
 }
