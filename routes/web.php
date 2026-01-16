@@ -24,9 +24,9 @@ Route::middleware('auth')->group(function () {
         return view('module.dashboard.dashboard');
     })->name('dashboard');
 
+    Route::get('appointments/availability', [AppointmentController::class, 'getAvailability'])->name('appointments.availability');
     Route::resource('appointments', AppointmentController::class);
     Route::put('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');
-    Route::get('appointments/availability', [AppointmentController::class, 'getAvailability'])->name('appointments.availability');
     Route::resource('customers', CustomerController::class);
     Route::resource('services', ServiceController::class);
     Route::resource('staff', StaffController::class);

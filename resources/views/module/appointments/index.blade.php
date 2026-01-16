@@ -995,30 +995,45 @@
                     roomSelect.remove(1);
                 }
 
-                // Add available rooms first
+                // Add available rooms first with green "Available" text
                 availableRooms.forEach(room => {
                     const option = document.createElement('option');
                     option.value = room.id;
-                    option.textContent = room.name + ' ✓ Available';
+                    option.textContent = room.name + ' - Available';
                     option.className = 'text-success';
                     option.setAttribute('data-available', 'true');
+                    option.style.color = '#198754'; // Green color
                     roomSelect.appendChild(option);
                 });
 
-                // Add unavailable rooms
+                // Add unavailable rooms with red "Booked" text
                 unavailableRooms.forEach(room => {
                     const option = document.createElement('option');
                     option.value = room.id;
-                    option.textContent = room.name + ' ✗ Unavailable';
+                    option.textContent = room.name + ' - Booked';
                     option.className = 'text-danger';
                     option.setAttribute('data-available', 'false');
+                    option.style.color = '#dc3545'; // Red color
                     option.disabled = true;
                     roomSelect.appendChild(option);
                 });
 
-                // Restore previous selection if still valid
+                // Restore previous selection if still valid and available
                 if (currentValue) {
-                    roomSelect.value = currentValue;
+                    const isStillAvailable = availableRooms.some(r => r.id == currentValue);
+                    if (isStillAvailable) {
+                        roomSelect.value = currentValue;
+                    } else {
+                        // If previously selected room is now unavailable, select first available or empty
+                        if (availableRooms.length > 0) {
+                            roomSelect.value = availableRooms[0].id;
+                        } else {
+                            roomSelect.value = '';
+                        }
+                    }
+                } else if (availableRooms.length > 0) {
+                    // Auto-select first available room if none was selected
+                    roomSelect.value = availableRooms[0].id;
                 }
             }
 
@@ -1041,9 +1056,25 @@
                 }
             }
 
-            // Check availability when date/time changes
+            // Check availability when date/time changes - automatically update room dropdown
             [appointmentDate, startTime, endTime].forEach(el => {
-                if (el) el.addEventListener('change', checkRoomAvailability);
+                if (el) {
+                    el.addEventListener('change', function() {
+                        // Small delay to ensure all values are set
+                        setTimeout(checkRoomAvailability, 100);
+                    });
+                }
+            });
+
+            // Also check on input event for real-time updates
+            [startTime, endTime].forEach(el => {
+                if (el) {
+                    el.addEventListener('input', function() {
+                        if (appointmentDate.value && startTime.value && endTime.value) {
+                            setTimeout(checkRoomAvailability, 300); // Debounce
+                        }
+                    });
+                }
             });
 
             // Check for conflicts when room is selected
@@ -1139,30 +1170,62 @@
                     editRoomSelect.remove(1);
                 }
 
+                // Add available rooms first with green "Available" text
                 availableRooms.forEach(room => {
                     const option = document.createElement('option');
                     option.value = room.id;
-                    option.textContent = room.name + ' ✓ Available';
+                    option.textContent = room.name + ' - Available';
                     option.className = 'text-success';
+                    option.style.color = '#198754'; // Green color
                     editRoomSelect.appendChild(option);
                 });
 
+                // Add unavailable rooms with red "Booked" text
                 unavailableRooms.forEach(room => {
                     const option = document.createElement('option');
                     option.value = room.id;
-                    option.textContent = room.name + ' ✗ Unavailable';
+                    option.textContent = room.name + ' - Booked';
                     option.className = 'text-danger';
+                    option.style.color = '#dc3545'; // Red color
                     option.disabled = true;
                     editRoomSelect.appendChild(option);
                 });
 
+                // Restore previous selection if still valid and available
                 if (currentValue) {
-                    editRoomSelect.value = currentValue;
+                    const isStillAvailable = availableRooms.some(r => r.id == currentValue);
+                    if (isStillAvailable) {
+                        editRoomSelect.value = currentValue;
+                    } else {
+                        // If previously selected room is now unavailable, select first available or keep current
+                        if (availableRooms.length > 0) {
+                            editRoomSelect.value = availableRooms[0].id;
+                        }
+                    }
+                } else if (availableRooms.length > 0) {
+                    // Auto-select first available room if none was selected
+                    editRoomSelect.value = availableRooms[0].id;
                 }
             }
 
+            // Check availability when date/time changes in edit modal
             [editAppointmentDate, editStartTime, editEndTime].forEach(el => {
-                if (el) el.addEventListener('change', checkEditRoomAvailability);
+                if (el) {
+                    el.addEventListener('change', function() {
+                        setTimeout(checkEditRoomAvailability, 100);
+                    });
+                }
+            });
+
+            // Also check on input event for real-time updates in edit modal
+            [editStartTime, editEndTime].forEach(el => {
+                if (el) {
+                    el.addEventListener('input', function() {
+                        if (editAppointmentDate.value && editStartTime.value && editEndTime.value) {
+                            setTimeout(checkEditRoomAvailability, 300); // Debounce
+                        }
+                    });
+                }
             });
 
             // Reset modals on close
@@ -1200,11 +1263,26 @@
             display: inline-block;
         }
 
+        /* Style for available rooms in dropdown */
         select option.text-success {
+            color: #198754 !important;
+            font-weight: 500;
+        }
+
+        /* Style for booked rooms in dropdown */
+        select option.text-danger {
+            color: #dc3545 !important;
+            font-weight: 500;
+        }
+
+        /* Ensure colors are visible in select dropdown */
+        #room_select option[data-available="true"],
+        #edit_room_id option[data-available="true"] {
             color: #198754 !important;
         }
 
-        select option.text-danger {
+        #room_select option[data-available="false"],
+        #edit_room_id option[data-available="false"] {
             color: #dc3545 !important;
         }
     </style>
