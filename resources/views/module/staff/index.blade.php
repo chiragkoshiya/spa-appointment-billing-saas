@@ -107,9 +107,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-end">
-                        {{ $staff->links() }}
-                    </div>
+                    @if ($staff->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $staff->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -132,7 +134,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Phone Number</label>
-                            <input type="text" name="phone" class="form-control" placeholder="Enter phone" required>
+                            <input type="text" name="phone" class="form-control" placeholder="Enter phone"
+                                required>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Email</label>

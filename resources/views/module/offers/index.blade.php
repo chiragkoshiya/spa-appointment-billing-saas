@@ -109,9 +109,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="mt-3 d-flex justify-content-end">
-                        {{ $offers->links() }}
-                    </div>
+                    @if ($offers->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $offers->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

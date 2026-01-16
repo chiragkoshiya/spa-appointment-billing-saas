@@ -100,7 +100,7 @@
                         </table>
                     </div>
                     @if ($services->hasPages())
-                        <div class="d-flex justify-content-end">
+                        <div class="pagination-wrapper">
                             {{ $services->links() }}
                         </div>
                     @endif

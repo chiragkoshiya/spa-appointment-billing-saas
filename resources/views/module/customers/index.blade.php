@@ -25,31 +25,35 @@
         <div class="col-lg-12">
             <div class="card">
                 <div class="card-header border-0 mt-n1">
-                    <div class="d-flex align-items-center">
-                        <h5 class="card-title mb-0 flex-grow-1">Customer List</h5>
-                        <div class="flex-shrink-0">
-                            <div class="d-flex gap-2 flex-wrap">
-                                <form action="{{ route('customers.index') }}" method="GET" class="d-flex gap-2">
-                                    <select name="type" class="form-select form-select-sm" onchange="this.form.submit()">
-                                        <option value="">All Types</option>
-                                        <option value="normal" {{ request('type') == 'normal' ? 'selected' : '' }}>Normal
-                                        </option>
-                                        <option value="member" {{ request('type') == 'member' ? 'selected' : '' }}>Member
-                                        </option>
-                                    </select>
-                                    <input type="text" name="search" class="form-control form-control-sm"
-                                        placeholder="Search name/phone..." value="{{ request('search') }}">
-                                    <button type="submit" class="btn btn-primary btn-sm">Search</button>
-                                    <a href="{{ route('customers.index') }}" class="btn btn-light btn-sm"
-                                        title="Refresh/Reset Filters">
-                                        <i class="ri-refresh-line"></i>
-                                    </a>
-                                </form>
-                                <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal"
-                                    data-bs-target="#createModal">
-                                    <i class="ri-add-line align-bottom me-1"></i> Add Customer
+                    <div class="d-flex align-items-center justify-content-between flex-wrap gap-2">
+                        <h5 class="card-title mb-0">Customer List</h5>
+                        <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1 flex-md-grow-0">
+                            <form id="customerSearchForm" action="{{ route('customers.index') }}" method="GET"
+                                class="d-flex gap-2 flex-wrap flex-grow-1 flex-md-grow-0">
+                                <select name="type" id="customer_type_filter" class="form-select form-select-sm"
+                                    style="min-width: 120px; max-width: 140px;">
+                                    <option value="">All Types</option>
+                                    <option value="normal" {{ request('type') == 'normal' ? 'selected' : '' }}>Normal
+                                    </option>
+                                    <option value="member" {{ request('type') == 'member' ? 'selected' : '' }}>Member
+                                    </option>
+                                </select>
+                                <input type="text" name="search" id="customer_search_input"
+                                    class="form-control form-control-sm" placeholder="Search name/phone..."
+                                    value="{{ request('search') }}" style="min-width: 180px; max-width: 250px;">
+                                <button type="submit" class="btn btn-primary btn-sm" id="customer_search_btn">
+                                    <i class="ri-search-line me-1"></i>Search
                                 </button>
-                            </div>
+                                <a href="{{ route('customers.index') }}" class="btn btn-light btn-sm"
+                                    title="Refresh/Reset Filters">
+                                    <i class="ri-refresh-line"></i>
+                                </a>
+                            </form>
+                            <button type="button" class="btn btn-success btn-sm add-btn" data-bs-toggle="modal"
+                                data-bs-target="#createModal">
+                                <i class="ri-add-line align-bottom me-1"></i> <span class="d-none d-sm-inline">Add
+                                    Customer</span><span class="d-sm-none">Add</span>
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -131,9 +135,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-end">
-                        {{ $customers->links() }}
-                    </div>
+                    @if ($customers->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $customers->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>
@@ -247,6 +253,38 @@
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Customer Search Form Handler
+            const customerSearchForm = document.getElementById('customerSearchForm');
+            const customerTypeFilter = document.getElementById('customer_type_filter');
+            const customerSearchInput = document.getElementById('customer_search_input');
+
+            // Handle type filter change - auto submit when type changes
+            if (customerTypeFilter && customerSearchForm) {
+                customerTypeFilter.addEventListener('change', function() {
+                    customerSearchForm.submit();
+                });
+            }
+
+            // Allow Enter key to submit search form
+            if (customerSearchInput && customerSearchForm) {
+                customerSearchInput.addEventListener('keypress', function(e) {
+                    if (e.key === 'Enter') {
+                        e.preventDefault();
+                        customerSearchForm.submit();
+                    }
+                });
+            }
+
+            // Ensure search button works (explicit handler for debugging)
+            const customerSearchBtn = document.getElementById('customer_search_btn');
+            if (customerSearchBtn && customerSearchForm) {
+                customerSearchBtn.addEventListener('click', function(e) {
+                    // Don't prevent default - let form submit naturally
+                    // This is just for debugging/logging
+                    console.log('Search button clicked');
+                });
+            }
+
             // Validation functions
             function validateName(name) {
                 return /^[a-zA-Z\s]+$/.test(name) && name.trim().length > 0;

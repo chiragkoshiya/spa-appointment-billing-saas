@@ -100,9 +100,11 @@
                             </tbody>
                         </table>
                     </div>
-                    <div class="d-flex justify-content-end">
-                        {{ $rooms->links() }}
-                    </div>
+                    @if ($rooms->hasPages())
+                        <div class="pagination-wrapper">
+                            {{ $rooms->links() }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

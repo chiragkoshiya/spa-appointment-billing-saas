@@ -131,7 +131,7 @@
                 <div class="collapse {{ request()->hasAny(['search', 'customer_id', 'payment_mode', 'payment_status', 'amount_min', 'amount_max', 'date_from', 'date_to']) ? 'show' : '' }}"
                     id="filterCollapse">
                     <div class="card-body">
-                        <form method="GET" action="{{ route('invoices.index') }}" id="filterForm">
+                        <form method="GET" action="{{ route('invoices.index') }}" id="filterForm" class="filter-form">
                             <div class="row g-3">
                                 <div class="col-md-3">
                                     <label class="form-label">Search</label>
@@ -351,7 +351,7 @@
                         </table>
                     </div>
                     @if($invoices->hasPages())
-                        <div class="d-flex justify-content-end">
+                        <div class="pagination-wrapper">
                             {{ $invoices->links() }}
                         </div>
                     @endif

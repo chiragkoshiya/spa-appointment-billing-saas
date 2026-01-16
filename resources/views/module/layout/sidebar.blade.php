@@ -81,7 +81,8 @@
                         <li class="nav-item">
                             <a class="nav-link menu-link {{ request()->routeIs('customers.*') ? 'active' : '' }}"
                                 href="{{ route('customers.index') }}">
-                                <i class="ri-user-heart-line"></i> <span data-key="t-customers">Customers</span>
+                                <i class="ri-user-heart-line"></i> <span data-key="t-customers">Customers
+                                    (Members)</span>
                             </a>
                         </li>
 

@@ -313,7 +313,7 @@
                         </table>
                     </div>
                     @if($items->hasPages())
-                        <div class="d-flex justify-content-end">
+                        <div class="pagination-wrapper">
                             {{ $items->links() }}
                         </div>
                     @endif
