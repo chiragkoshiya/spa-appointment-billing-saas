@@ -459,7 +459,7 @@
                                         </td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
-                                                @if ($appointment->status == 'created')
+                                                @if ($appointment->status == 'created' && $appointment->payment_status != 'paid')
                                                     <li class="list-inline-item">
                                                         <form
                                                             action="{{ route('appointments.updateStatus', $appointment->id) }}"
@@ -907,6 +907,47 @@
         </div>
     </div>
 
+    <!-- Payment Status Change Confirmation Modal -->
+    <div class="modal fade" id="paymentStatusConfirmModal" tabindex="-1"
+        aria-labelledby="paymentStatusConfirmModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header bg-primary-subtle">
+                    <h5 class="modal-title text-primary" id="paymentStatusConfirmModalLabel">
+                        <i class="ri-money-rupee-circle-line me-2"></i>Confirm Payment Status Change
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="text-center mb-3">
+                        <div class="avatar-md mx-auto mb-4">
+                            <div class="avatar-title bg-primary-subtle text-primary rounded-circle font-size-24">
+                                <i class="ri-alert-line"></i>
+                            </div>
+                        </div>
+                        <h5 class="mb-3">Change Payment Status to Paid?</h5>
+                        <p class="text-muted mb-0">
+                            When you change the payment status to <strong class="text-success">Paid</strong>,
+                            an invoice will be automatically generated for this appointment.
+                        </p>
+                        <div class="alert alert-info mt-3 mb-0">
+                            <i class="ri-information-line me-1"></i>
+                            <strong>Note:</strong> After generating the invoice, you won't be able to edit this appointment.
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-light" data-bs-dismiss="modal">
+                        <i class="ri-close-line me-1"></i> Cancel
+                    </button>
+                    <button type="button" class="btn btn-primary" id="confirmPaymentStatusChange">
+                        <i class="ri-check-line me-1"></i> Yes, Change to Paid
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
 @endsection
 
 @push('scripts')
@@ -952,7 +993,87 @@
                 document.getElementById('edit_sleep').value = button.getAttribute('data-sleep') || '';
                 document.getElementById('edit_is_member').checked = button.getAttribute('data-is_member') ==
                     '1';
+
+                // Store original payment status
+                const originalPaymentStatus = button.getAttribute('data-payment_status') || 'pending';
+                editForm.setAttribute('data-original-payment-status', originalPaymentStatus);
             });
+
+            // Payment Status Change Confirmation
+            const paymentStatusConfirmModal = document.getElementById('paymentStatusConfirmModal');
+            const editPaymentStatusSelect = document.getElementById('edit_payment_status');
+            let pendingFormSubmit = false;
+
+            // Handle payment status change in edit form
+            if (editPaymentStatusSelect) {
+                editPaymentStatusSelect.addEventListener('change', function() {
+                    const newStatus = this.value;
+                    const originalStatus = editForm.getAttribute('data-original-payment-status') ||
+                        'pending';
+
+                    // If changing to "paid" from any other status, mark for confirmation
+                    if (newStatus === 'paid' && originalStatus !== 'paid') {
+                        pendingFormSubmit = true;
+                    } else {
+                        pendingFormSubmit = false;
+                    }
+                });
+            }
+
+            // Intercept edit form submission when payment status is changed to paid
+            if (editForm) {
+                editForm.addEventListener('submit', function(e) {
+                    const currentStatus = editPaymentStatusSelect ? editPaymentStatusSelect.value :
+                        'pending';
+                    const originalStatus = editForm.getAttribute('data-original-payment-status') ||
+                        'pending';
+
+                    // If changing to "paid" from any other status, show confirmation
+                    if (currentStatus === 'paid' && originalStatus !== 'paid' && pendingFormSubmit) {
+                        e.preventDefault();
+                        e.stopPropagation();
+
+                        // Show confirmation modal
+                        const modal = new bootstrap.Modal(paymentStatusConfirmModal);
+                        modal.show();
+
+                        return false;
+                    }
+                });
+            }
+
+            // Confirm payment status change
+            const confirmPaymentBtn = document.getElementById('confirmPaymentStatusChange');
+            if (confirmPaymentBtn) {
+                confirmPaymentBtn.addEventListener('click', function() {
+                    // Close confirmation modal
+                    const modal = bootstrap.Modal.getInstance(paymentStatusConfirmModal);
+                    if (modal) {
+                        modal.hide();
+                    }
+
+                    // Submit the form
+                    if (editForm && pendingFormSubmit) {
+                        pendingFormSubmit = false;
+                        editForm.submit();
+                    }
+                });
+            }
+
+            // Reset pending submit when confirmation modal is closed without confirmation
+            if (paymentStatusConfirmModal) {
+                paymentStatusConfirmModal.addEventListener('hidden.bs.modal', function() {
+                    if (pendingFormSubmit) {
+                        // Revert payment status to original
+                        const originalStatus = editForm.getAttribute('data-original-payment-status') ||
+                            'pending';
+                        if (editPaymentStatusSelect) {
+                            editPaymentStatusSelect.value = originalStatus;
+                        }
+                        pendingFormSubmit = false;
+                    }
+                });
+            }
 
             // Reset edit form when modal is hidden
             editModal.addEventListener('hidden.bs.modal', function() {
@@ -1025,7 +1146,7 @@
 
                     // Handle member wallet display
                     const memberWalletBalance = parseFloat(selectedOption.getAttribute('data-balance') ||
-                    0);
+                        0);
                     window.memberWalletBalance = isMember ? memberWalletBalance : 0;
 
                     if (isMember && memberWalletBalance > 0) {
