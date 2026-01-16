@@ -6,7 +6,7 @@
                 <div class="navbar-brand-box horizontal-logo">
                     <a href="{{ route('dashboard') }}" class="logo logo-dark">
                         <span class="logo-sm">
-                            <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+                            <img src="{{ asset('assets/images/logo-sm1.png') }}" alt="" height="22">
                         </span>
                         <span class="logo-lg">
                             <img src="{{ asset('assets/images/logo-dark.png') }}" alt="" height="17">
@@ -15,7 +15,7 @@
 
                     <a href="{{ route('dashboard') }}" class="logo logo-light">
                         <span class="logo-sm">
-                            <img src="{{ asset('assets/images/logo-sm.png') }}" alt="" height="22">
+                            <img src="{{ asset('assets/images/logo-sm1.png') }}" alt="" height="22">
                         </span>
                         <span class="logo-lg">
                             <img src="{{ asset('assets/images/logo-light.png') }}" alt="" height="17">
@@ -66,7 +66,8 @@
                             <span class="text-start ms-xl-2">
                                 <span
                                     class="d-none d-xl-inline-block ms-1 fw-medium user-name-text">{{ Auth::user()->name }}</span>
-                                <span class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ Auth::user()->role->name ?? 'User' }}</span>
+                                <span
+                                    class="d-none d-xl-block ms-1 fs-12 user-name-sub-text">{{ Auth::user()->role->name ?? 'User' }}</span>
                             </span>
                         </span>
                     </button>
@@ -83,7 +84,8 @@
                         <a class="dropdown-item" href="{{ route('lock-screen') }}"><i
                                 class="mdi mdi-lock text-muted fs-16 align-middle me-1"></i> <span
                                 class="align-middle">Lock screen</span></a>
-                        <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal" data-bs-target="#logoutConfirmModal"><i
+                        <a class="dropdown-item" href="javascript:void(0);" data-bs-toggle="modal"
+                            data-bs-target="#logoutConfirmModal"><i
                                 class="mdi mdi-logout text-muted fs-16 align-middle me-1"></i> <span
                                 class="align-middle" data-key="t-logout">Logout</span></a>
                     </div>

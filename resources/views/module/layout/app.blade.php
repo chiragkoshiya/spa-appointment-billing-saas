@@ -1,15 +1,16 @@
 <!doctype html>
-<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg" data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
+<html lang="en" data-layout="vertical" data-topbar="light" data-sidebar="dark" data-sidebar-size="lg"
+    data-sidebar-image="none" data-preloader="disable" data-theme="default" data-theme-colors="default">
 
 <head>
 
     <meta charset="utf-8" />
-    <title>@yield('title') | Admin & Dashboard Template</title>
+    <title>@yield('title') | SPA Management System</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <meta content="Premium Multipurpose Admin & Dashboard Template" name="description" />
-    <meta content="Themesbrand" name="author" />
+    <meta content="Professional SPA Appointment and Billing Management System" name="description" />
+    <meta content="SPA System" name="author" />
     <!-- App favicon -->
-    <link rel="shortcut icon" href="{{ asset('assets/images/favicon.ico') }}">
+    <link rel="shortcut icon" href="{{ asset('assets/images/logo-sm1.png') }}">
 
     <!-- Layout config Js -->
     <script src="{{ asset('assets/js/layout.js') }}"></script>
@@ -36,9 +37,10 @@
 
         @include('module.layout.notification-modal')
         @include('module.layout.delete-modal')
-        
+
         <!-- Logout Confirmation Modal -->
-        <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel" aria-hidden="true">
+        <div class="modal fade" id="logoutConfirmModal" tabindex="-1" aria-labelledby="logoutConfirmModalLabel"
+            aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered">
                 <div class="modal-content">
                     <div class="modal-header">
@@ -47,7 +49,8 @@
                     </div>
                     <div class="modal-body">
                         <div class="text-center">
-                            <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop" colors="primary:#f06548,secondary:#f7b84b" style="width:100px;height:100px"></lord-icon>
+                            <lord-icon src="https://cdn.lordicon.com/gsqxdxog.json" trigger="loop"
+                                colors="primary:#f06548,secondary:#f7b84b" style="width:100px;height:100px"></lord-icon>
                             <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
                                 <h4>Are you sure you want to logout?</h4>
                                 <p class="text-muted mx-4 mb-0">You will need to login again to access your account.</p>
@@ -56,7 +59,8 @@
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Cancel</button>
-                        <form id="logout-form-confirm" action="{{ route('logout') }}" method="POST" style="display: inline;">
+                        <form id="logout-form-confirm" action="{{ route('logout') }}" method="POST"
+                            style="display: inline;">
                             @csrf
                             <button type="submit" class="btn btn-danger">Yes, Logout</button>
                         </form>
@@ -142,29 +146,29 @@
                 style: {
                     background: background,
                 },
-                onClick: function(){}
+                onClick: function() {}
             }).showToast();
         }
 
         // Handle Session Messages
-        @if(session('success'))
+        @if (session('success'))
             showToast('success', "{{ session('success') }}");
         @endif
 
-        @if(session('error'))
+        @if (session('error'))
             showToast('error', "{{ session('error') }}");
         @endif
 
-        @if(session('warning'))
+        @if (session('warning'))
             showToast('warning', "{{ session('warning') }}");
         @endif
 
-        @if(session('info'))
+        @if (session('info'))
             showToast('info', "{{ session('info') }}");
         @endif
 
-        @if($errors->any())
-            @foreach($errors->all() as $error)
+        @if ($errors->any())
+            @foreach ($errors->all() as $error)
                 showToast('error', "{{ $error }}");
             @endforeach
         @endif
@@ -177,10 +181,10 @@
                     const button = event.relatedTarget;
                     const action = button.getAttribute('data-action');
                     const message = button.getAttribute('data-message');
-                    
+
                     const form = deleteModal.querySelector('#delete-form');
                     const messageContainer = deleteModal.querySelector('#delete-message');
-                    
+
                     if (form) form.action = action;
                     if (messageContainer && message) messageContainer.textContent = message;
                 });

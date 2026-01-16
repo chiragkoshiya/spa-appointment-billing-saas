@@ -236,7 +236,9 @@
     <div class="container">
         <div class="header">
             <div class="logo-section">
-                <h1>SPA SYSTEM</h1>
+                {{-- Use absolute path for logo in PDF --}}
+                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="SPA Management System Logo"
+                    style="height: 40px; margin-bottom: 5px;">
                 <p>Wellness & Relaxation Center</p>
             </div>
             <div class="invoice-info">
@@ -260,7 +262,7 @@
                 <h3>Bill To</h3>
                 <address>
                     <strong>{{ $invoice->customer->name }}</strong><br>
-                    @if($invoice->customer->email)
+                    @if ($invoice->customer->email)
                         {{ $invoice->customer->email }}<br>
                     @endif
                     Phone: {{ $invoice->customer->phone }}<br>
@@ -282,15 +284,16 @@
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach($invoice->items as $index => $item)
+                    @foreach ($invoice->items as $index => $item)
                         <tr>
                             <td>{{ $index + 1 }}</td>
                             <td>
                                 <strong>{{ $item->description }}</strong>
-                                @if($invoice->appointment && $loop->first)
+                                @if ($invoice->appointment && $loop->first)
                                     <div style="font-size: 11px; color: #888; margin-top: 4px;">
                                         APT #{{ str_pad($invoice->appointment->id, 4, '0', STR_PAD_LEFT) }} |
-                                        {{ \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M, Y') }} |
+                                        {{ \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M, Y') }}
+                                        |
                                         {{ $invoice->appointment->start_time }}
                                     </div>
                                 @endif
@@ -308,7 +311,7 @@
                     <td>Sub Total</td>
                     <td class="text-right">₹{{ number_format($invoice->total_amount, 2) }}</td>
                 </tr>
-                @if($invoice->wallet_deduction > 0)
+                @if ($invoice->wallet_deduction > 0)
                     <tr>
                         <td>Wallet Deduction</td>
                         <td class="text-right text-success">-₹{{ number_format($invoice->wallet_deduction, 2) }}</td>
@@ -327,7 +330,7 @@
                     <h3 style="font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Payment
                         Status</h3>
                     <p>
-                        @if($invoice->isPaid())
+                        @if ($invoice->isPaid())
                             <span class="badge badge-success">Fully Paid</span>
                         @elseif($invoice->wallet_deduction > 0)
                             <span class="badge badge-warning">Partial Payment</span>
@@ -339,8 +342,9 @@
                     </p>
                 </div>
                 <div style="text-align: right;">
-                    @if($invoice->appointment && $invoice->appointment->staff)
-                        <h3 style="font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Served By
+                    @if ($invoice->appointment && $invoice->appointment->staff)
+                        <h3 style="font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Served
+                            By
                         </h3>
                         <p><strong>{{ $invoice->appointment->staff->name }}</strong></p>
                     @endif
