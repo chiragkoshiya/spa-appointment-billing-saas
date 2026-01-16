@@ -14,15 +14,19 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LockScreenController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [AuthController::class, 'showLoginForm']);
-Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+// Guest routes
+Route::middleware('guest')->group(function () {
+    Route::get('/', [AuthController::class, 'showLoginForm']);
+    Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+    Route::post('/login', [AuthController::class, 'login']);
+});
 
 // Public invoice share view (no auth required)
 Route::get('invoices/{invoice}/share-view', [InvoiceController::class, 'shareView'])->name('invoices.share.view');
 
-Route::middleware('auth')->group(function () {
+Route::middleware(['auth', 'prevent-back-history'])->group(function () {
+    Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
     Route::get('/dashboard', function () {
         return view('module.dashboard.dashboard');
     })->name('dashboard');
