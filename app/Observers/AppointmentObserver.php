@@ -23,10 +23,10 @@ class AppointmentObserver
      */
     public function updated(Appointment $appointment): void
     {
-        // Only trigger when status changes to completed
+        // Trigger when status changes to completed OR payment_status changes to paid
         if (
-            $appointment->isDirty('status') &&
-            $appointment->status === 'completed'
+            ($appointment->isDirty('status') && $appointment->status === 'completed') ||
+            ($appointment->isDirty('payment_status') && $appointment->payment_status === 'paid')
         ) {
             $this->generateInvoice($appointment);
         }
@@ -71,18 +71,37 @@ class AppointmentObserver
                 $totalAmount += $service->price;
             }
 
-            $walletDeduction = 0;
-            $payableAmount   = $totalAmount;
+            // Calculate offer discount
+            $offerDiscount = 0;
+            if ($appointment->offer_id && $appointment->offer) {
+                $offer = $appointment->offer;
+                
+                if ($offer->discount_type === 'percentage') {
+                    $offerDiscount = ($totalAmount * $offer->discount_value) / 100;
+                } else {
+                    $offerDiscount = $offer->discount_value;
+                }
+            }
 
-            // Member wallet logic
+            // Amount after offer discount
+            $amountAfterOffer = $totalAmount - $offerDiscount;
+            if ($amountAfterOffer < 0) {
+                $amountAfterOffer = 0;
+            }
+
+            $walletDeduction = 0;
+            $payableAmount   = $amountAfterOffer;
+
+            // Member wallet logic (apply after offer discount)
             if (
+                $appointment->customer &&
                 $appointment->customer->customer_type === 'member' &&
                 $appointment->customer->wallet
             ) {
                 $wallet = $appointment->customer->wallet;
 
-                $walletDeduction = min($wallet->balance, $totalAmount);
-                $payableAmount   = $totalAmount - $walletDeduction;
+                $walletDeduction = min($wallet->balance, $amountAfterOffer);
+                $payableAmount   = $amountAfterOffer - $walletDeduction;
 
                 // Update wallet balance
                 $wallet->decrement('balance', $walletDeduction);
@@ -102,9 +121,19 @@ class AppointmentObserver
 
             // Invoice items
             foreach ($appointment->services as $service) {
+                $description = $service->service->name;
+                
+                // Add offer info to description if applicable
+                if ($appointment->offer_id && $appointment->offer) {
+                    $discountText = $appointment->offer->discount_type === 'percentage' 
+                        ? $appointment->offer->discount_value . '%' 
+                        : '₹' . number_format($appointment->offer->discount_value, 2);
+                    $description .= ' (Offer: ' . $appointment->offer->name . ' - ' . $discountText . ' off)';
+                }
+                
                 InvoiceItem::create([
                     'invoice_id'  => $invoice->id,
-                    'description' => $service->service->name,
+                    'description' => $description,
                     'amount'      => $service->price,
                     'created_by' => Auth::id() ?? $appointment->created_by,
                     'updated_by' => Auth::id() ?? $appointment->updated_by,

@@ -8,6 +8,7 @@ use App\Models\Customer;
 use App\Models\Service;
 use App\Models\Room;
 use App\Models\Staff;
+use App\Models\Offer;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -20,7 +21,7 @@ class AppointmentController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Appointment::with(['customer', 'staff', 'room', 'service', 'services.service', 'invoice']);
+        $query = Appointment::with(['customer', 'staff', 'room', 'service', 'services.service', 'invoice', 'offer']);
 
         // Advanced Filters
         if ($request->filled('search')) {
@@ -111,8 +112,12 @@ class AppointmentController extends Controller
         $services = Service::where('is_active', true)->orderBy('name')->get();
         $rooms = Room::where('is_active', true)->orderBy('name')->get();
         $staff = Staff::where('is_active', true)->orderBy('name')->get();
+        $offers = Offer::where('is_active', true)
+            ->whereDate('start_date', '<=', now())
+            ->whereDate('end_date', '>=', now())
+            ->orderBy('name')->get();
 
-        return view('module.appointments.index', compact('appointments', 'stats', 'customers', 'services', 'rooms', 'staff'));
+        return view('module.appointments.index', compact('appointments', 'stats', 'customers', 'services', 'rooms', 'staff', 'offers'));
     }
 
     /**
@@ -136,6 +141,7 @@ class AppointmentController extends Controller
             'payment_method' => 'nullable|string',
             'payment_status' => 'required|in:pending,paid',
             'is_member' => 'nullable|boolean',
+            'offer_id' => 'nullable|exists:offers,id',
             'sleep' => 'nullable|string|max:255',
         ]);
 
@@ -197,6 +203,7 @@ class AppointmentController extends Controller
                 'is_member' => $request->is_member ?? false,
                 'payment_method' => $request->payment_method,
                 'amount' => $amount,
+                'offer_id' => $request->offer_id,
                 'payment_status' => $request->payment_status,
                 'sleep' => $request->sleep,
                 'status' => 'created',
@@ -226,6 +233,11 @@ class AppointmentController extends Controller
      */
     public function update(Request $request, Appointment $appointment)
     {
+        // Check if invoice exists
+        if ($appointment->invoice) {
+            return redirect()->back()->with('error', 'Cannot edit appointment after invoice is generated.');
+        }
+
         $request->validate([
             'customer_id' => 'required|exists:customers,id',
             'phone' => 'required|string|max:20',
@@ -240,6 +252,7 @@ class AppointmentController extends Controller
             'payment_method' => 'nullable|string',
             'payment_status' => 'required|in:pending,paid',
             'is_member' => 'nullable|boolean',
+            'offer_id' => 'nullable|exists:offers,id',
             'sleep' => 'nullable|string|max:255',
         ]);
 

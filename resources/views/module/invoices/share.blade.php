@@ -129,7 +129,16 @@
                                     <h6 class="mb-3">Appointment Details:</h6>
                                     @if($invoice->appointment)
                                     <p class="text-muted mb-1">
-                                        <strong>Date:</strong> {{ $invoice->appointment->appointment_date->format('d M, Y') }}
+                                        <strong>Date:</strong> 
+                                        @if($invoice->appointment->appointment_date)
+                                            @if(is_string($invoice->appointment->appointment_date))
+                                                {{ \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M, Y') }}
+                                            @else
+                                                {{ $invoice->appointment->appointment_date->format('d M, Y') }}
+                                            @endif
+                                        @else
+                                            N/A
+                                        @endif
                                     </p>
                                     <p class="text-muted mb-1">
                                         <strong>Time:</strong> {{ $invoice->appointment->start_time }} - {{ $invoice->appointment->end_time }}

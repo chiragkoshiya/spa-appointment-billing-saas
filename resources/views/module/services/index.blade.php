@@ -120,7 +120,7 @@
                         <div class="mb-3">
                             <label class="form-label">Service Name <span class="text-danger">*</span></label>
                             <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                required placeholder="Enter service name" value="{{ old('name') }}">
+                                placeholder="Enter service name" value="{{ old('name') }}">
                             @error('name')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
@@ -128,7 +128,7 @@
                         <div class="mb-3">
                             <label class="form-label">Price (₹) <span class="text-danger">*</span></label>
                             <input type="number" step="0.01" min="0" name="price"
-                                class="form-control @error('price') is-invalid @enderror" required placeholder="Enter price"
+                                class="form-control @error('price') is-invalid @enderror" placeholder="Enter price"
                                 value="{{ old('price') }}">
                             @error('price')
                                 <div class="invalid-feedback">{{ $message }}</div>

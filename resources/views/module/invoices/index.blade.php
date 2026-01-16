@@ -238,8 +238,12 @@
                                     </div>
                                 </td>
                                 <td>
-                                    @if($invoice->appointment)
-                                        {{ $invoice->appointment->appointment_date->format('d M, Y') }}
+                                    @if($invoice->appointment && $invoice->appointment->appointment_date)
+                                        @if(is_string($invoice->appointment->appointment_date))
+                                            {{ \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M, Y') }}
+                                        @else
+                                            {{ $invoice->appointment->appointment_date->format('d M, Y') }}
+                                        @endif
                                         <br><small class="text-muted">{{ $invoice->appointment->start_time }}</small>
                                     @else
                                         <span class="text-muted">N/A</span>

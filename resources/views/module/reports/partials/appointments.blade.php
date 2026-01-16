@@ -16,7 +16,17 @@
             @foreach($data['appointments'] as $appointment)
             <tr>
                 <td>
-                    <div>{{ $appointment->appointment_date->format('d M, Y') }}</div>
+                    <div>
+                        @if($appointment->appointment_date)
+                            @if(is_string($appointment->appointment_date))
+                                {{ \Carbon\Carbon::parse($appointment->appointment_date)->format('d M, Y') }}
+                            @else
+                                {{ $appointment->appointment_date->format('d M, Y') }}
+                            @endif
+                        @else
+                            N/A
+                        @endif
+                    </div>
                     <small class="text-muted">{{ $appointment->start_time }} - {{ $appointment->end_time }}</small>
                 </td>
                 <td>{{ $appointment->customer->name ?? 'N/A' }}</td>

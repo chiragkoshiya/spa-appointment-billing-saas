@@ -215,7 +215,8 @@
                     <div class="d-flex align-items-end justify-content-between mt-4">
                         <div>
                             <h4 class="fs-22 fw-semibold ff-secondary mb-4" id="availableRoomsCount">
-                                {{ $stats['active_rooms'] }}</h4>
+                                {{ $stats['active_rooms'] }}
+                            </h4>
                             <p class="text-muted mb-0"><small id="availableRoomsText">Select date & time to check</small>
                             </p>
                         </div>
@@ -259,8 +260,7 @@
                                         <option value="">All</option>
                                         <option value="created" {{ request('status') == 'created' ? 'selected' : '' }}>
                                             Created</option>
-                                        <option value="completed"
-                                            {{ request('status') == 'completed' ? 'selected' : '' }}>
+                                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
                                             Completed</option>
                                     </select>
                                 </div>
@@ -269,8 +269,7 @@
                                     <select name="customer_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($customers as $customer)
-                                            <option value="{{ $customer->id }}"
-                                                {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                            <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
                                                 {{ $customer->name }}
                                             </option>
                                         @endforeach
@@ -281,8 +280,7 @@
                                     <select name="staff_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($staff as $s)
-                                            <option value="{{ $s->id }}"
-                                                {{ request('staff_id') == $s->id ? 'selected' : '' }}>
+                                            <option value="{{ $s->id }}" {{ request('staff_id') == $s->id ? 'selected' : '' }}>
                                                 {{ $s->name }}
                                             </option>
                                         @endforeach
@@ -293,8 +291,7 @@
                                     <select name="room_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($rooms as $room)
-                                            <option value="{{ $room->id }}"
-                                                {{ request('room_id') == $room->id ? 'selected' : '' }}>
+                                            <option value="{{ $room->id }}" {{ request('room_id') == $room->id ? 'selected' : '' }}>
                                                 {{ $room->name }}
                                             </option>
                                         @endforeach
@@ -305,8 +302,7 @@
                                     <select name="service_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($services as $service)
-                                            <option value="{{ $service->id }}"
-                                                {{ request('service_id') == $service->id ? 'selected' : '' }}>
+                                            <option value="{{ $service->id }}" {{ request('service_id') == $service->id ? 'selected' : '' }}>
                                                 {{ $service->name }}
                                             </option>
                                         @endforeach
@@ -316,10 +312,9 @@
                                     <label class="form-label">Payment Status</label>
                                     <select name="payment_status" class="form-select">
                                         <option value="">All</option>
-                                        <option value="pending"
-                                            {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="paid"
-                                            {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid</option>
+                                        <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid
+                                        </option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -329,16 +324,14 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Date To</label>
-                                    <input type="date" name="date_to" class="form-control"
-                                        value="{{ request('date_to') }}">
+                                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Sort By</label>
                                     <select name="sort_by" class="form-select">
-                                        <option value="appointment_date"
-                                            {{ request('sort_by') == 'appointment_date' ? 'selected' : '' }}>Date</option>
-                                        <option value="created_at"
-                                            {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>Created</option>
+                                        <option value="appointment_date" {{ request('sort_by') == 'appointment_date' ? 'selected' : '' }}>Date</option>
+                                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>
+                                            Created</option>
                                         <option value="amount" {{ request('sort_by') == 'amount' ? 'selected' : '' }}>
                                             Amount</option>
                                         <option value="status" {{ request('sort_by') == 'status' ? 'selected' : '' }}>
@@ -458,42 +451,43 @@
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
                                                 @if ($appointment->status == 'created')
                                                     <li class="list-inline-item">
-                                                        <form
-                                                            action="{{ route('appointments.updateStatus', $appointment->id) }}"
+                                                        <form action="{{ route('appointments.updateStatus', $appointment->id) }}"
                                                             method="POST" style="display: inline;">
                                                             @csrf
                                                             @method('PUT')
                                                             <input type="hidden" name="status" value="completed">
                                                             <button type="submit" class="btn btn-sm btn-soft-success"
-                                                                onclick="return confirm('Mark this appointment as completed? Invoice will be generated automatically.')"
+                                                                onclick="return confirm('Mark this appointment as completed? Invoice will be generated automatically. Note: After generating invoice, you cannot edit this appointment.')"
                                                                 title="Mark as Completed">
                                                                 <i class="ri-check-line"></i>
                                                             </button>
                                                         </form>
                                                     </li>
                                                 @endif
-                                                <li class="list-inline-item">
-                                                    <a href="javascript:void(0);"
-                                                        class="edit-item-btn btn btn-sm btn-soft-info"
-                                                        data-bs-toggle="modal" data-bs-target="#editModal"
-                                                        data-id="{{ $appointment->id }}"
-                                                        data-customer_id="{{ $appointment->customer_id }}"
-                                                        data-phone="{{ $appointment->phone }}"
-                                                        data-service_id="{{ $appointment->service_id }}"
-                                                        data-room_id="{{ $appointment->room_id }}"
-                                                        data-staff_id="{{ $appointment->staff_id }}"
-                                                        data-date="{{ $appointment->appointment_date }}"
-                                                        data-start_time="{{ $appointment->start_time }}"
-                                                        data-end_time="{{ $appointment->end_time }}"
-                                                        data-duration="{{ $appointment->duration }}"
-                                                        data-amount="{{ $appointment->amount }}"
-                                                        data-payment_method="{{ $appointment->payment_method }}"
-                                                        data-payment_status="{{ $appointment->payment_status }}"
-                                                        data-is_member="{{ $appointment->is_member }}"
-                                                        data-sleep="{{ $appointment->sleep }}" title="Edit">
-                                                        <i class="ri-pencil-line"></i>
-                                                    </a>
-                                                </li>
+                                                @if (!$appointment->invoice)
+                                                    <li class="list-inline-item">
+                                                        <a href="javascript:void(0);" class="edit-item-btn btn btn-sm btn-soft-info"
+                                                            data-bs-toggle="modal" data-bs-target="#editModal"
+                                                            data-id="{{ $appointment->id }}"
+                                                            data-customer_id="{{ $appointment->customer_id }}"
+                                                            data-phone="{{ $appointment->phone }}"
+                                                            data-service_id="{{ $appointment->service_id }}"
+                                                            data-room_id="{{ $appointment->room_id }}"
+                                                            data-staff_id="{{ $appointment->staff_id }}"
+                                                            data-date="{{ $appointment->appointment_date }}"
+                                                            data-start_time="{{ $appointment->start_time }}"
+                                                            data-end_time="{{ $appointment->end_time }}"
+                                                            data-duration="{{ $appointment->duration }}"
+                                                            data-amount="{{ $appointment->amount }}"
+                                                            data-payment_method="{{ $appointment->payment_method }}"
+                                                            data-payment_status="{{ $appointment->payment_status }}"
+                                                            data-is_member="{{ $appointment->is_member }}"
+                                                            data-offer_id="{{ $appointment->offer_id }}"
+                                                            data-sleep="{{ $appointment->sleep }}" title="Edit">
+                                                            <i class="ri-pencil-line"></i>
+                                                        </a>
+                                                    </li>
+                                                @endif
                                                 @if ($appointment->invoice)
                                                     <li class="list-inline-item">
                                                         <a href="{{ route('invoices.show', $appointment->invoice->id) }}"
@@ -509,8 +503,7 @@
                                                         style="display: inline;">
                                                         @csrf
                                                         @method('DELETE')
-                                                        <button type="submit" class="btn btn-sm btn-soft-danger"
-                                                            title="Delete">
+                                                        <button type="submit" class="btn btn-sm btn-soft-danger" title="Delete">
                                                             <i class="ri-delete-bin-line"></i>
                                                         </button>
                                                     </form>
@@ -563,9 +556,8 @@
                                 <select name="customer_id" id="customer_select" class="form-select">
                                     <option value="">-- New / Walk-in Customer --</option>
                                     @foreach ($customers as $c)
-                                        <option value="{{ $c->id }}" data-phone="{{ $c->phone }}"
-                                            data-email="{{ $c->email }}" data-type="{{ $c->customer_type }}"
-                                            data-balance="{{ $c->wallet->balance ?? 0 }}">
+                                        <option value="{{ $c->id }}" data-phone="{{ $c->phone }}" data-email="{{ $c->email }}"
+                                            data-type="{{ $c->customer_type }}" data-balance="{{ $c->wallet->balance ?? 0 }}">
                                             {{ $c->name }}
                                             @if ($c->customer_type == 'member')
                                                 (Member - Bal: ₹{{ number_format($c->wallet->balance ?? 0, 2) }})
@@ -623,7 +615,8 @@
                                     <option value="">Select Room</option>
                                     @foreach ($rooms as $r)
                                         <option value="{{ $r->id }}" data-room-name="{{ $r->name }}">
-                                            {{ $r->name }}</option>
+                                            {{ $r->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div id="roomAvailabilityStatus" class="mt-2" style="display: none;"></div>
@@ -648,8 +641,59 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="amount" id="amount" class="form-control"
-                                    required placeholder="0.00" min="0">
+                                <input type="number" step="0.01" name="amount" id="amount" class="form-control" required
+                                    placeholder="0.00" min="0" readonly>
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label">Offer (Optional)</label>
+                                <select name="offer_id" id="offer_select" class="form-select">
+                                    <option value="">-- Select Offer --</option>
+                                    @foreach ($offers as $offer)
+                                        <option value="{{ $offer->id }}" data-discount-type="{{ $offer->discount_type }}"
+                                            data-discount-value="{{ $offer->discount_value }}">
+                                            {{ $offer->name }}
+                                            ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
+                                        </option>
+                                    @endforeach
+                                </select>
+                            </div>
+                            <div class="col-lg-12 mt-2">
+                                <div id="memberWalletInfo" class="alert alert-info py-2 mb-0" style="display: none;">
+                                    <small>
+                                        <i class="ri-wallet-line"></i>
+                                        <strong>Member Wallet Balance:</strong>
+                                        <span id="memberBalance">₹0.00</span>
+                                    </small>
+                                </div>
+                            </div>
+                            <div class="col-lg-12 mt-2">
+                                <div id="amountBreakdown" class="card border-primary mb-0" style="display: none;">
+                                    <div class="card-body py-2">
+                                        <h6 class="card-title mb-2"><i class="ri-calculator-line"></i> Amount Breakdown</h6>
+                                        <div class="row">
+                                            <div class="col-6">
+                                                <small class="text-muted">Service Amount:</small>
+                                                <div class="fw-bold" id="serviceAmount">₹0.00</div>
+                                            </div>
+                                            <div class="col-6">
+                                                <small class="text-muted">Member Wallet Used:</small>
+                                                <div class="fw-bold text-warning" id="walletUsed">₹0.00</div>
+                                            </div>
+                                            <div class="col-6 mt-2">
+                                                <small class="text-muted">Offer Discount:</small>
+                                                <div class="fw-bold text-success" id="offerDiscount">₹0.00</div>
+                                            </div>
+                                            <div class="col-6 mt-2">
+                                                <small class="text-muted">Final Amount:</small>
+                                                <div class="fw-bold text-primary fs-5" id="finalAmount">₹0.00</div>
+                                            </div>
+                                            <div class="col-12 mt-2" id="remainingBalanceDiv" style="display: none;">
+                                                <small class="text-muted">Remaining Wallet Balance:</small>
+                                                <div class="fw-bold text-info" id="remainingBalance">₹0.00</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
 
                             <!-- Payment Information -->
@@ -675,8 +719,7 @@
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Sleep / Notes</label>
-                                <input type="text" name="sleep" class="form-control"
-                                    placeholder="Additional notes">
+                                <input type="text" name="sleep" class="form-control" placeholder="Additional notes">
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">&nbsp;</label>
@@ -737,7 +780,8 @@
                                 <select name="service_id" id="edit_service_id" class="form-select" required>
                                     @foreach ($services as $s)
                                         <option value="{{ $s->id }}" data-price="{{ $s->price }}">
-                                            {{ $s->name }}</option>
+                                            {{ $s->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                             </div>
@@ -754,20 +798,20 @@
                                 <select name="room_id" id="edit_room_id" class="form-select" required>
                                     @foreach ($rooms as $r)
                                         <option value="{{ $r->id }}" data-room-name="{{ $r->name }}">
-                                            {{ $r->name }}</option>
+                                            {{ $r->name }}
+                                        </option>
                                     @endforeach
                                 </select>
                                 <div id="editRoomAvailabilityStatus" class="mt-2" style="display: none;"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
-                                <input type="date" name="appointment_date" id="edit_appointment_date"
-                                    class="form-control" required>
+                                <input type="date" name="appointment_date" id="edit_appointment_date" class="form-control"
+                                    required>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Start Time <span class="text-danger">*</span></label>
-                                <input type="time" name="start_time" id="edit_start_time" class="form-control"
-                                    required>
+                                <input type="time" name="start_time" id="edit_start_time" class="form-control" required>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">End Time <span class="text-danger">*</span></label>
@@ -775,13 +819,25 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Duration (Minutes)</label>
-                                <input type="number" name="duration" id="edit_duration" class="form-control"
-                                    min="1">
+                                <input type="number" name="duration" id="edit_duration" class="form-control" min="1">
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="amount" id="edit_amount"
-                                    class="form-control" required min="0">
+                                <input type="number" step="0.01" name="amount" id="edit_amount" class="form-control"
+                                    required min="0">
+                            </div>
+                            <div class="col-lg-4">
+                                <label class="form-label">Offer (Optional)</label>
+                                <select name="offer_id" id="edit_offer_select" class="form-select">
+                                    <option value="">-- Select Offer --</option>
+                                    @foreach ($offers as $offer)
+                                        <option value="{{ $offer->id }}" data-discount-type="{{ $offer->discount_type }}"
+                                            data-discount-value="{{ $offer->discount_value }}">
+                                            {{ $offer->name }}
+                                            ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
+                                        </option>
+                                    @endforeach
+                                </select>
                             </div>
                             <div class="col-lg-12 mt-3">
                                 <h6 class="mb-3"><i class="ri-money-rupee-circle-line me-1"></i> Payment Information
@@ -834,10 +890,10 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Edit Modal Handler
             const editModal = document.getElementById('editModal');
-            editModal.addEventListener('show.bs.modal', function(event) {
+            editModal.addEventListener('show.bs.modal', function (event) {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
                 const form = document.getElementById('editForm');
@@ -861,6 +917,7 @@
                     'data-payment_method') || 'Cash';
                 document.getElementById('edit_payment_status').value = button.getAttribute(
                     'data-payment_status') || 'pending';
+                document.getElementById('edit_offer_select').value = button.getAttribute('data-offer_id') || '';
                 document.getElementById('edit_sleep').value = button.getAttribute('data-sleep') || '';
                 document.getElementById('edit_is_member').checked = button.getAttribute('data-is_member') ==
                     '1';
@@ -875,7 +932,7 @@
             const newCustomerEmail = document.getElementById('new_customer_email');
             const isMemberSwitch = document.getElementById('isMemberSwitch');
 
-            customerSelect.addEventListener('change', function() {
+            customerSelect.addEventListener('change', function () {
                 const selectedOption = this.options[this.selectedIndex];
 
                 if (this.value === "") {
@@ -884,6 +941,11 @@
                     newCustomerName.required = true;
                     customerPhone.value = "";
                     isMemberSwitch.checked = false;
+                    // Hide member wallet info
+                    document.getElementById('memberWalletInfo').style.display = 'none';
+                    // Clear member wallet data
+                    window.memberWalletBalance = 0;
+                    calculateFinalAmount();
                 } else {
                     newCustNameDiv.style.display = 'none';
                     newCustEmailDiv.style.display = 'none';
@@ -893,6 +955,18 @@
                     newCustomerEmail.value = selectedOption.getAttribute('data-email') || "";
                     const isMember = selectedOption.getAttribute('data-type') === 'member';
                     isMemberSwitch.checked = isMember;
+
+                    // Handle member wallet display
+                    const memberWalletBalance = parseFloat(selectedOption.getAttribute('data-balance') || 0);
+                    window.memberWalletBalance = isMember ? memberWalletBalance : 0;
+
+                    if (isMember && memberWalletBalance > 0) {
+                        document.getElementById('memberWalletInfo').style.display = 'block';
+                        document.getElementById('memberBalance').textContent = '₹' + memberWalletBalance.toFixed(2);
+                    } else {
+                        document.getElementById('memberWalletInfo').style.display = 'none';
+                    }
+                    calculateFinalAmount();
                 }
             });
 
@@ -901,15 +975,102 @@
             const amountInput = document.getElementById('amount');
             const durationInput = document.getElementById('duration');
 
-            serviceSelect.addEventListener('change', function() {
+            serviceSelect.addEventListener('change', function () {
                 const selectedOption = this.options[this.selectedIndex];
                 if (selectedOption.value) {
                     const price = selectedOption.getAttribute('data-price');
                     const duration = selectedOption.getAttribute('data-duration');
-                    if (price) amountInput.value = price;
+                    if (price) {
+                        window.serviceAmount = parseFloat(price);
+                        amountInput.value = price;
+                    }
                     if (duration) durationInput.value = duration;
+                    calculateFinalAmount();
+                } else {
+                    window.serviceAmount = 0;
+                    amountInput.value = '';
+                    calculateFinalAmount();
                 }
             });
+
+            // Offer selection - calculate discount
+            const offerSelect = document.getElementById('offer_select');
+            offerSelect.addEventListener('change', function () {
+                calculateFinalAmount();
+            });
+
+            // Initialize service amount
+            window.serviceAmount = 0;
+            window.memberWalletBalance = 0;
+
+            // Initialize calculation when modal opens
+            const createModal = document.getElementById('createModal');
+            createModal.addEventListener('show.bs.modal', function () {
+                window.serviceAmount = 0;
+                window.memberWalletBalance = 0;
+                calculateFinalAmount();
+            });
+
+            // Function to calculate final amount
+            function calculateFinalAmount() {
+                const serviceAmount = window.serviceAmount || 0;
+                const memberBalance = window.memberWalletBalance || 0;
+                const offerSelect = document.getElementById('offer_select');
+                const selectedOfferOption = offerSelect.options[offerSelect.selectedIndex];
+
+                // Calculate offer discount
+                let offerDiscount = 0;
+                if (selectedOfferOption.value) {
+                    const discountType = selectedOfferOption.getAttribute('data-discount-type');
+                    const discountValue = parseFloat(selectedOfferOption.getAttribute('data-discount-value') || 0);
+
+                    if (discountType === 'percentage') {
+                        offerDiscount = (serviceAmount * discountValue) / 100;
+                    } else {
+                        offerDiscount = discountValue;
+                    }
+                }
+
+                // Calculate amounts after offer discount
+                let amountAfterOffer = serviceAmount - offerDiscount;
+                if (amountAfterOffer < 0) amountAfterOffer = 0;
+
+                // Calculate wallet usage (can only use up to remaining amount after offer)
+                let walletUsed = 0;
+                if (memberBalance > 0 && amountAfterOffer > 0) {
+                    walletUsed = Math.min(memberBalance, amountAfterOffer);
+                }
+
+                // Calculate final amount
+                const finalAmount = amountAfterOffer - walletUsed;
+                const remainingBalance = memberBalance - walletUsed;
+
+                // Update display
+                document.getElementById('serviceAmount').textContent = '₹' + serviceAmount.toFixed(2);
+                document.getElementById('offerDiscount').textContent = '-₹' + offerDiscount.toFixed(2);
+                document.getElementById('walletUsed').textContent = '-₹' + walletUsed.toFixed(2);
+                document.getElementById('finalAmount').textContent = '₹' + (finalAmount >= 0 ? finalAmount.toFixed(2) : '0.00');
+
+                // Show/hide breakdown
+                if (serviceAmount > 0 || offerDiscount > 0 || walletUsed > 0) {
+                    document.getElementById('amountBreakdown').style.display = 'block';
+                } else {
+                    document.getElementById('amountBreakdown').style.display = 'none';
+                }
+
+                // Show remaining balance if member and wallet used
+                if (memberBalance > 0 && walletUsed > 0) {
+                    document.getElementById('remainingBalanceDiv').style.display = 'block';
+                    document.getElementById('remainingBalance').textContent = '₹' + remainingBalance.toFixed(2);
+                } else {
+                    document.getElementById('remainingBalanceDiv').style.display = 'none';
+                }
+
+                // Update amount input (this will be the final payable amount)
+                if (amountInput && finalAmount >= 0) {
+                    amountInput.value = finalAmount.toFixed(2);
+                }
+            }
 
             // Room availability checking
             const appointmentDate = document.getElementById('appointment_date');
@@ -1059,7 +1220,7 @@
             // Check availability when date/time changes - automatically update room dropdown
             [appointmentDate, startTime, endTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('change', function() {
+                    el.addEventListener('change', function () {
                         // Small delay to ensure all values are set
                         setTimeout(checkRoomAvailability, 100);
                     });
@@ -1069,7 +1230,7 @@
             // Also check on input event for real-time updates
             [startTime, endTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('input', function() {
+                    el.addEventListener('input', function () {
                         if (appointmentDate.value && startTime.value && endTime.value) {
                             setTimeout(checkRoomAvailability, 300); // Debounce
                         }
@@ -1078,7 +1239,7 @@
             });
 
             // Check for conflicts when room is selected
-            roomSelect.addEventListener('change', function() {
+            roomSelect.addEventListener('change', function () {
                 if (roomAvailabilityData) {
                     checkSelectedRoomConflict(roomAvailabilityData);
                 }
@@ -1120,8 +1281,8 @@
                     editRoomAvailabilityStatus.style.display = 'block';
 
                     fetch(
-                            `/appointments/availability?date=${date}&start_time=${start}&end_time=${end}&exclude_appointment_id=${appointmentId || ''}`
-                            )
+                        `/appointments/availability?date=${date}&start_time=${start}&end_time=${end}&exclude_appointment_id=${appointmentId || ''}`
+                    )
                         .then(response => response.json())
                         .then(data => {
                             editRoomAvailabilityData = data;
@@ -1211,7 +1372,7 @@
             // Check availability when date/time changes in edit modal
             [editAppointmentDate, editStartTime, editEndTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('change', function() {
+                    el.addEventListener('change', function () {
                         setTimeout(checkEditRoomAvailability, 100);
                     });
                 }
@@ -1220,7 +1381,7 @@
             // Also check on input event for real-time updates in edit modal
             [editStartTime, editEndTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('input', function() {
+                    el.addEventListener('input', function () {
                         if (editAppointmentDate.value && editStartTime.value && editEndTime.value) {
                             setTimeout(checkEditRoomAvailability, 300); // Debounce
                         }
@@ -1230,7 +1391,7 @@
 
             // Reset modals on close
             [editModal, document.getElementById('createModal')].forEach(modal => {
-                modal.addEventListener('hidden.bs.modal', function() {
+                modal.addEventListener('hidden.bs.modal', function () {
                     const form = modal.querySelector('form');
                     if (form) {
                         form.reset();

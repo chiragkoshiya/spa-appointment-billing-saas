@@ -7,27 +7,40 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Appointment extends Model
 {
-    Use SoftDeletes;
+    use SoftDeletes;
 
     protected $fillable = [
-        'customer_id', 
+        'customer_id',
         'phone',
-        'staff_id', 
-        'room_id', 
+        'staff_id',
+        'room_id',
         'service_id',
-        'appointment_date', 
-        'start_time', 
-        'end_time', 
+        'appointment_date',
+        'start_time',
+        'end_time',
         'duration',
         'is_member',
         'payment_method',
         'amount',
+        'offer_id',
         'payment_status',
         'sleep',
-        'status', 
-        'created_by', 
+        'status',
+        'created_by',
         'updated_by'
     ];
+
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'appointment_date' => 'date',
+        ];
+    }
 
     public function service()
     {
@@ -57,5 +70,10 @@ class Appointment extends Model
     public function invoice()
     {
         return $this->hasOne(Invoice::class);
+    }
+
+    public function offer()
+    {
+        return $this->belongsTo(Offer::class);
     }
 }
