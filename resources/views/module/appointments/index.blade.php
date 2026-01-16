@@ -558,6 +558,12 @@
                 <form action="{{ route('appointments.store') }}" method="POST" id="createForm">
                     @csrf
                     <div class="modal-body">
+                        <!-- Error Display Area -->
+                        <div id="createFormErrors" class="alert alert-danger" style="display: none;">
+                            <h6 class="alert-heading"><i class="ri-error-warning-line me-1"></i> Please fix the following
+                                errors:</h6>
+                            <ul class="mb-0" id="createErrorList"></ul>
+                        </div>
                         <div class="row g-3">
                             <!-- Customer Selection -->
                             <div class="col-lg-12">
@@ -595,8 +601,9 @@
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" id="customer_phone" class="form-control" required
+                                <input type="text" name="phone" id="customer_phone" class="form-control"
                                     placeholder="Enter phone number">
+                                <div class="invalid-feedback"></div>
                             </div>
 
                             <!-- Appointment Details -->
@@ -605,7 +612,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Service (Therapy) <span class="text-danger">*</span></label>
-                                <select name="service_id" id="service_select" class="form-select" required>
+                                <select name="service_id" id="service_select" class="form-select">
                                     <option value="">Select Service</option>
                                     @foreach ($services as $s)
                                         <option value="{{ $s->id }}" data-price="{{ $s->price }}"
@@ -617,7 +624,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Staff <span class="text-danger">*</span></label>
-                                <select name="staff_id" id="staff_select" class="form-select" required>
+                                <select name="staff_id" id="staff_select" class="form-select">
                                     <option value="">Select Staff</option>
                                     @foreach ($staff as $st)
                                         <option value="{{ $st->id }}">{{ $st->name }}</option>
@@ -626,7 +633,7 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Room <span class="text-danger">*</span></label>
-                                <select name="room_id" id="room_select" class="form-select" required>
+                                <select name="room_id" id="room_select" class="form-select">
                                     <option value="">Select Room</option>
                                     @foreach ($rooms as $r)
                                         <option value="{{ $r->id }}" data-room-name="{{ $r->name }}">
@@ -639,15 +646,18 @@
                             <div class="col-lg-4">
                                 <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
                                 <input type="date" name="appointment_date" id="appointment_date" class="form-control"
-                                    required value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
+                                    value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Start Time <span class="text-danger">*</span></label>
-                                <input type="time" name="start_time" id="start_time" class="form-control" required>
+                                <input type="time" name="start_time" id="start_time" class="form-control">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">End Time <span class="text-danger">*</span></label>
-                                <input type="time" name="end_time" id="end_time" class="form-control" required>
+                                <input type="time" name="end_time" id="end_time" class="form-control">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Duration (Minutes)</label>
@@ -657,7 +667,8 @@
                             <div class="col-lg-4">
                                 <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
                                 <input type="number" step="0.01" name="amount" id="amount" class="form-control"
-                                    required placeholder="0.00" min="0" readonly>
+                                    placeholder="0.00" min="0" readonly>
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Offer (Optional)</label>
@@ -729,10 +740,11 @@
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Payment Status <span class="text-danger">*</span></label>
-                                <select name="payment_status" id="payment_status" class="form-select" required>
+                                <select name="payment_status" id="payment_status" class="form-select">
                                     <option value="pending">Pending</option>
                                     <option value="paid">Paid</option>
                                 </select>
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Sleep / Notes</label>
@@ -774,13 +786,20 @@
                     @csrf
                     @method('PUT')
                     <div class="modal-body">
+                        <!-- Error Display Area -->
+                        <div id="editFormErrors" class="alert alert-danger" style="display: none;">
+                            <h6 class="alert-heading"><i class="ri-error-warning-line me-1"></i> Please fix the following
+                                errors:</h6>
+                            <ul class="mb-0" id="editErrorList"></ul>
+                        </div>
                         <div class="row g-3">
                             <div class="col-lg-12">
                                 <h6 class="mb-3"><i class="ri-user-line me-1"></i> Customer Information</h6>
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Customer <span class="text-danger">*</span></label>
-                                <select name="customer_id" id="edit_customer_id" class="form-select" required>
+                                <select name="customer_id" id="edit_customer_id" class="form-select">
+                                    <div class="invalid-feedback"></div>
                                     @foreach ($customers as $c)
                                         <option value="{{ $c->id }}">{{ $c->name }}</option>
                                     @endforeach
@@ -788,53 +807,62 @@
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" id="edit_phone" class="form-control" required>
+                                <input type="text" name="phone" id="edit_phone" class="form-control">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-12 mt-3">
                                 <h6 class="mb-3"><i class="ri-calendar-line me-1"></i> Appointment Details</h6>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Service <span class="text-danger">*</span></label>
-                                <select name="service_id" id="edit_service_id" class="form-select" required>
+                                <select name="service_id" id="edit_service_id" class="form-select">
+                                    <option value="">Select Service</option>
                                     @foreach ($services as $s)
                                         <option value="{{ $s->id }}" data-price="{{ $s->price }}">
                                             {{ $s->name }}
                                         </option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Staff <span class="text-danger">*</span></label>
-                                <select name="staff_id" id="edit_staff_id" class="form-select" required>
+                                <select name="staff_id" id="edit_staff_id" class="form-select">
+                                    <option value="">Select Staff</option>
                                     @foreach ($staff as $st)
                                         <option value="{{ $st->id }}">{{ $st->name }}</option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Room <span class="text-danger">*</span></label>
-                                <select name="room_id" id="edit_room_id" class="form-select" required>
+                                <select name="room_id" id="edit_room_id" class="form-select">
+                                    <option value="">Select Room</option>
                                     @foreach ($rooms as $r)
                                         <option value="{{ $r->id }}" data-room-name="{{ $r->name }}">
                                             {{ $r->name }}
                                         </option>
                                     @endforeach
                                 </select>
+                                <div class="invalid-feedback"></div>
                                 <div id="editRoomAvailabilityStatus" class="mt-2" style="display: none;"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
                                 <input type="date" name="appointment_date" id="edit_appointment_date"
-                                    class="form-control" required>
+                                    class="form-control">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Start Time <span class="text-danger">*</span></label>
-                                <input type="time" name="start_time" id="edit_start_time" class="form-control"
-                                    required>
+                                <input type="time" name="start_time" id="edit_start_time" class="form-control">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">End Time <span class="text-danger">*</span></label>
-                                <input type="time" name="end_time" id="edit_end_time" class="form-control" required>
+                                <input type="time" name="end_time" id="edit_end_time" class="form-control">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Duration (Minutes)</label>
@@ -844,7 +872,8 @@
                             <div class="col-lg-4">
                                 <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
                                 <input type="number" step="0.01" name="amount" id="edit_amount"
-                                    class="form-control" required min="0">
+                                    class="form-control" min="0">
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Offer (Optional)</label>
@@ -875,10 +904,11 @@
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Payment Status <span class="text-danger">*</span></label>
-                                <select name="payment_status" id="edit_payment_status" class="form-select" required>
+                                <select name="payment_status" id="edit_payment_status" class="form-select">
                                     <option value="pending">Pending</option>
                                     <option value="paid">Paid</option>
                                 </select>
+                                <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Sleep / Notes</label>
@@ -1020,25 +1050,252 @@
                 });
             }
 
-            // Intercept edit form submission when payment status is changed to paid
+            // Comprehensive JavaScript Validation Function for Edit Form
+            function validateEditForm() {
+                let isValid = true;
+                const errors = {};
+
+                // Clear previous validation
+                editForm.querySelectorAll('.is-invalid').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+                editForm.querySelectorAll('.invalid-feedback').forEach(el => {
+                    el.textContent = '';
+                });
+                document.getElementById('editFormErrors').style.display = 'none';
+                document.getElementById('editErrorList').innerHTML = '';
+
+                // Customer validation
+                const customerIdEl = document.getElementById('edit_customer_id');
+                const customerId = customerIdEl.value;
+                if (!customerId) {
+                    errors.customer_id = ['Customer is required.'];
+                    setFieldError(customerIdEl, 'Customer is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(customerIdEl);
+                }
+
+                // Phone validation
+                const phoneEl = document.getElementById('edit_phone');
+                const phone = phoneEl.value.trim();
+                if (!phone) {
+                    errors.phone = ['Phone number is required.'];
+                    setFieldError(phoneEl, 'Phone number is required.');
+                    isValid = false;
+                } else if (phone.length > 20) {
+                    errors.phone = ['Phone number must not exceed 20 characters.'];
+                    setFieldError(phoneEl, 'Phone number must not exceed 20 characters.');
+                    isValid = false;
+                } else {
+                    clearFieldError(phoneEl);
+                }
+
+                // Service validation
+                const serviceIdEl = document.getElementById('edit_service_id');
+                const serviceId = serviceIdEl.value;
+                if (!serviceId) {
+                    errors.service_id = ['Service is required.'];
+                    setFieldError(serviceIdEl, 'Service is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(serviceIdEl);
+                }
+
+                // Staff validation
+                const staffIdEl = document.getElementById('edit_staff_id');
+                const staffId = staffIdEl.value;
+                if (!staffId) {
+                    errors.staff_id = ['Staff is required.'];
+                    setFieldError(staffIdEl, 'Staff is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(staffIdEl);
+                }
+
+                // Room validation
+                const roomIdEl = document.getElementById('edit_room_id');
+                const roomId = roomIdEl.value;
+                if (!roomId) {
+                    errors.room_id = ['Room is required.'];
+                    setFieldError(roomIdEl, 'Room is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(roomIdEl);
+                }
+
+                // Appointment date validation
+                const appointmentDateEl = document.getElementById('edit_appointment_date');
+                const appointmentDate = appointmentDateEl.value;
+                if (!appointmentDate) {
+                    errors.appointment_date = ['Appointment date is required.'];
+                    setFieldError(appointmentDateEl, 'Appointment date is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(appointmentDateEl);
+                }
+
+                // Start time validation
+                const startTimeEl = document.getElementById('edit_start_time');
+                const startTime = startTimeEl.value;
+                if (!startTime) {
+                    errors.start_time = ['Start time is required.'];
+                    setFieldError(startTimeEl, 'Start time is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(startTimeEl);
+                }
+
+                // End time validation
+                const endTimeEl = document.getElementById('edit_end_time');
+                const endTime = endTimeEl.value;
+                if (!endTime) {
+                    errors.end_time = ['End time is required.'];
+                    setFieldError(endTimeEl, 'End time is required.');
+                    isValid = false;
+                } else if (startTime && endTime && endTime <= startTime) {
+                    errors.end_time = ['End time must be after start time.'];
+                    setFieldError(endTimeEl, 'End time must be after start time.');
+                    isValid = false;
+                } else {
+                    clearFieldError(endTimeEl);
+                }
+
+                // Amount validation
+                const amountEl = document.getElementById('edit_amount');
+                const amount = amountEl.value;
+                if (!amount || parseFloat(amount) < 0) {
+                    errors.amount = ['Amount is required and must be greater than or equal to 0.'];
+                    setFieldError(amountEl, 'Amount is required and must be greater than or equal to 0.');
+                    isValid = false;
+                } else {
+                    clearFieldError(amountEl);
+                }
+
+                // Payment status validation
+                const paymentStatus = editPaymentStatusSelect ? editPaymentStatusSelect.value : '';
+                if (!paymentStatus) {
+                    errors.payment_status = ['Payment status is required.'];
+                    if (editPaymentStatusSelect) {
+                        setFieldError(editPaymentStatusSelect, 'Payment status is required.');
+                    }
+                    isValid = false;
+                } else if (editPaymentStatusSelect) {
+                    clearFieldError(editPaymentStatusSelect);
+                }
+
+                // Hide top error display (errors are shown below each field)
+                document.getElementById('editFormErrors').style.display = 'none';
+
+                // Scroll to first error if validation failed
+                if (!isValid) {
+                    const firstError = editForm.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        firstError.focus();
+                    }
+                }
+
+                return isValid;
+            }
+
+            // Intercept edit form submission
             if (editForm) {
                 editForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+
                     const currentStatus = editPaymentStatusSelect ? editPaymentStatusSelect.value :
                         'pending';
                     const originalStatus = editForm.getAttribute('data-original-payment-status') ||
                         'pending';
 
-                    // If changing to "paid" from any other status, show confirmation
+                    // If changing to "paid" from any other status, show confirmation first
                     if (currentStatus === 'paid' && originalStatus !== 'paid' && pendingFormSubmit) {
-                        e.preventDefault();
-                        e.stopPropagation();
-
                         // Show confirmation modal
                         const modal = new bootstrap.Modal(paymentStatusConfirmModal);
                         modal.show();
-
                         return false;
                     }
+
+                    // First validate with JavaScript
+                    if (!validateEditForm()) {
+                        return false;
+                    }
+
+                    // Disable submit button
+                    const submitBtn = editForm.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<i class="ri-loader-4-line spin me-1"></i> Updating...';
+
+                    // Prepare form data
+                    const formData = new FormData(editForm);
+
+                    // AJAX submission
+                    fetch(editForm.action, {
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
+                        .then(response => {
+                            return response.json().then(data => ({
+                                status: response.status,
+                                data: data
+                            }));
+                        })
+                        .then(result => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+
+                            if (result.status === 200 && result.data.success) {
+                                // Show success message
+                                if (typeof showToast === 'function') {
+                                    showToast('success', result.data.message);
+                                }
+
+                                // Close modal
+                                const modal = bootstrap.Modal.getInstance(editModal);
+                                if (modal) {
+                                    modal.hide();
+                                }
+
+                                // Reload page to show updated appointment
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 500);
+                            } else if (result.status === 422) {
+                                // Validation errors
+                                if (result.data.errors) {
+                                    displayValidationErrors(result.data.errors, 'editForm');
+                                } else if (result.data.message) {
+                                    if (typeof showToast === 'function') {
+                                        showToast('error', result.data.message);
+                                    }
+                                }
+                            } else {
+                                // Other errors
+                                if (typeof showToast === 'function') {
+                                    showToast('error', result.data.message ||
+                                        'An error occurred. Please try again.');
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+
+                            if (typeof showToast === 'function') {
+                                showToast('error',
+                                    'Network error. Please check your connection and try again.');
+                            }
+                            console.error('Error:', error);
+                        });
                 });
             }
 
@@ -1052,10 +1309,87 @@
                         modal.hide();
                     }
 
-                    // Submit the form
+                    // Validate and submit the form via AJAX
                     if (editForm && pendingFormSubmit) {
                         pendingFormSubmit = false;
-                        editForm.submit();
+
+                        // Validate first
+                        if (!validateEditForm()) {
+                            return false;
+                        }
+
+                        // Disable submit button
+                        const submitBtn = editForm.querySelector('button[type="submit"]');
+                        const originalBtnText = submitBtn.innerHTML;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML = '<i class="ri-loader-4-line spin me-1"></i> Updating...';
+
+                        // Prepare form data
+                        const formData = new FormData(editForm);
+
+                        // AJAX submission
+                        fetch(editForm.action, {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            })
+                            .then(response => {
+                                return response.json().then(data => ({
+                                    status: response.status,
+                                    data: data
+                                }));
+                            })
+                            .then(result => {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+
+                                if (result.status === 200 && result.data.success) {
+                                    // Show success message
+                                    if (typeof showToast === 'function') {
+                                        showToast('success', result.data.message);
+                                    }
+
+                                    // Close modals
+                                    const editModalInstance = bootstrap.Modal.getInstance(editModal);
+                                    if (editModalInstance) {
+                                        editModalInstance.hide();
+                                    }
+
+                                    // Reload page
+                                    setTimeout(() => {
+                                        window.location.reload();
+                                    }, 500);
+                                } else if (result.status === 422) {
+                                    // Validation errors
+                                    if (result.data.errors) {
+                                        displayValidationErrors(result.data.errors, 'editForm');
+                                    } else if (result.data.message) {
+                                        if (typeof showToast === 'function') {
+                                            showToast('error', result.data.message);
+                                        }
+                                    }
+                                } else {
+                                    // Other errors
+                                    if (typeof showToast === 'function') {
+                                        showToast('error', result.data.message ||
+                                            'An error occurred. Please try again.');
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+
+                                if (typeof showToast === 'function') {
+                                    showToast('error',
+                                        'Network error. Please check your connection and try again.'
+                                    );
+                                }
+                                console.error('Error:', error);
+                            });
                     }
                 });
             }
@@ -1249,39 +1583,331 @@
                 window.memberWalletBalance = 0;
             });
 
-            // Form submission validation
-            createForm.addEventListener('submit', function(e) {
+            // Helper functions to set and clear field errors
+            function setFieldError(fieldElement, errorMessage) {
+                if (!fieldElement) return;
+
+                fieldElement.classList.add('is-invalid');
+                fieldElement.classList.remove('is-valid');
+
+                // Find or create invalid-feedback element
+                let feedback = fieldElement.nextElementSibling;
+                if (!feedback || !feedback.classList.contains('invalid-feedback')) {
+                    // Look in parent for invalid-feedback
+                    const parent = fieldElement.parentElement;
+                    feedback = parent.querySelector('.invalid-feedback');
+                    if (!feedback) {
+                        // Create invalid-feedback if it doesn't exist
+                        feedback = document.createElement('div');
+                        feedback.className = 'invalid-feedback';
+                        fieldElement.parentNode.insertBefore(feedback, fieldElement.nextSibling);
+                    }
+                }
+
+                if (feedback) {
+                    feedback.textContent = errorMessage;
+                }
+            }
+
+            function clearFieldError(fieldElement) {
+                if (!fieldElement) return;
+
+                fieldElement.classList.remove('is-invalid');
+                const feedback = fieldElement.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = '';
+                }
+            }
+
+            // Comprehensive JavaScript Validation Function
+            function validateCreateForm() {
+                let isValid = true;
+                const errors = {};
+
+                // Clear previous validation
+                createForm.querySelectorAll('.is-invalid').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+                createForm.querySelectorAll('.invalid-feedback').forEach(el => {
+                    el.textContent = '';
+                });
+                document.getElementById('createFormErrors').style.display = 'none';
+                document.getElementById('createErrorList').innerHTML = '';
+
+                // Phone validation
+                const phone = customerPhone.value.trim();
+                if (!phone) {
+                    errors.phone = ['Phone number is required.'];
+                    customerPhone.classList.add('is-invalid');
+                    setFieldError(customerPhone, 'Phone number is required.');
+                    isValid = false;
+                } else if (phone.length > 20) {
+                    errors.phone = ['Phone number must not exceed 20 characters.'];
+                    customerPhone.classList.add('is-invalid');
+                    setFieldError(customerPhone, 'Phone number must not exceed 20 characters.');
+                    isValid = false;
+                } else {
+                    clearFieldError(customerPhone);
+                }
+
+                // Customer name validation
                 const paymentStatus = paymentStatusSelect.value;
                 const customerId = customerSelect.value;
                 const customerName = newCustomerName.value.trim();
 
-                // Clear previous validation
-                newCustomerName.classList.remove('is-invalid');
-
-                // Validate customer name if required
                 if ((paymentStatus === 'paid' || customerId === '') && !customerName) {
-                    e.preventDefault();
-                    newCustomerName.classList.add('is-invalid');
-                    newCustomerName.focus();
-
-                    // Show error message
-                    let errorDiv = newCustNameDiv.querySelector('.invalid-feedback');
-                    if (!errorDiv) {
-                        errorDiv = document.createElement('div');
-                        errorDiv.className = 'invalid-feedback';
-                        newCustNameDiv.appendChild(errorDiv);
-                    }
-                    errorDiv.textContent = paymentStatus === 'paid' ?
+                    const errorMsg = paymentStatus === 'paid' ?
                         'Customer name is required when payment status is paid.' :
                         'Customer name is required.';
+                    errors.customer_name = [errorMsg];
+                    setFieldError(newCustomerName, errorMsg);
+                    isValid = false;
+                } else {
+                    clearFieldError(newCustomerName);
+                }
 
-                    // Scroll to error
-                    newCustomerName.scrollIntoView({
+                // Service validation
+                const serviceId = serviceSelect.value;
+                if (!serviceId) {
+                    errors.service_id = ['Service is required.'];
+                    setFieldError(serviceSelect, 'Service is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(serviceSelect);
+                }
+
+                // Staff validation
+                const staffId = staffSelect.value;
+                if (!staffId) {
+                    errors.staff_id = ['Staff is required.'];
+                    setFieldError(staffSelect, 'Staff is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(staffSelect);
+                }
+
+                // Room validation
+                const roomId = roomSelect.value;
+                if (!roomId) {
+                    errors.room_id = ['Room is required.'];
+                    setFieldError(roomSelect, 'Room is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(roomSelect);
+                }
+
+                // Appointment date validation
+                const appointmentDateEl = document.getElementById('appointment_date');
+                const appointmentDate = appointmentDateEl.value;
+                if (!appointmentDate) {
+                    errors.appointment_date = ['Appointment date is required.'];
+                    setFieldError(appointmentDateEl, 'Appointment date is required.');
+                    isValid = false;
+                } else {
+                    const selectedDate = new Date(appointmentDate);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    if (selectedDate < today) {
+                        errors.appointment_date = ['Appointment date must be today or later.'];
+                        setFieldError(appointmentDateEl, 'Appointment date must be today or later.');
+                        isValid = false;
+                    } else {
+                        clearFieldError(appointmentDateEl);
+                    }
+                }
+
+                // Start time validation
+                const startTimeEl = document.getElementById('start_time');
+                const startTime = startTimeEl.value;
+                if (!startTime) {
+                    errors.start_time = ['Start time is required.'];
+                    setFieldError(startTimeEl, 'Start time is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(startTimeEl);
+                }
+
+                // End time validation
+                const endTimeEl = document.getElementById('end_time');
+                const endTime = endTimeEl.value;
+                if (!endTime) {
+                    errors.end_time = ['End time is required.'];
+                    setFieldError(endTimeEl, 'End time is required.');
+                    isValid = false;
+                } else if (startTime && endTime && endTime <= startTime) {
+                    errors.end_time = ['End time must be after start time.'];
+                    setFieldError(endTimeEl, 'End time must be after start time.');
+                    isValid = false;
+                } else {
+                    clearFieldError(endTimeEl);
+                }
+
+                // Amount validation
+                const amount = amountInput.value;
+                if (!amount || parseFloat(amount) < 0) {
+                    errors.amount = ['Amount is required and must be greater than or equal to 0.'];
+                    setFieldError(amountInput, 'Amount is required and must be greater than or equal to 0.');
+                    isValid = false;
+                } else {
+                    clearFieldError(amountInput);
+                }
+
+                // Payment status validation
+                if (!paymentStatus) {
+                    errors.payment_status = ['Payment status is required.'];
+                    setFieldError(paymentStatusSelect, 'Payment status is required.');
+                    isValid = false;
+                } else {
+                    clearFieldError(paymentStatusSelect);
+                }
+
+                // Customer email validation (if provided)
+                const customerEmail = newCustomerEmail.value.trim();
+                if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
+                    errors.customer_email = ['Please enter a valid email address.'];
+                    setFieldError(newCustomerEmail, 'Please enter a valid email address.');
+                    isValid = false;
+                } else if (customerEmail) {
+                    clearFieldError(newCustomerEmail);
+                }
+
+                // Hide top error display (errors are shown below each field)
+                document.getElementById('createFormErrors').style.display = 'none';
+
+                // Scroll to first error if validation failed
+                if (!isValid) {
+                    const firstError = createForm.querySelector('.is-invalid');
+                    if (firstError) {
+                        firstError.scrollIntoView({
+                            behavior: 'smooth',
+                            block: 'center'
+                        });
+                        firstError.focus();
+                    }
+                }
+
+                return isValid;
+            }
+
+            // Function to display validation errors from server (show below each field)
+            function displayValidationErrors(errors, formType) {
+                const form = formType === 'createForm' ? createForm : editForm;
+                const errorDisplay = document.getElementById(formType === 'createForm' ? 'createFormErrors' :
+                    'editFormErrors');
+
+                // Clear previous errors
+                form.querySelectorAll('.is-invalid').forEach(el => {
+                    el.classList.remove('is-invalid');
+                });
+                form.querySelectorAll('.invalid-feedback').forEach(el => {
+                    el.textContent = '';
+                });
+
+                // Display errors below each field
+                Object.keys(errors).forEach(field => {
+                    const fieldElement = form.querySelector(`[name="${field}"]`);
+                    if (fieldElement) {
+                        const errorMsg = Array.isArray(errors[field]) ? errors[field][0] : errors[field];
+                        setFieldError(fieldElement, errorMsg);
+                    }
+                });
+
+                // Hide top error display
+                if (errorDisplay) {
+                    errorDisplay.style.display = 'none';
+                }
+
+                // Scroll to first error
+                const firstError = form.querySelector('.is-invalid');
+                if (firstError) {
+                    firstError.scrollIntoView({
                         behavior: 'smooth',
                         block: 'center'
                     });
+                    firstError.focus();
+                }
+            }
+
+            // AJAX Form Submission for Create
+            createForm.addEventListener('submit', function(e) {
+                e.preventDefault();
+
+                // First validate with JavaScript
+                if (!validateCreateForm()) {
                     return false;
                 }
+
+                // Disable submit button
+                const submitBtn = createForm.querySelector('button[type="submit"]');
+                const originalBtnText = submitBtn.innerHTML;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<i class="ri-loader-4-line spin me-1"></i> Creating...';
+
+                // Prepare form data
+                const formData = new FormData(createForm);
+
+                // AJAX submission
+                fetch(createForm.action, {
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
+                    .then(response => {
+                        return response.json().then(data => ({
+                            status: response.status,
+                            data: data
+                        }));
+                    })
+                    .then(result => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+
+                        if (result.status === 200 && result.data.success) {
+                            // Show success message
+                            if (typeof showToast === 'function') {
+                                showToast('success', result.data.message);
+                            }
+
+                            // Close modal
+                            const modal = bootstrap.Modal.getInstance(createModal);
+                            if (modal) {
+                                modal.hide();
+                            }
+
+                            // Reload page to show new appointment
+                            setTimeout(() => {
+                                window.location.reload();
+                            }, 500);
+                        } else if (result.status === 422) {
+                            // Validation errors
+                            if (result.data.errors) {
+                                displayValidationErrors(result.data.errors, 'createForm');
+                            } else if (result.data.message) {
+                                if (typeof showToast === 'function') {
+                                    showToast('error', result.data.message);
+                                }
+                            }
+                        } else {
+                            // Other errors
+                            if (typeof showToast === 'function') {
+                                showToast('error', result.data.message ||
+                                    'An error occurred. Please try again.');
+                            }
+                        }
+                    })
+                    .catch(error => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = originalBtnText;
+
+                        if (typeof showToast === 'function') {
+                            showToast('error',
+                                'Network error. Please check your connection and try again.');
+                        }
+                        console.error('Error:', error);
+                    });
             });
 
             // Function to calculate final amount

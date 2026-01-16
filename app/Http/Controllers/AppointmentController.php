@@ -125,119 +125,156 @@ class AppointmentController extends Controller
      */
     public function store(Request $request)
     {
-        $request->validate([
-            'customer_id' => 'nullable|exists:customers,id',
-            'customer_name' => [
-                'required_without:customer_id',
-                function ($attribute, $value, $fail) use ($request) {
-                    // If payment status is paid and no customer selected, customer name is required
-                    if ($request->payment_status === 'paid' && empty($request->customer_id) && empty($value)) {
-                        $fail('Customer name is required when payment status is paid and no customer is selected.');
-                    }
-                },
-                'nullable',
-                'string',
-                'max:255'
-            ],
-            'customer_email' => 'nullable|email',
-            'phone' => 'required|string|max:20',
-            'service_id' => 'required|exists:services,id',
-            'staff_id' => 'required|exists:staff,id',
-            'room_id' => 'required|exists:rooms,id',
-            'appointment_date' => 'required|date|after_or_equal:today',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-            'duration' => 'nullable|integer|min:1',
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'nullable|string',
-            'payment_status' => 'required|in:pending,paid',
-            'is_member' => 'nullable|boolean',
-            'offer_id' => 'nullable|exists:offers,id',
-            'sleep' => 'nullable|string|max:255',
-        ], [
-            'customer_name.required_if' => 'Customer name is required when creating a new customer or when payment status is paid.',
-        ]);
-
-        // Check for conflicts
-        $conflicts = $this->checkConflicts($request->staff_id, $request->room_id, $request->appointment_date, $request->start_time, $request->end_time);
-
-        if (!empty($conflicts)) {
-            return redirect()->back()->withErrors(['conflict' => 'Conflict detected: ' . implode(', ', $conflicts)])->withInput();
-        }
-
-        DB::beginTransaction();
         try {
-            $customerId = $request->customer_id;
+            $request->validate([
+                'customer_id' => 'nullable|exists:customers,id',
+                'customer_name' => [
+                    'required_without:customer_id',
+                    function ($attribute, $value, $fail) use ($request) {
+                        // If payment status is paid and no customer selected, customer name is required
+                        if ($request->payment_status === 'paid' && empty($request->customer_id) && empty($value)) {
+                            $fail('Customer name is required when payment status is paid and no customer is selected.');
+                        }
+                    },
+                    'nullable',
+                    'string',
+                    'max:255'
+                ],
+                'customer_email' => 'nullable|email',
+                'phone' => 'required|string|max:20',
+                'service_id' => 'required|exists:services,id',
+                'staff_id' => 'required|exists:staff,id',
+                'room_id' => 'required|exists:rooms,id',
+                'appointment_date' => 'required|date|after_or_equal:today',
+                'start_time' => 'required',
+                'end_time' => 'required|after:start_time',
+                'duration' => 'nullable|integer|min:1',
+                'amount' => 'required|numeric|min:0',
+                'payment_method' => 'nullable|string',
+                'payment_status' => 'required|in:pending,paid',
+                'is_member' => 'nullable|boolean',
+                'offer_id' => 'nullable|exists:offers,id',
+                'sleep' => 'nullable|string|max:255',
+            ], [
+                'customer_name.required_if' => 'Customer name is required when creating a new customer or when payment status is paid.',
+            ]);
 
-            // Auto-create customer if not selected
-            if (!$customerId) {
-                $customer = Customer::where('email', $request->customer_email)
-                    ->orWhere('phone', $request->phone)
-                    ->first();
+            // Check for conflicts
+            $conflicts = $this->checkConflicts($request->staff_id, $request->room_id, $request->appointment_date, $request->start_time, $request->end_time);
 
-                if (!$customer) {
-                    $customer = Customer::create([
-                        'name' => $request->customer_name,
-                        'email' => $request->customer_email,
-                        'phone' => $request->phone,
-                        'customer_type' => $request->is_member ? 'member' : 'normal',
-                        'created_by' => Auth::id(),
-                        'updated_by' => Auth::id(),
-                    ]);
+            if (!empty($conflicts)) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Conflict detected: ' . implode(', ', $conflicts),
+                        'errors' => ['conflict' => ['Conflict detected: ' . implode(', ', $conflicts)]]
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['conflict' => 'Conflict detected: ' . implode(', ', $conflicts)])->withInput();
+            }
 
-                    // Create wallet for member customers
-                    if ($customer->customer_type == 'member' && !$customer->wallet) {
-                        \App\Models\MemberWallet::create([
-                            'customer_id' => $customer->id,
-                            'balance' => 0,
+            DB::beginTransaction();
+            try {
+                $customerId = $request->customer_id;
+
+                // Auto-create customer if not selected
+                if (!$customerId) {
+                    $customer = Customer::where('email', $request->customer_email)
+                        ->orWhere('phone', $request->phone)
+                        ->first();
+
+                    if (!$customer) {
+                        $customer = Customer::create([
+                            'name' => $request->customer_name,
+                            'email' => $request->customer_email,
+                            'phone' => $request->phone,
+                            'customer_type' => $request->is_member ? 'member' : 'normal',
                             'created_by' => Auth::id(),
                             'updated_by' => Auth::id(),
                         ]);
+
+                        // Create wallet for member customers
+                        if ($customer->customer_type == 'member' && !$customer->wallet) {
+                            \App\Models\MemberWallet::create([
+                                'customer_id' => $customer->id,
+                                'balance' => 0,
+                                'created_by' => Auth::id(),
+                                'updated_by' => Auth::id(),
+                            ]);
+                        }
                     }
+                    $customerId = $customer->id;
                 }
-                $customerId = $customer->id;
+
+                // Get service price
+                $service = Service::findOrFail($request->service_id);
+                $amount = $request->amount ?? $service->price;
+
+                // Create appointment
+                $appointment = Appointment::create([
+                    'customer_id' => $customerId,
+                    'phone' => $request->phone,
+                    'service_id' => $request->service_id,
+                    'staff_id' => $request->staff_id,
+                    'room_id' => $request->room_id,
+                    'appointment_date' => $request->appointment_date,
+                    'start_time' => $request->start_time,
+                    'end_time' => $request->end_time,
+                    'duration' => $request->duration ?? $service->duration_minutes,
+                    'is_member' => $request->is_member ?? false,
+                    'payment_method' => $request->payment_method,
+                    'amount' => $amount,
+                    'offer_id' => $request->offer_id,
+                    'payment_status' => $request->payment_status,
+                    'sleep' => $request->sleep,
+                    'status' => 'created',
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]);
+
+                // Create appointment service record
+                AppointmentService::create([
+                    'appointment_id' => $appointment->id,
+                    'service_id' => $request->service_id,
+                    'price' => $amount,
+                    'created_by' => Auth::id(),
+                    'updated_by' => Auth::id(),
+                ]);
+
+                DB::commit();
+
+                // Load relationships for response
+                $appointment->load(['customer', 'staff', 'room', 'service', 'invoice']);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Appointment created successfully.',
+                        'appointment' => $appointment
+                    ], 200);
+                }
+
+                return redirect()->back()->with('success', 'Appointment created successfully.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error creating appointment: ' . $e->getMessage(),
+                        'errors' => ['general' => [$e->getMessage()]]
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Error creating appointment: ' . $e->getMessage())->withInput();
             }
-
-            // Get service price
-            $service = Service::findOrFail($request->service_id);
-            $amount = $request->amount ?? $service->price;
-
-            // Create appointment
-            $appointment = Appointment::create([
-                'customer_id' => $customerId,
-                'phone' => $request->phone,
-                'service_id' => $request->service_id,
-                'staff_id' => $request->staff_id,
-                'room_id' => $request->room_id,
-                'appointment_date' => $request->appointment_date,
-                'start_time' => $request->start_time,
-                'end_time' => $request->end_time,
-                'duration' => $request->duration ?? $service->duration_minutes,
-                'is_member' => $request->is_member ?? false,
-                'payment_method' => $request->payment_method,
-                'amount' => $amount,
-                'offer_id' => $request->offer_id,
-                'payment_status' => $request->payment_status,
-                'sleep' => $request->sleep,
-                'status' => 'created',
-                'created_by' => Auth::id(),
-                'updated_by' => Auth::id(),
-            ]);
-
-            // Create appointment service record
-            AppointmentService::create([
-                'appointment_id' => $appointment->id,
-                'service_id' => $request->service_id,
-                'price' => $amount,
-                'created_by' => Auth::id(),
-                'updated_by' => Auth::id(),
-            ]);
-
-            DB::commit();
-            return redirect()->back()->with('success', 'Appointment created successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Error creating appointment: ' . $e->getMessage())->withInput();
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
         }
     }
 
@@ -246,70 +283,114 @@ class AppointmentController extends Controller
      */
     public function update(Request $request, Appointment $appointment)
     {
-        // Check if invoice exists
-        if ($appointment->invoice) {
-            return redirect()->back()->with('error', 'Cannot edit appointment after invoice is generated.');
-        }
-
-        $request->validate([
-            'customer_id' => 'required|exists:customers,id',
-            'phone' => 'required|string|max:20',
-            'service_id' => 'required|exists:services,id',
-            'staff_id' => 'required|exists:staff,id',
-            'room_id' => 'required|exists:rooms,id',
-            'appointment_date' => 'required|date',
-            'start_time' => 'required',
-            'end_time' => 'required|after:start_time',
-            'duration' => 'nullable|integer|min:1',
-            'amount' => 'required|numeric|min:0',
-            'payment_method' => 'nullable|string',
-            'payment_status' => 'required|in:pending,paid',
-            'is_member' => 'nullable|boolean',
-            'offer_id' => 'nullable|exists:offers,id',
-            'sleep' => 'nullable|string|max:255',
-        ]);
-
-        // Check for conflicts (excluding current appointment)
-        $conflicts = $this->checkConflicts(
-            $request->staff_id,
-            $request->room_id,
-            $request->appointment_date,
-            $request->start_time,
-            $request->end_time,
-            $appointment->id
-        );
-
-        if (!empty($conflicts)) {
-            return redirect()->back()->withErrors(['conflict' => 'Conflict detected: ' . implode(', ', $conflicts)])->withInput();
-        }
-
-        DB::beginTransaction();
         try {
-            $data = $request->all();
-            $data['updated_by'] = Auth::id();
-
-            // Don't allow status change via update (use separate method)
-            unset($data['status']);
-
-            $appointment->update($data);
-
-            // Update appointment service if service changed
-            if ($appointment->service_id != $request->service_id) {
-                $appointment->services()->delete();
-                AppointmentService::create([
-                    'appointment_id' => $appointment->id,
-                    'service_id' => $request->service_id,
-                    'price' => $request->amount,
-                    'created_by' => Auth::id(),
-                    'updated_by' => Auth::id(),
-                ]);
+            // Check if invoice exists
+            if ($appointment->invoice) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot edit appointment after invoice is generated.',
+                        'errors' => ['general' => ['Cannot edit appointment after invoice is generated.']]
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Cannot edit appointment after invoice is generated.');
             }
 
-            DB::commit();
-            return redirect()->back()->with('success', 'Appointment updated successfully.');
-        } catch (\Exception $e) {
-            DB::rollBack();
-            return redirect()->back()->with('error', 'Error updating appointment: ' . $e->getMessage())->withInput();
+            $request->validate([
+                'customer_id' => 'required|exists:customers,id',
+                'phone' => 'required|string|max:20',
+                'service_id' => 'required|exists:services,id',
+                'staff_id' => 'required|exists:staff,id',
+                'room_id' => 'required|exists:rooms,id',
+                'appointment_date' => 'required|date',
+                'start_time' => 'required',
+                'end_time' => 'required|after:start_time',
+                'duration' => 'nullable|integer|min:1',
+                'amount' => 'required|numeric|min:0',
+                'payment_method' => 'nullable|string',
+                'payment_status' => 'required|in:pending,paid',
+                'is_member' => 'nullable|boolean',
+                'offer_id' => 'nullable|exists:offers,id',
+                'sleep' => 'nullable|string|max:255',
+            ]);
+
+            // Check for conflicts (excluding current appointment)
+            $conflicts = $this->checkConflicts(
+                $request->staff_id,
+                $request->room_id,
+                $request->appointment_date,
+                $request->start_time,
+                $request->end_time,
+                $appointment->id
+            );
+
+            if (!empty($conflicts)) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Conflict detected: ' . implode(', ', $conflicts),
+                        'errors' => ['conflict' => ['Conflict detected: ' . implode(', ', $conflicts)]]
+                    ], 422);
+                }
+                return redirect()->back()->withErrors(['conflict' => 'Conflict detected: ' . implode(', ', $conflicts)])->withInput();
+            }
+
+            DB::beginTransaction();
+            try {
+                $data = $request->all();
+                $data['updated_by'] = Auth::id();
+
+                // Don't allow status change via update (use separate method)
+                unset($data['status']);
+
+                $appointment->update($data);
+
+                // Update appointment service if service changed
+                if ($appointment->service_id != $request->service_id) {
+                    $appointment->services()->delete();
+                    AppointmentService::create([
+                        'appointment_id' => $appointment->id,
+                        'service_id' => $request->service_id,
+                        'price' => $request->amount,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                    ]);
+                }
+
+                DB::commit();
+
+                // Load relationships for response
+                $appointment->load(['customer', 'staff', 'room', 'service', 'invoice']);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => 'Appointment updated successfully.',
+                        'appointment' => $appointment
+                    ], 200);
+                }
+
+                return redirect()->back()->with('success', 'Appointment updated successfully.');
+            } catch (\Exception $e) {
+                DB::rollBack();
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error updating appointment: ' . $e->getMessage(),
+                        'errors' => ['general' => [$e->getMessage()]]
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Error updating appointment: ' . $e->getMessage())->withInput();
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Validation failed',
+                    'errors' => $e->errors()
+                ], 422);
+            }
+            throw $e;
         }
     }
 

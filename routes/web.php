@@ -10,10 +10,13 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\OfferController;
 use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\ReportController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\LockScreenController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [AuthController::class, 'showLoginForm']);
-Route::post('/login', [AuthController::class, 'login'])->name('login');
+Route::get('/login', [AuthController::class, 'showLoginForm'])->name('login');
+Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
 // Public invoice share view (no auth required)
@@ -23,6 +26,16 @@ Route::middleware('auth')->group(function () {
     Route::get('/dashboard', function () {
         return view('module.dashboard.dashboard');
     })->name('dashboard');
+
+    // Profile routes
+    Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');
+    Route::get('/profile/settings', [ProfileController::class, 'settings'])->name('profile.settings');
+    Route::put('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::put('/profile/password', [ProfileController::class, 'updatePassword'])->name('profile.password.update');
+
+    // Lock screen routes
+    Route::get('/lock-screen', [LockScreenController::class, 'show'])->name('lock-screen');
+    Route::post('/lock-screen/unlock', [LockScreenController::class, 'unlock'])->name('lock-screen.unlock');
 
     Route::get('appointments/availability', [AppointmentController::class, 'getAvailability'])->name('appointments.availability');
     Route::resource('appointments', AppointmentController::class);

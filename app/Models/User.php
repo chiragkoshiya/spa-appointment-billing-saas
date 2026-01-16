@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class User extends Authenticatable
 {
@@ -23,7 +24,8 @@ class User extends Authenticatable
         'email',
         'password',
         'role_id',
-        'is_active'
+        'is_active',
+        'profile_picture'
     ];
 
     /**
@@ -55,5 +57,16 @@ class User extends Authenticatable
     public function role()
     {
         return $this->belongsTo(Role::class);
+    }
+
+    /**
+     * Get the profile picture URL
+     */
+    public function getProfilePictureUrlAttribute()
+    {
+        if ($this->profile_picture) {
+            return Storage::url('profile-pictures/' . $this->profile_picture);
+        }
+        return asset('assets/images/users/avatar-1.jpg');
     }
 }
