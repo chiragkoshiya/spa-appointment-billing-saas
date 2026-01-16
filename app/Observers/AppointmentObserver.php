@@ -23,11 +23,8 @@ class AppointmentObserver
      */
     public function updated(Appointment $appointment): void
     {
-        // Trigger when status changes to completed OR payment_status changes to paid
-        if (
-            ($appointment->isDirty('status') && $appointment->status === 'completed') ||
-            ($appointment->isDirty('payment_status') && $appointment->payment_status === 'paid')
-        ) {
+        // Generate invoice ONLY when payment_status changes to paid
+        if ($appointment->isDirty('payment_status') && $appointment->payment_status === 'paid') {
             $this->generateInvoice($appointment);
         }
     }
@@ -56,7 +53,7 @@ class AppointmentObserver
         //
     }
 
-     protected function generateInvoice(Appointment $appointment)
+    protected function generateInvoice(Appointment $appointment)
     {
         // Prevent duplicate invoice
         if ($appointment->invoice) {
@@ -75,7 +72,7 @@ class AppointmentObserver
             $offerDiscount = 0;
             if ($appointment->offer_id && $appointment->offer) {
                 $offer = $appointment->offer;
-                
+
                 if ($offer->discount_type === 'percentage') {
                     $offerDiscount = ($totalAmount * $offer->discount_value) / 100;
                 } else {
@@ -90,7 +87,7 @@ class AppointmentObserver
             }
 
             $walletDeduction = 0;
-            $payableAmount   = $amountAfterOffer;
+            $payableAmount = $amountAfterOffer;
 
             // Member wallet logic (apply after offer discount)
             if (
@@ -101,7 +98,7 @@ class AppointmentObserver
                 $wallet = $appointment->customer->wallet;
 
                 $walletDeduction = min($wallet->balance, $amountAfterOffer);
-                $payableAmount   = $amountAfterOffer - $walletDeduction;
+                $payableAmount = $amountAfterOffer - $walletDeduction;
 
                 // Update wallet balance
                 $wallet->decrement('balance', $walletDeduction);
@@ -109,32 +106,32 @@ class AppointmentObserver
 
             // Create invoice
             $invoice = Invoice::create([
-                'appointment_id'   => $appointment->id,
-                'customer_id'      => $appointment->customer_id,
-                'total_amount'     => $totalAmount,
+                'appointment_id' => $appointment->id,
+                'customer_id' => $appointment->customer_id,
+                'total_amount' => $totalAmount,
                 'wallet_deduction' => $walletDeduction,
-                'payable_amount'   => $payableAmount,
-                'payment_mode'     => 'cash',
-                'created_by'       => Auth::id() ?? $appointment->created_by,
-                'updated_by'       => Auth::id() ?? $appointment->updated_by,
+                'payable_amount' => $payableAmount,
+                'payment_mode' => 'cash',
+                'created_by' => Auth::id() ?? $appointment->created_by,
+                'updated_by' => Auth::id() ?? $appointment->updated_by,
             ]);
 
             // Invoice items
             foreach ($appointment->services as $service) {
                 $description = $service->service->name;
-                
+
                 // Add offer info to description if applicable
                 if ($appointment->offer_id && $appointment->offer) {
-                    $discountText = $appointment->offer->discount_type === 'percentage' 
-                        ? $appointment->offer->discount_value . '%' 
+                    $discountText = $appointment->offer->discount_type === 'percentage'
+                        ? $appointment->offer->discount_value . '%'
                         : '₹' . number_format($appointment->offer->discount_value, 2);
                     $description .= ' (Offer: ' . $appointment->offer->name . ' - ' . $discountText . ' off)';
                 }
-                
+
                 InvoiceItem::create([
-                    'invoice_id'  => $invoice->id,
+                    'invoice_id' => $invoice->id,
                     'description' => $description,
-                    'amount'      => $service->price,
+                    'amount' => $service->price,
                     'created_by' => Auth::id() ?? $appointment->created_by,
                     'updated_by' => Auth::id() ?? $appointment->updated_by,
                 ]);

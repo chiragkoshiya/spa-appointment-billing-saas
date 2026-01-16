@@ -127,7 +127,18 @@ class AppointmentController extends Controller
     {
         $request->validate([
             'customer_id' => 'nullable|exists:customers,id',
-            'customer_name' => 'required_if:customer_id,|string|max:255',
+            'customer_name' => [
+                'required_without:customer_id',
+                function ($attribute, $value, $fail) use ($request) {
+                    // If payment status is paid and no customer selected, customer name is required
+                    if ($request->payment_status === 'paid' && empty($request->customer_id) && empty($value)) {
+                        $fail('Customer name is required when payment status is paid and no customer is selected.');
+                    }
+                },
+                'nullable',
+                'string',
+                'max:255'
+            ],
             'customer_email' => 'nullable|email',
             'phone' => 'required|string|max:20',
             'service_id' => 'required|exists:services,id',
@@ -143,6 +154,8 @@ class AppointmentController extends Controller
             'is_member' => 'nullable|boolean',
             'offer_id' => 'nullable|exists:offers,id',
             'sleep' => 'nullable|string|max:255',
+        ], [
+            'customer_name.required_if' => 'Customer name is required when creating a new customer or when payment status is paid.',
         ]);
 
         // Check for conflicts
