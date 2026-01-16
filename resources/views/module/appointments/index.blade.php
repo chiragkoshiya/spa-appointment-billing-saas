@@ -260,7 +260,8 @@
                                         <option value="">All</option>
                                         <option value="created" {{ request('status') == 'created' ? 'selected' : '' }}>
                                             Created</option>
-                                        <option value="completed" {{ request('status') == 'completed' ? 'selected' : '' }}>
+                                        <option value="completed"
+                                            {{ request('status') == 'completed' ? 'selected' : '' }}>
                                             Completed</option>
                                     </select>
                                 </div>
@@ -269,7 +270,8 @@
                                     <select name="customer_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($customers as $customer)
-                                            <option value="{{ $customer->id }}" {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
+                                            <option value="{{ $customer->id }}"
+                                                {{ request('customer_id') == $customer->id ? 'selected' : '' }}>
                                                 {{ $customer->name }}
                                             </option>
                                         @endforeach
@@ -280,7 +282,8 @@
                                     <select name="staff_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($staff as $s)
-                                            <option value="{{ $s->id }}" {{ request('staff_id') == $s->id ? 'selected' : '' }}>
+                                            <option value="{{ $s->id }}"
+                                                {{ request('staff_id') == $s->id ? 'selected' : '' }}>
                                                 {{ $s->name }}
                                             </option>
                                         @endforeach
@@ -291,7 +294,8 @@
                                     <select name="room_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($rooms as $room)
-                                            <option value="{{ $room->id }}" {{ request('room_id') == $room->id ? 'selected' : '' }}>
+                                            <option value="{{ $room->id }}"
+                                                {{ request('room_id') == $room->id ? 'selected' : '' }}>
                                                 {{ $room->name }}
                                             </option>
                                         @endforeach
@@ -302,7 +306,8 @@
                                     <select name="service_id" class="form-select">
                                         <option value="">All</option>
                                         @foreach ($services as $service)
-                                            <option value="{{ $service->id }}" {{ request('service_id') == $service->id ? 'selected' : '' }}>
+                                            <option value="{{ $service->id }}"
+                                                {{ request('service_id') == $service->id ? 'selected' : '' }}>
                                                 {{ $service->name }}
                                             </option>
                                         @endforeach
@@ -312,8 +317,10 @@
                                     <label class="form-label">Payment Status</label>
                                     <select name="payment_status" class="form-select">
                                         <option value="">All</option>
-                                        <option value="pending" {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
-                                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid
+                                        <option value="pending"
+                                            {{ request('payment_status') == 'pending' ? 'selected' : '' }}>Pending</option>
+                                        <option value="paid"
+                                            {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid
                                         </option>
                                     </select>
                                 </div>
@@ -324,13 +331,16 @@
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Date To</label>
-                                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                                    <input type="date" name="date_to" class="form-control"
+                                        value="{{ request('date_to') }}">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Sort By</label>
                                     <select name="sort_by" class="form-select">
-                                        <option value="appointment_date" {{ request('sort_by') == 'appointment_date' ? 'selected' : '' }}>Date</option>
-                                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>
+                                        <option value="appointment_date"
+                                            {{ request('sort_by') == 'appointment_date' ? 'selected' : '' }}>Date</option>
+                                        <option value="created_at"
+                                            {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>
                                             Created</option>
                                         <option value="amount" {{ request('sort_by') == 'amount' ? 'selected' : '' }}>
                                             Amount</option>
@@ -451,7 +461,8 @@
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
                                                 @if ($appointment->status == 'created' && $appointment->payment_status != 'paid')
                                                     <li class="list-inline-item">
-                                                        <form action="{{ route('appointments.updateStatus', $appointment->id) }}"
+                                                        <form
+                                                            action="{{ route('appointments.updateStatus', $appointment->id) }}"
                                                             method="POST" style="display: inline;">
                                                             @csrf
                                                             @method('PUT')
@@ -466,7 +477,8 @@
                                                 @endif
                                                 @if (!$appointment->invoice)
                                                     <li class="list-inline-item">
-                                                        <a href="javascript:void(0);" class="edit-item-btn btn btn-sm btn-soft-info"
+                                                        <a href="javascript:void(0);"
+                                                            class="edit-item-btn btn btn-sm btn-soft-info"
                                                             data-bs-toggle="modal" data-bs-target="#editModal"
                                                             data-id="{{ $appointment->id }}"
                                                             data-customer_id="{{ $appointment->customer_id }}"
@@ -497,7 +509,8 @@
                                                     </li>
                                                 @endif
                                                 <li class="list-inline-item">
-                                                    <button type="button" class="btn btn-sm btn-soft-danger remove-item-btn"
+                                                    <button type="button"
+                                                        class="btn btn-sm btn-soft-danger remove-item-btn"
                                                         data-bs-toggle="modal" data-bs-target="#deleteRecordModal"
                                                         data-action="{{ route('appointments.destroy', $appointment->id) }}"
                                                         data-message="Are you sure you want to delete this appointment?"
@@ -513,7 +526,7 @@
                                         <td colspan="11" class="text-center py-4">
                                             <div class="text-muted">
                                                 <i class="ri-inbox-line fs-48"></i>
-                                                <p class="mt-2">No appointments found</p>
+                                                <p class="mt-2">No data found</p>
                                             </div>
                                         </td>
                                     </tr>
@@ -559,8 +572,9 @@
                                 <select name="customer_id" id="customer_select" class="form-select">
                                     <option value="">-- New / Walk-in Customer --</option>
                                     @foreach ($customers as $c)
-                                        <option value="{{ $c->id }}" data-phone="{{ $c->phone }}" data-email="{{ $c->email }}"
-                                            data-type="{{ $c->customer_type }}" data-balance="{{ $c->wallet->balance ?? 0 }}">
+                                        <option value="{{ $c->id }}" data-phone="{{ $c->phone }}"
+                                            data-email="{{ $c->email }}" data-type="{{ $c->customer_type }}"
+                                            data-balance="{{ $c->wallet->balance ?? 0 }}">
                                             {{ $c->name }}
                                             @if ($c->customer_type == 'member')
                                                 (Member - Bal: ₹{{ number_format($c->wallet->balance ?? 0, 2) }})
@@ -572,7 +586,7 @@
                                 </select>
                             </div>
                             <div class="col-lg-6" id="new_cust_name_div">
-                                <label class="form-label">Customer Name (New) <span class="text-danger">*</span></label>
+                                <label class="form-label">Customer Name (New)</label>
                                 <input type="text" name="customer_name" id="new_customer_name" class="form-control"
                                     placeholder="Enter customer name">
                                 <div class="invalid-feedback"></div>
@@ -658,7 +672,8 @@
                                 <select name="offer_id" id="offer_select" class="form-select">
                                     <option value="">-- Select Offer --</option>
                                     @foreach ($offers as $offer)
-                                        <option value="{{ $offer->id }}" data-discount-type="{{ $offer->discount_type }}"
+                                        <option value="{{ $offer->id }}"
+                                            data-discount-type="{{ $offer->discount_type }}"
                                             data-discount-value="{{ $offer->discount_value }}">
                                             {{ $offer->name }}
                                             ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
@@ -730,7 +745,8 @@
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">Sleep / Notes</label>
-                                <input type="text" name="sleep" class="form-control" placeholder="Additional notes">
+                                <input type="text" name="sleep" class="form-control"
+                                    placeholder="Additional notes">
                             </div>
                             <div class="col-lg-6">
                                 <label class="form-label">&nbsp;</label>
@@ -831,7 +847,8 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
-                                <input type="date" name="appointment_date" id="edit_appointment_date" class="form-control">
+                                <input type="date" name="appointment_date" id="edit_appointment_date"
+                                    class="form-control">
                                 <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
@@ -846,12 +863,13 @@
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Duration (Minutes)</label>
-                                <input type="number" name="duration" id="edit_duration" class="form-control" min="1">
+                                <input type="number" name="duration" id="edit_duration" class="form-control"
+                                    min="1">
                             </div>
                             <div class="col-lg-4">
                                 <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="amount" id="edit_amount" class="form-control"
-                                    min="0">
+                                <input type="number" step="0.01" name="amount" id="edit_amount"
+                                    class="form-control" min="0">
                                 <div class="invalid-feedback"></div>
                             </div>
                             <div class="col-lg-4">
@@ -859,7 +877,8 @@
                                 <select name="offer_id" id="edit_offer_select" class="form-select">
                                     <option value="">-- Select Offer --</option>
                                     @foreach ($offers as $offer)
-                                        <option value="{{ $offer->id }}" data-discount-type="{{ $offer->discount_type }}"
+                                        <option value="{{ $offer->id }}"
+                                            data-discount-type="{{ $offer->discount_type }}"
                                             data-discount-value="{{ $offer->discount_value }}">
                                             {{ $offer->name }}
                                             ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
@@ -916,8 +935,8 @@
     </div>
 
     <!-- Payment Status Change Confirmation Modal -->
-    <div class="modal fade" id="paymentStatusConfirmModal" tabindex="-1" aria-labelledby="paymentStatusConfirmModalLabel"
-        aria-hidden="true">
+    <div class="modal fade" id="paymentStatusConfirmModal" tabindex="-1"
+        aria-labelledby="paymentStatusConfirmModalLabel" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content">
                 <div class="modal-header bg-primary-subtle">
@@ -960,12 +979,12 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Edit Modal Handler
             const editModal = document.getElementById('editModal');
             const editForm = document.getElementById('editForm');
 
-            editModal.addEventListener('show.bs.modal', function (event) {
+            editModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
                 editForm.action = `/appointments/${id}`;
@@ -1014,7 +1033,7 @@
 
             // Handle payment status change in edit form
             if (editPaymentStatusSelect) {
-                editPaymentStatusSelect.addEventListener('change', function () {
+                editPaymentStatusSelect.addEventListener('change', function() {
                     const newStatus = this.value;
                     const originalStatus = editForm.getAttribute('data-original-payment-status') ||
                         'pending';
@@ -1182,7 +1201,7 @@
 
             // Intercept edit form submission
             if (editForm) {
-                editForm.addEventListener('submit', function (e) {
+                editForm.addEventListener('submit', function(e) {
                     e.preventDefault();
 
                     const currentStatus = editPaymentStatusSelect ? editPaymentStatusSelect.value :
@@ -1214,13 +1233,13 @@
 
                     // AJAX submission
                     fetch(editForm.action, {
-                        method: 'POST',
-                        body: formData,
-                        headers: {
-                            'X-Requested-With': 'XMLHttpRequest',
-                            'Accept': 'application/json'
-                        }
-                    })
+                            method: 'POST',
+                            body: formData,
+                            headers: {
+                                'X-Requested-With': 'XMLHttpRequest',
+                                'Accept': 'application/json'
+                            }
+                        })
                         .then(response => {
                             return response.json().then(data => ({
                                 status: response.status,
@@ -1280,7 +1299,7 @@
             // Confirm payment status change
             const confirmPaymentBtn = document.getElementById('confirmPaymentStatusChange');
             if (confirmPaymentBtn) {
-                confirmPaymentBtn.addEventListener('click', function () {
+                confirmPaymentBtn.addEventListener('click', function() {
                     // Close confirmation modal
                     const modal = bootstrap.Modal.getInstance(paymentStatusConfirmModal);
                     if (modal) {
@@ -1307,13 +1326,13 @@
 
                         // AJAX submission
                         fetch(editForm.action, {
-                            method: 'POST',
-                            body: formData,
-                            headers: {
-                                'X-Requested-With': 'XMLHttpRequest',
-                                'Accept': 'application/json'
-                            }
-                        })
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'Accept': 'application/json'
+                                }
+                            })
                             .then(response => {
                                 return response.json().then(data => ({
                                     status: response.status,
@@ -1374,7 +1393,7 @@
 
             // Reset pending submit when confirmation modal is closed without confirmation
             if (paymentStatusConfirmModal) {
-                paymentStatusConfirmModal.addEventListener('hidden.bs.modal', function () {
+                paymentStatusConfirmModal.addEventListener('hidden.bs.modal', function() {
                     if (pendingFormSubmit) {
                         // Revert payment status to original
                         const originalStatus = editForm.getAttribute('data-original-payment-status') ||
@@ -1388,7 +1407,7 @@
             }
 
             // Reset edit form when modal is hidden
-            editModal.addEventListener('hidden.bs.modal', function () {
+            editModal.addEventListener('hidden.bs.modal', function() {
                 editForm.reset();
                 editForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
                 document.getElementById('editConflictWarning').style.display = 'none';
@@ -1412,25 +1431,15 @@
                 const paymentStatus = paymentStatusSelect.value;
                 const customerId = customerSelect.value;
 
-                // If payment status is paid OR no customer selected, customer name is required
+                // Logic simplified: just manage visibility if needed, or do nothing for 'required' attribute
                 if (paymentStatus === 'paid' || customerId === '') {
-                    newCustomerName.required = true;
                     newCustNameDiv.style.display = 'block';
-                    // Update label to show required
-                    const label = newCustNameDiv.querySelector('label');
-                    if (label && !label.innerHTML.includes('<span class="text-danger">*</span>')) {
-                        label.innerHTML = label.innerHTML.replace('Customer Name',
-                            'Customer Name <span class="text-danger">*</span>');
-                    }
-                } else if (customerId !== '') {
-                    // Customer selected and payment not paid - name not required
-                    newCustomerName.required = false;
                 }
             }
 
             paymentStatusSelect.addEventListener('change', updateCustomerNameRequirement);
 
-            customerSelect.addEventListener('change', function () {
+            customerSelect.addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
 
                 if (this.value === "") {
@@ -1480,7 +1489,7 @@
             const amountInput = document.getElementById('amount');
             const durationInput = document.getElementById('duration');
 
-            serviceSelect.addEventListener('change', function () {
+            serviceSelect.addEventListener('change', function() {
                 const selectedOption = this.options[this.selectedIndex];
                 if (selectedOption.value) {
                     const price = selectedOption.getAttribute('data-price');
@@ -1500,7 +1509,7 @@
 
             // Offer selection - calculate discount
             const offerSelect = document.getElementById('offer_select');
-            offerSelect.addEventListener('change', function () {
+            offerSelect.addEventListener('change', function() {
                 calculateFinalAmount();
             });
 
@@ -1512,7 +1521,7 @@
             const createModal = document.getElementById('createModal');
             const createForm = document.getElementById('createForm');
 
-            createModal.addEventListener('show.bs.modal', function () {
+            createModal.addEventListener('show.bs.modal', function() {
                 // Reset form
                 createForm.reset();
 
@@ -1538,7 +1547,6 @@
                 document.getElementById('payment_status').value = 'pending';
                 document.getElementById('new_cust_name_div').style.display = 'block';
                 document.getElementById('new_cust_email_div').style.display = 'block';
-                document.getElementById('new_customer_name').required = true;
                 document.getElementById('new_customer_name').classList.remove('is-invalid');
 
                 // Update customer name requirement
@@ -1549,7 +1557,7 @@
             });
 
             // Reset create form when modal is hidden
-            createModal.addEventListener('hidden.bs.modal', function () {
+            createModal.addEventListener('hidden.bs.modal', function() {
                 createForm.reset();
                 createForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
                 document.getElementById('conflictWarning').style.display = 'none';
@@ -1807,7 +1815,7 @@
             }
 
             // AJAX Form Submission for Create
-            createForm.addEventListener('submit', function (e) {
+            createForm.addEventListener('submit', function(e) {
                 e.preventDefault();
 
                 // First validate with JavaScript
@@ -1826,13 +1834,13 @@
 
                 // AJAX submission
                 fetch(createForm.action, {
-                    method: 'POST',
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
+                        method: 'POST',
+                        body: formData,
+                        headers: {
+                            'X-Requested-With': 'XMLHttpRequest',
+                            'Accept': 'application/json'
+                        }
+                    })
                     .then(response => {
                         return response.json().then(data => ({
                             status: response.status,
@@ -2098,7 +2106,7 @@
             // Check availability when date/time changes - automatically update room dropdown
             [appointmentDate, startTime, endTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('change', function () {
+                    el.addEventListener('change', function() {
                         // Small delay to ensure all values are set
                         setTimeout(checkRoomAvailability, 100);
                     });
@@ -2108,7 +2116,7 @@
             // Also check on input event for real-time updates
             [startTime, endTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('input', function () {
+                    el.addEventListener('input', function() {
                         if (appointmentDate.value && startTime.value && endTime.value) {
                             setTimeout(checkRoomAvailability, 300); // Debounce
                         }
@@ -2117,7 +2125,7 @@
             });
 
             // Check for conflicts when room is selected
-            roomSelect.addEventListener('change', function () {
+            roomSelect.addEventListener('change', function() {
                 if (roomAvailabilityData) {
                     checkSelectedRoomConflict(roomAvailabilityData);
                 }
@@ -2159,8 +2167,8 @@
                     editRoomAvailabilityStatus.style.display = 'block';
 
                     fetch(
-                        `/appointments/availability?date=${date}&start_time=${start}&end_time=${end}&exclude_appointment_id=${appointmentId || ''}`
-                    )
+                            `/appointments/availability?date=${date}&start_time=${start}&end_time=${end}&exclude_appointment_id=${appointmentId || ''}`
+                        )
                         .then(response => response.json())
                         .then(data => {
                             editRoomAvailabilityData = data;
@@ -2250,7 +2258,7 @@
             // Check availability when date/time changes in edit modal
             [editAppointmentDate, editStartTime, editEndTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('change', function () {
+                    el.addEventListener('change', function() {
                         setTimeout(checkEditRoomAvailability, 100);
                     });
                 }
@@ -2259,7 +2267,7 @@
             // Also check on input event for real-time updates in edit modal
             [editStartTime, editEndTime].forEach(el => {
                 if (el) {
-                    el.addEventListener('input', function () {
+                    el.addEventListener('input', function() {
                         if (editAppointmentDate.value && editStartTime.value && editEndTime.value) {
                             setTimeout(checkEditRoomAvailability, 300); // Debounce
                         }

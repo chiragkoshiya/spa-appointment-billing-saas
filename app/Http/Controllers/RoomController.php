@@ -23,8 +23,8 @@ class RoomController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:rooms,name',
-            'is_active' => 'boolean'
+            'name' => ['required', 'string', 'max:100', 'unique:rooms,name'],
+            'is_active' => ['boolean']
         ]);
 
         $room = new Room();
@@ -35,7 +35,7 @@ class RoomController extends Controller
         $room->updated_by = Auth::id();
         $room->save();
 
-        return redirect()->back()->with('success', 'Room "' . $room->name . '" created successfully.');
+        return redirect()->back()->with('success', 'Room ' . $room->name . ' created successfully.');
     }
 
     /**
@@ -44,8 +44,8 @@ class RoomController extends Controller
     public function update(Request $request, Room $room)
     {
         $request->validate([
-            'name' => 'required|string|max:100|unique:rooms,name,' . $room->id,
-            'is_active' => 'boolean'
+            'name' => ['required', 'string', 'max:100', 'unique:rooms,name,' . $room->id],
+            'is_active' => ['boolean']
         ]);
 
         $room->name = $request->name;
@@ -54,7 +54,7 @@ class RoomController extends Controller
         $room->updated_by = Auth::id();
         $room->save();
 
-        return redirect()->back()->with('success', 'Room "' . $room->name . '" updated successfully.');
+        return redirect()->back()->with('success', 'Room ' . $room->name . ' updated successfully.');
     }
 
     /**
@@ -64,6 +64,6 @@ class RoomController extends Controller
     {
         $name = $room->name;
         $room->delete();
-        return redirect()->back()->with('success', 'Room "' . $name . '" deleted successfully.');
+        return redirect()->back()->with('success', 'Room ' . $name . ' deleted successfully.');
     }
 }

@@ -50,7 +50,7 @@
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all">
-                                @foreach ($rooms as $room)
+                                @forelse ($rooms as $room)
                                     <tr>
                                         <td class="name">{{ $room->name }}</td>
                                         <td class="slug">{{ $room->slug }}</td>
@@ -84,7 +84,16 @@
                                             </ul>
                                         </td>
                                     </tr>
-                                @endforeach
+                                @empty
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4">
+                                            <div class="text-muted">
+                                                <i class="ri-inbox-line fs-48"></i>
+                                                <p class="mt-2">No data found</p>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                @endforelse
                             </tbody>
                         </table>
                     </div>

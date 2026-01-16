@@ -9,6 +9,7 @@ use App\Models\Service;
 use App\Models\Room;
 use App\Models\Staff;
 use App\Models\Offer;
+use App\Services\AppointmentCompletionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,6 +17,12 @@ use Illuminate\Support\Facades\Log;
 
 class AppointmentController extends Controller
 {
+    protected $appointmentService;
+
+    public function __construct(AppointmentCompletionService $appointmentService)
+    {
+        $this->appointmentService = $appointmentService;
+    }
     /**
      * Display a listing of the resource with advanced filters
      */
@@ -140,23 +147,25 @@ class AppointmentController extends Controller
                     'string',
                     'max:255'
                 ],
-                'customer_email' => 'nullable|email',
-                'phone' => 'required|string|max:20',
-                'service_id' => 'required|exists:services,id',
-                'staff_id' => 'required|exists:staff,id',
-                'room_id' => 'required|exists:rooms,id',
-                'appointment_date' => 'required|date|after_or_equal:today',
-                'start_time' => 'required',
-                'end_time' => 'required|after:start_time',
-                'duration' => 'nullable|integer|min:1',
-                'amount' => 'required|numeric|min:0',
-                'payment_method' => 'nullable|string',
-                'payment_status' => 'required|in:pending,paid',
-                'is_member' => 'nullable|boolean',
-                'offer_id' => 'nullable|exists:offers,id',
-                'sleep' => 'nullable|string|max:255',
+                'customer_email' => ['nullable', 'email'],
+                'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+                'service_id' => ['required', 'exists:services,id'],
+                'staff_id' => ['required', 'exists:staff,id'],
+                'room_id' => ['required', 'exists:rooms,id'],
+                'appointment_date' => ['required', 'date', 'after_or_equal:today'],
+                'start_time' => ['required'],
+                'end_time' => ['required', 'after:start_time'],
+                'duration' => ['nullable', 'integer', 'min:1'],
+                'amount' => ['required', 'numeric', 'min:0.01'],
+                'payment_method' => ['nullable', 'string'],
+                'payment_status' => ['required', 'in:pending,paid'],
+                'is_member' => ['nullable', 'boolean'],
+                'offer_id' => ['nullable', 'exists:offers,id'],
+                'sleep' => ['nullable', 'string', 'max:255'],
             ], [
                 'customer_name.required_if' => 'Customer name is required when creating a new customer or when payment status is paid.',
+                'phone.regex' => 'Phone number must be exactly 10 digits.',
+                'amount.min' => 'Amount must be a positive number.',
             ]);
 
             // Check for conflicts
@@ -233,7 +242,7 @@ class AppointmentController extends Controller
                 ]);
 
                 // Create appointment service record
-                AppointmentService::create([
+                \App\Models\AppointmentService::create([
                     'appointment_id' => $appointment->id,
                     'service_id' => $request->service_id,
                     'price' => $amount,
@@ -297,21 +306,24 @@ class AppointmentController extends Controller
             }
 
             $request->validate([
-                'customer_id' => 'required|exists:customers,id',
-                'phone' => 'required|string|max:20',
-                'service_id' => 'required|exists:services,id',
-                'staff_id' => 'required|exists:staff,id',
-                'room_id' => 'required|exists:rooms,id',
-                'appointment_date' => 'required|date',
-                'start_time' => 'required',
-                'end_time' => 'required|after:start_time',
-                'duration' => 'nullable|integer|min:1',
-                'amount' => 'required|numeric|min:0',
-                'payment_method' => 'nullable|string',
-                'payment_status' => 'required|in:pending,paid',
-                'is_member' => 'nullable|boolean',
-                'offer_id' => 'nullable|exists:offers,id',
-                'sleep' => 'nullable|string|max:255',
+                'customer_id' => ['required', 'exists:customers,id'],
+                'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+                'service_id' => ['required', 'exists:services,id'],
+                'staff_id' => ['required', 'exists:staff,id'],
+                'room_id' => ['required', 'exists:rooms,id'],
+                'appointment_date' => ['required', 'date'],
+                'start_time' => ['required'],
+                'end_time' => ['required', 'after:start_time'],
+                'duration' => ['nullable', 'integer', 'min:1'],
+                'amount' => ['required', 'numeric', 'min:0.01'],
+                'payment_method' => ['nullable', 'string'],
+                'payment_status' => ['required', 'in:pending,paid'],
+                'is_member' => ['nullable', 'boolean'],
+                'offer_id' => ['nullable', 'exists:offers,id'],
+                'sleep' => ['nullable', 'string', 'max:255'],
+            ], [
+                'phone.regex' => 'Phone number must be exactly 10 digits.',
+                'amount.min' => 'Amount must be a positive number.',
             ]);
 
             // Check for conflicts (excluding current appointment)
@@ -340,15 +352,31 @@ class AppointmentController extends Controller
                 $data = $request->all();
                 $data['updated_by'] = Auth::id();
 
-                // Don't allow status change via update (use separate method)
-                unset($data['status']);
+                // Check if status is being changed to completed
+                $statusChangedToCompleted = false;
+                if (isset($data['status']) && $data['status'] === 'completed' && $appointment->status !== 'completed') {
+                    $statusChangedToCompleted = true;
+                }
 
-                $appointment->update($data);
+                // If status/time changed and appointment should be completed, use completion service
+                if ($statusChangedToCompleted) {
+                    // Use shared service to complete appointment (status + payment + invoice in one transaction)
+                    $result = $this->appointmentService->completeAppointment($appointment);
+
+                    // Update other fields
+                    unset($data['status']); // Already handled by completion service
+                    unset($data['payment_status']); // Already handled by completion service
+                    $appointment->update($data);
+                } else {
+                    // Don't allow status change via update (use separate method)
+                    unset($data['status']);
+                    $appointment->update($data);
+                }
 
                 // Update appointment service if service changed
                 if ($appointment->service_id != $request->service_id) {
                     $appointment->services()->delete();
-                    AppointmentService::create([
+                    \App\Models\AppointmentService::create([
                         'appointment_id' => $appointment->id,
                         'service_id' => $request->service_id,
                         'price' => $request->amount,
@@ -407,14 +435,44 @@ class AppointmentController extends Controller
             return redirect()->back()->with('error', 'Cannot revert completed appointment to created status.');
         }
 
+        // If completing appointment, use shared service (status + payment + invoice in one transaction)
+        if ($request->status === 'completed') {
+            try {
+                $result = $this->appointmentService->completeAppointment($appointment);
+
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => true,
+                        'message' => $result['message'],
+                    ], 200);
+                }
+
+                return redirect()->back()->with('success', $result['message']);
+            } catch (\Exception $e) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Error completing appointment: ' . $e->getMessage(),
+                    ], 422);
+                }
+                return redirect()->back()->with('error', 'Error completing appointment: ' . $e->getMessage());
+            }
+        }
+
+        // For other status changes
         $appointment->update([
             'status' => $request->status,
             'updated_by' => Auth::id(),
         ]);
 
-        $message = $request->status === 'completed'
-            ? 'Appointment marked as completed. Invoice generated automatically.'
-            : 'Appointment status updated.';
+        $message = 'Appointment status updated.';
+
+        if ($request->ajax() || $request->wantsJson()) {
+            return response()->json([
+                'success' => true,
+                'message' => $message,
+            ], 200);
+        }
 
         return redirect()->back()->with('success', $message);
     }

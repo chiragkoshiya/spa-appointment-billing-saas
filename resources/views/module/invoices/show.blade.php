@@ -26,7 +26,10 @@
                 <div class="invoice-title">
                     <div class="mb-4">
                         <h4 class="mb-1">Invoice #{{ $invoice->invoice_number }}</h4>
-                        <p class="text-muted mb-0">Date: {{ $invoice->created_at->format('d M, Y h:i A') }}</p>
+                        <p class="text-muted mb-0">Invoice Date: {{ $invoice->created_at->format('d M, Y h:i A') }}</p>
+                        @if($invoice->appointment)
+                        <p class="text-muted mb-0">Appointment ID: #APT{{ str_pad($invoice->appointment->id, 4, '0', STR_PAD_LEFT) }}</p>
+                        @endif
                     </div>
                     <div class="text-end">
                         <a href="{{ route('invoices.download', $invoice->id) }}" class="btn btn-success me-2" target="_blank">
@@ -165,7 +168,7 @@
                                 </span>
                             </p>
                             <p class="text-muted mb-1">
-                                <strong>Status:</strong> 
+                                <strong>Payment Status:</strong> 
                                 @if($invoice->isPaid())
                                     <span class="badge bg-success-subtle text-success">Paid</span>
                                 @elseif($invoice->wallet_deduction > 0)

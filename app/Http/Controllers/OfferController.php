@@ -32,7 +32,7 @@ class OfferController extends Controller
 
         Offer::create($data);
 
-        return redirect()->back()->with('success', 'Offer "' . $data['name'] . '" created successfully.');
+        return redirect()->back()->with('success', 'Offer ' . $data['name'] . ' created successfully.');
     }
 
     public function update(Request $request, Offer $offer)
@@ -52,13 +52,13 @@ class OfferController extends Controller
 
         $offer->update($data);
 
-        return redirect()->back()->with('success', 'Offer "' . $offer->name . '" updated successfully.');
+        return redirect()->back()->with('success', 'Offer ' . $offer->name . ' updated successfully.');
     }
 
     public function destroy(Offer $offer)
     {
         $name = $offer->name;
         $offer->delete();
-        return redirect()->back()->with('success', 'Offer "' . $name . '" deleted successfully.');
+        return redirect()->back()->with('success', 'Offer ' . $name . ' deleted successfully.');
     }
 }

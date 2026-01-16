@@ -91,9 +91,11 @@ class InventoryItemController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'quantity' => 'required|integer|min:0',
-            'amount' => 'required|numeric|min:0',
+            'name' => ['required', 'string', 'max:255'],
+            'quantity' => ['required', 'integer', 'min:0'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+        ], [
+            'amount.min' => 'Amount must be a positive number.',
         ]);
 
         DB::beginTransaction();
@@ -128,8 +130,10 @@ class InventoryItemController extends Controller
     public function update(Request $request, InventoryItem $inventory)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'amount' => 'required|numeric|min:0',
+            'name' => ['required', 'string', 'max:255'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+        ], [
+            'amount.min' => 'Amount must be a positive number.',
         ]);
 
         try {

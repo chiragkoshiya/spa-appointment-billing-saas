@@ -12,6 +12,7 @@ use App\Http\Controllers\InventoryItemController;
 use App\Http\Controllers\ReportController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\LockScreenController;
+use App\Http\Controllers\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 // Guest routes
@@ -27,9 +28,7 @@ Route::get('invoices/{invoice}/share-view', [InvoiceController::class, 'shareVie
 Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
 
-    Route::get('/dashboard', function () {
-        return view('module.dashboard.dashboard');
-    })->name('dashboard');
+    Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
 
     // Profile routes
     Route::get('/profile', [ProfileController::class, 'index'])->name('profile.index');

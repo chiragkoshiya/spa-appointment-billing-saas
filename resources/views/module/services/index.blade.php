@@ -88,7 +88,7 @@
                                         <td colspan="6" class="text-center py-4">
                                             <div class="text-muted">
                                                 <i class="ri-inbox-line fs-48"></i>
-                                                <p class="mt-2">No services found</p>
+                                                <p class="mt-2">No data found</p>
                                             </div>
                                         </td>
                                     </tr>

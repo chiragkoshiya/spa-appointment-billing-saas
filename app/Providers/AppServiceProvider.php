@@ -6,6 +6,8 @@ use App\Models\Appointment;
 use Illuminate\Support\ServiceProvider;
 use App\Observers\AppointmentObserver;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Pagination\Paginator;
+
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -22,6 +24,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+            Paginator::useBootstrapFive(); // for Bootstrap 5
+
             Schema::defaultStringLength(191);
         Appointment::observe(AppointmentObserver::class);
     }

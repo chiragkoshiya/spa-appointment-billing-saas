@@ -14,16 +14,16 @@ class CustomerController extends Controller
      */
     public function index(Request $request)
     {
-        $query = Customer::query();
+        $query = Customer::with('wallet');
 
         if ($request->filled('type')) {
             $query->where('customer_type', $request->type);
         }
 
         if ($request->filled('search')) {
-            $query->where(function($q) use ($request) {
+            $query->where(function ($q) use ($request) {
                 $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('phone', 'like', '%' . $request->search . '%');
+                    ->orWhere('phone', 'like', '%' . $request->search . '%');
             });
         }
 
@@ -33,16 +33,83 @@ class CustomerController extends Controller
     }
 
     /**
+     * Display the specified resource.
+     */
+    public function show(Customer $customer)
+    {
+        $customer->load(['wallet', 'appointments.service', 'appointments.staff', 'appointments.room', 'appointments.offer']);
+
+        // Calculate statistics
+        $totalAppointments = $customer->appointments()->count();
+        $completedAppointments = $customer->appointments()->where('status', 'completed')->count();
+        $pendingAppointments = $customer->appointments()->where('status', 'pending')->count();
+        $cancelledAppointments = $customer->appointments()->where('status', 'cancelled')->count();
+
+        // Calculate total spending
+        $totalSpending = $customer->appointments()
+            ->where('payment_status', 'paid')
+            ->sum('amount');
+
+        // Get invoices
+        $invoices = \App\Models\Invoice::where('customer_id', $customer->id)
+            ->with('appointment.service')
+            ->latest()
+            ->get();
+
+        $totalInvoices = $invoices->count();
+        $totalInvoiceAmount = $invoices->sum('total_amount');
+        $totalWalletDeduction = $invoices->sum('wallet_deduction');
+
+        // Recent appointments (last 10)
+        $recentAppointments = $customer->appointments()
+            ->with(['service', 'staff', 'room', 'offer'])
+            ->latest()
+            ->limit(10)
+            ->get();
+
+        // Wallet transactions (if member)
+        $walletTransactions = collect([]);
+        if ($customer->customer_type == 'member' && $customer->wallet) {
+            // Get invoices where wallet was used
+            $walletInvoices = \App\Models\Invoice::where('customer_id', $customer->id)
+                ->where('wallet_deduction', '>', 0)
+                ->with(['appointment.service'])
+                ->latest()
+                ->get();
+
+            $walletTransactions = $walletInvoices;
+        }
+
+        return view('module.customers.show', compact(
+            'customer',
+            'totalAppointments',
+            'completedAppointments',
+            'pendingAppointments',
+            'cancelledAppointments',
+            'totalSpending',
+            'invoices',
+            'totalInvoices',
+            'totalInvoiceAmount',
+            'totalWalletDeduction',
+            'recentAppointments',
+            'walletTransactions'
+        ));
+    }
+
+    /**
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:customers,phone',
-            'email' => 'nullable|email|max:255',
-            'customer_type' => 'required|in:normal,member',
-            'wallet_balance' => 'nullable|numeric|min:0',
+            'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/', 'unique:customers,phone'],
+            'email' => ['nullable', 'email', 'max:255'],
+            'customer_type' => ['required', 'in:normal,member'],
+            'wallet_balance' => ['nullable', 'numeric', 'min:0'],
+        ], [
+            'name.regex' => 'Name must contain only alphabets and spaces.',
+            'phone.regex' => 'Phone number must be exactly 10 digits.',
         ]);
 
         if ($request->customer_type == 'normal') {
@@ -64,7 +131,7 @@ class CustomerController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Customer "' . $customer->name . '" created successfully.');
+        return redirect()->back()->with('success', 'Customer ' . $customer->name . ' created successfully.');
     }
 
     /**
@@ -73,11 +140,14 @@ class CustomerController extends Controller
     public function update(Request $request, Customer $customer)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20|unique:customers,phone,' . $customer->id,
-            'email' => 'nullable|email|max:255',
-            'customer_type' => 'required|in:normal,member',
-            'wallet_balance' => 'nullable|numeric|min:0',
+            'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/', 'unique:customers,phone,' . $customer->id],
+            'email' => ['nullable', 'email', 'max:255'],
+            'customer_type' => ['required', 'in:normal,member'],
+            'wallet_balance' => ['nullable', 'numeric', 'min:0'],
+        ], [
+            'name.regex' => 'Name must contain only alphabets and spaces.',
+            'phone.regex' => 'Phone number must be exactly 10 digits.',
         ]);
 
         $data = $request->all();
@@ -95,7 +165,7 @@ class CustomerController extends Controller
             ]);
         }
 
-        return redirect()->back()->with('success', 'Customer "' . $customer->name . '" updated successfully.');
+        return redirect()->back()->with('success', 'Customer ' . $customer->name . ' updated successfully.');
     }
 
     /**
@@ -105,6 +175,6 @@ class CustomerController extends Controller
     {
         $name = $customer->name;
         $customer->delete();
-        return redirect()->back()->with('success', 'Customer "' . $name . '" deleted successfully.');
+        return redirect()->back()->with('success', 'Customer ' . $name . ' deleted successfully.');
     }
 }

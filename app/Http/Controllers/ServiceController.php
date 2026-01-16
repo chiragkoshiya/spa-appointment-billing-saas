@@ -36,7 +36,7 @@ class ServiceController extends Controller
 
         Service::create($data);
 
-        return redirect()->back()->with('success', 'Service "' . $data['name'] . '" created successfully.');
+        return redirect()->back()->with('success', 'Service ' . $data['name'] . ' created successfully.');
     }
 
     /**
@@ -57,7 +57,7 @@ class ServiceController extends Controller
 
         $service->update($data);
 
-        return redirect()->back()->with('success', 'Service "' . $service->name . '" updated successfully.');
+        return redirect()->back()->with('success', 'Service ' . $service->name . ' updated successfully.');
     }
 
     /**
@@ -73,7 +73,7 @@ class ServiceController extends Controller
 
             $name = $service->name;
             $service->delete();
-            return redirect()->back()->with('success', 'Service "' . $name . '" deleted successfully.');
+            return redirect()->back()->with('success', 'Service ' . $name . ' deleted successfully.');
         } catch (\Exception $e) {
             return redirect()->back()->with('error', 'Error deleting service: ' . $e->getMessage());
         }

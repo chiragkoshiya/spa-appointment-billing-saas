@@ -23,11 +23,14 @@ class StaffController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255|unique:staff,email',
-            'address' => 'required|string|max:500',
-            'is_active' => 'boolean'
+            'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+            'email' => ['required', 'email', 'max:255', 'unique:staff,email'],
+            'address' => ['required', 'string', 'max:500'],
+            'is_active' => ['boolean']
+        ], [
+            'name.regex' => 'Name must contain only alphabets and spaces.',
+            'phone.regex' => 'Phone number must be exactly 10 digits.',
         ]);
 
         $data = $request->except('documents');
@@ -37,7 +40,7 @@ class StaffController extends Controller
 
         $staff = Staff::create($data);
 
-        return redirect()->back()->with('success', 'Staff member "' . $staff->name . '" created successfully.');
+        return redirect()->back()->with('success', 'Staff member ' . $staff->name . ' created successfully.');
     }
 
     /**
@@ -55,11 +58,14 @@ class StaffController extends Controller
     public function update(Request $request, Staff $staff)
     {
         $request->validate([
-            'name' => 'required|string|max:255',
-            'phone' => 'required|string|max:20',
-            'email' => 'required|email|max:255|unique:staff,email,' . $staff->id,
-            'address' => 'required|string|max:500',
-            'is_active' => 'boolean'
+            'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
+            'email' => ['required', 'email', 'max:255', 'unique:staff,email,' . $staff->id],
+            'address' => ['required', 'string', 'max:500'],
+            'is_active' => ['boolean']
+        ], [
+            'name.regex' => 'Name must contain only alphabets and spaces.',
+            'phone.regex' => 'Phone number must be exactly 10 digits.',
         ]);
 
         $data = $request->all();
@@ -68,7 +74,7 @@ class StaffController extends Controller
 
         $staff->update($data);
 
-        return redirect()->back()->with('success', 'Staff member "' . $staff->name . '" updated successfully.');
+        return redirect()->back()->with('success', 'Staff member ' . $staff->name . ' updated successfully.');
     }
 
     /**
@@ -78,7 +84,7 @@ class StaffController extends Controller
     {
         $name = $staff->name;
         $staff->delete();
-        return redirect()->back()->with('success', 'Staff member "' . $name . '" deleted successfully.');
+        return redirect()->back()->with('success', 'Staff member ' . $name . ' deleted successfully.');
     }
 
     /**
