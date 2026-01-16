@@ -29,6 +29,9 @@
                         <h5 class="card-title mb-0 flex-grow-1">Room List</h5>
                         <div class="flex-shrink-0">
                             <div class="d-flex gap-2 flex-wrap">
+                                <a href="{{ route('rooms.index') }}" class="btn btn-light" title="Refresh">
+                                    <i class="ri-refresh-line"></i>
+                                </a>
                                 <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal"
                                     data-bs-target="#createModal">
                                     <i class="ri-add-line align-bottom me-1"></i> Add Room

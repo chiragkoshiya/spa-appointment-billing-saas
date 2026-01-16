@@ -40,6 +40,10 @@
                                     <input type="text" name="search" class="form-control form-control-sm"
                                         placeholder="Search name/phone..." value="{{ request('search') }}">
                                     <button type="submit" class="btn btn-primary btn-sm">Search</button>
+                                    <a href="{{ route('customers.index') }}" class="btn btn-light btn-sm"
+                                        title="Refresh/Reset Filters">
+                                        <i class="ri-refresh-line"></i>
+                                    </a>
                                 </form>
                                 <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal"
                                     data-bs-target="#createModal">

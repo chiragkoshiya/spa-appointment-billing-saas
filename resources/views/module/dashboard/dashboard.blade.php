@@ -22,7 +22,8 @@
     <div class="row">
         <!-- Today Appointments -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('appointments.index', ['filter' => 'today']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -41,7 +42,8 @@
 
         <!-- Week Appointments -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('appointments.index', ['filter' => 'week']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -60,7 +62,8 @@
 
         <!-- Month Appointments -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('appointments.index', ['filter' => 'month']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -79,7 +82,8 @@
 
         <!-- Total Member Customers -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('customers.index', ['type' => 'member']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -98,7 +102,8 @@
 
         <!-- Total Wallet Balance -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('customers.index', ['type' => 'member']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -118,7 +123,7 @@
 
         <!-- Total Invoices -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer" onclick="location.href='{{ route('invoices.index') }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -137,7 +142,8 @@
 
         <!-- Total Paid Amount -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('invoices.index', ['payment_status' => 'paid']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -156,7 +162,8 @@
 
         <!-- Total Unpaid Amount -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer"
+                onclick="location.href='{{ route('invoices.index', ['payment_status' => 'unpaid']) }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -176,7 +183,7 @@
 
         <!-- Total Inventory -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer" onclick="location.href='{{ route('inventory.index') }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -195,7 +202,7 @@
 
         <!-- Active Offers -->
         <div class="col-xl-3 col-md-6">
-            <div class="card card-animate">
+            <div class="card card-animate cursor-pointer" onclick="location.href='{{ route('offers.index') }}'">
                 <div class="card-body">
                     <div class="d-flex align-items-center">
                         <div class="avatar-sm flex-shrink-0">
@@ -391,8 +398,7 @@
                     <div class="row g-3">
                         @forelse($staff as $staffMember)
                             <div class="col-md-6">
-                                <div
-                                    class="card border {{ $staffMember['is_busy'] ? 'border-warning' : 'border-success' }}">
+                                <div class="card border {{ $staffMember['is_busy'] ? 'border-warning' : 'border-success' }}">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
                                             <h6 class="mb-0">{{ $staffMember['name'] }}</h6>
@@ -494,7 +500,7 @@
         };
 
         // Initialize chart
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             var options = {
                 series: [{
                     name: 'Appointments',
@@ -544,18 +550,18 @@
             chart.render();
 
             // Auto-refresh dashboard every 60 seconds
-            let refreshInterval = setInterval(function() {
+            let refreshInterval = setInterval(function () {
                 if (!document.hidden) {
                     location.reload();
                 }
             }, 60000);
 
             // Clear interval when page is hidden
-            document.addEventListener('visibilitychange', function() {
+            document.addEventListener('visibilitychange', function () {
                 if (document.hidden) {
                     clearInterval(refreshInterval);
                 } else {
-                    refreshInterval = setInterval(function() {
+                    refreshInterval = setInterval(function () {
                         if (!document.hidden) {
                             location.reload();
                         }

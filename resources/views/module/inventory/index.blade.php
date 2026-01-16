@@ -219,6 +219,10 @@
                     <div class="d-flex align-items-center">
                         <h5 class="card-title mb-0 flex-grow-1">Inventory Items</h5>
                         <div class="flex-shrink-0">
+                            <a href="{{ route('inventory.index') }}" class="btn btn-light me-1"
+                                title="Refresh/Reset Filters">
+                                <i class="ri-refresh-line"></i>
+                            </a>
                             <button class="btn btn-success add-btn" data-bs-toggle="modal" data-bs-target="#createModal">
                                 <i class="ri-add-line align-bottom me-1"></i> Add Item
                             </button>
@@ -584,11 +588,11 @@
                                 const date = new Date(movement.created_at).toLocaleString();
 
                                 row.innerHTML = `
-                                    <td>${date}</td>
-                                    <td>${movement.user ? movement.user.name : 'N/A'}</td>
-                                    <td class="${changeClass} fw-semibold">${changeIcon}${movement.change_qty}</td>
-                                    <td>${movement.reason || 'N/A'}</td>
-                                `;
+                                        <td>${date}</td>
+                                        <td>${movement.user ? movement.user.name : 'N/A'}</td>
+                                        <td class="${changeClass} fw-semibold">${changeIcon}${movement.change_qty}</td>
+                                        <td>${movement.reason || 'N/A'}</td>
+                                    `;
                                 tbody.appendChild(row);
                             });
                         } else {

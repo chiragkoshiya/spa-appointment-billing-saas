@@ -28,6 +28,9 @@
                     <div class="d-flex align-items-center">
                         <h5 class="card-title mb-0 flex-grow-1">Offers List</h5>
                         <div class="flex-shrink-0">
+                            <a href="{{ route('offers.index') }}" class="btn btn-light me-1" title="Refresh">
+                                <i class="ri-refresh-line"></i>
+                            </a>
                             <button class="btn btn-success add-btn" data-bs-toggle="modal" data-bs-target="#createModal">
                                 <i class="ri-add-line align-bottom me-1"></i> Create Offer
                             </button>
