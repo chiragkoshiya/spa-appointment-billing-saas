@@ -304,6 +304,13 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item">
+                                                    <a href="{{ route('invoices.show', $invoice->id) }}"
+                                                        class="btn btn-sm btn-soft-primary">
+                                                        <i class="ri-eye-line"></i>
+                                                    </a>
+                                                </li>
+                                                @if(Auth::user()->isAdmin())
+                                                <li class="list-inline-item">
                                                     <a href="javascript:void(0);" class="edit-item-btn btn btn-sm btn-soft-info"
                                                         data-bs-toggle="modal" data-bs-target="#editModal"
                                                         data-id="{{ $invoice->id }}"
@@ -312,6 +319,7 @@
                                                         <i class="ri-pencil-line"></i>
                                                     </a>
                                                 </li>
+                                                @endif
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('invoices.download', $invoice->id) }}"
                                                         class="btn btn-sm btn-soft-success" target="_blank">
@@ -325,6 +333,7 @@
                                                         <i class="ri-share-line"></i>
                                                     </a>
                                                 </li>
+                                                @if(Auth::user()->isAdmin())
                                                 <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
                                                     data-bs-placement="top" title="Remove">
                                                     <a class="btn btn-sm btn-soft-danger remove-item-btn" data-bs-toggle="modal"
@@ -334,6 +343,7 @@
                                                         <i class="ri-delete-bin-line"></i>
                                                     </a>
                                                 </li>
+                                                @endif
                                             </ul>
                                         </td>
                                     </tr>

@@ -86,13 +86,16 @@
                             </a>
                         </li>
 
-                        <!-- Services (Therapy) -->
-                        <li class="nav-item">
-                            <a class="nav-link menu-link {{ request()->routeIs('services.*') ? 'active' : '' }}"
-                                href="{{ route('services.index') }}">
-                                <i class="ri-hand-heart-line"></i> <span data-key="t-services">Services (Therapy)</span>
-                            </a>
-                        </li>
+                        <!-- Services (Therapy) - Admin Only -->
+                        @if (Auth::user()->isAdmin())
+                            <li class="nav-item">
+                                <a class="nav-link menu-link {{ request()->routeIs('services.*') ? 'active' : '' }}"
+                                    href="{{ route('services.index') }}">
+                                    <i class="ri-hand-heart-line"></i> <span data-key="t-services">Services
+                                        (Therapy)</span>
+                                </a>
+                            </li>
+                        @endif
 
                         <!-- Staff -->
                         <li class="nav-item">

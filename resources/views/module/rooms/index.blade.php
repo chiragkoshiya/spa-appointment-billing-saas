@@ -32,10 +32,12 @@
                                 <a href="{{ route('rooms.index') }}" class="btn btn-light" title="Refresh">
                                     <i class="ri-refresh-line"></i>
                                 </a>
+                                @if(Auth::user()->isAdmin())
                                 <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal"
                                     data-bs-target="#createModal">
                                     <i class="ri-add-line align-bottom me-1"></i> Add Room
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -65,6 +67,7 @@
                                         </td>
                                         <td class="date">{{ $room->created_at->format('d M, Y') }}</td>
                                         <td>
+                                            @if(Auth::user()->isAdmin())
                                             <ul class="list-inline hstack gap-2 mb-0">
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
@@ -85,6 +88,9 @@
                                                     </a>
                                                 </li>
                                             </ul>
+                                            @else
+                                            <span class="text-muted">View Only</span>
+                                            @endif
                                         </td>
                                     </tr>
                                 @empty

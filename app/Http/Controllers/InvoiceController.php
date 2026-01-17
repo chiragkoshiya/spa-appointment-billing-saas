@@ -110,6 +110,11 @@ class InvoiceController extends Controller
      */
     public function edit(Invoice $invoice)
     {
+        // Manager can only view/download/share invoices, not edit
+        if (Auth::user()->isManager()) {
+            return redirect()->route('invoices.index')->with('error', 'You do not have permission to edit invoices.');
+        }
+
         $invoice->load(['customer', 'appointment', 'items']);
         return view('module.invoices.edit', compact('invoice'));
     }
@@ -119,6 +124,11 @@ class InvoiceController extends Controller
      */
     public function update(Request $request, Invoice $invoice)
     {
+        // Manager can only view/download/share invoices, not update
+        if (Auth::user()->isManager()) {
+            return redirect()->route('invoices.index')->with('error', 'You do not have permission to update invoices.');
+        }
+
         $request->validate([
             'payment_mode' => 'required|in:cash,online',
             'payable_amount' => 'required|numeric|min:0',
@@ -141,6 +151,11 @@ class InvoiceController extends Controller
      */
     public function destroy(Invoice $invoice)
     {
+        // Manager can only view/download/share invoices, not delete
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to delete invoices.');
+        }
+
         try {
             $invoice->delete();
             return redirect()->back()->with('success', 'Invoice deleted successfully.');

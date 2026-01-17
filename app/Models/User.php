@@ -69,4 +69,28 @@ class User extends Authenticatable
         }
         return asset('assets/images/users/avatar-1.jpg');
     }
+
+    /**
+     * Check if user is admin
+     */
+    public function isAdmin()
+    {
+        return $this->role && $this->role->name === 'admin';
+    }
+
+    /**
+     * Check if user is manager
+     */
+    public function isManager()
+    {
+        return $this->role && $this->role->name === 'manager';
+    }
+
+    /**
+     * Get role name
+     */
+    public function getRoleName()
+    {
+        return $this->role ? $this->role->name : null;
+    }
 }

@@ -87,6 +87,7 @@
     </div>
 
     <div class="col-xl-8">
+        @if(Auth::user()->isAdmin())
         <div class="card">
             <div class="card-header align-items-center d-flex">
                 <h4 class="card-title mb-0 flex-grow-1">Staff Documents (Admin Only)</h4>
@@ -138,10 +139,12 @@
                 </div>
             </div>
         </div>
+        @endif
     </div>
 </div>
 
 <!-- Upload Modal -->
+@if(Auth::user()->isAdmin())
 <div class="modal fade" id="uploadModal" tabindex="-1" aria-labelledby="uploadModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -176,5 +179,6 @@
             </form>
         </div>
     </div>
+    @endif
 </div>
 @endsection

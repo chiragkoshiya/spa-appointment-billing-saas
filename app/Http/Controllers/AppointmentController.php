@@ -292,6 +292,17 @@ class AppointmentController extends Controller
      */
     public function update(Request $request, Appointment $appointment)
     {
+        // Manager can only add/view, not edit
+        if (Auth::user()->isManager()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to edit appointments.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'You do not have permission to edit appointments.');
+        }
+
         try {
             // Check if invoice exists
             if ($appointment->invoice) {
@@ -427,6 +438,17 @@ class AppointmentController extends Controller
      */
     public function updateStatus(Request $request, Appointment $appointment)
     {
+        // Manager can only add/view, not change status
+        if (Auth::user()->isManager()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to update appointment status.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'You do not have permission to update appointment status.');
+        }
+
         $request->validate([
             'status' => 'required|in:created,completed',
         ]);
@@ -482,6 +504,11 @@ class AppointmentController extends Controller
      */
     public function destroy(Appointment $appointment)
     {
+        // Manager can only add/view, not delete
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to delete appointments.');
+        }
+
         try {
             if ($appointment->invoice) {
                 return redirect()->back()->with('error', 'Cannot delete appointment with existing invoice. Please delete invoice first.');

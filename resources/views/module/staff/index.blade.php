@@ -32,10 +32,12 @@
                                 <a href="{{ route('staff.index') }}" class="btn btn-light" title="Refresh">
                                     <i class="ri-refresh-line"></i>
                                 </a>
+                                @if(Auth::user()->isAdmin())
                                 <button type="button" class="btn btn-success add-btn" data-bs-toggle="modal"
                                     data-bs-target="#createModal">
                                     <i class="ri-add-line align-bottom me-1"></i> Add Staff
                                 </button>
+                                @endif
                             </div>
                         </div>
                     </div>
@@ -79,6 +81,7 @@
                                                         <i class="ri-eye-fill fs-16"></i>
                                                     </a>
                                                 </li>
+                                                @if(Auth::user()->isAdmin())
                                                 <li class="list-inline-item" data-bs-toggle="tooltip"
                                                     data-bs-trigger="hover" data-bs-placement="top" title="Edit">
                                                     <a href="javascript:void(0);" class="edit-item-btn"
@@ -100,6 +103,7 @@
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
                                                 </li>
+                                                @endif
                                             </ul>
                                         </td>
                                     </tr>

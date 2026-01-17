@@ -101,6 +101,11 @@ class CustomerController extends Controller
      */
     public function store(Request $request)
     {
+        // Manager can only view/edit customers, not create
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to create customers.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/', 'unique:customers,phone'],
@@ -173,6 +178,11 @@ class CustomerController extends Controller
      */
     public function destroy(Customer $customer)
     {
+        // Manager can only view/edit customers, not delete
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to delete customers.');
+        }
+
         $name = $customer->name;
         $customer->delete();
         return redirect()->back()->with('success', 'Customer ' . $name . ' deleted successfully.');

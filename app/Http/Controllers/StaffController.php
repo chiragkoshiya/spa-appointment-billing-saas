@@ -22,6 +22,11 @@ class StaffController extends Controller
      */
     public function store(Request $request)
     {
+        // Manager can only view staff, not create
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to create staff members.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
@@ -57,6 +62,11 @@ class StaffController extends Controller
      */
     public function update(Request $request, Staff $staff)
     {
+        // Manager can only view staff, not edit
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to edit staff members.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
             'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
@@ -82,6 +92,11 @@ class StaffController extends Controller
      */
     public function destroy(Staff $staff)
     {
+        // Manager can only view staff, not delete
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to delete staff members.');
+        }
+
         $name = $staff->name;
         $staff->delete();
         return redirect()->back()->with('success', 'Staff member ' . $name . ' deleted successfully.');
@@ -92,6 +107,17 @@ class StaffController extends Controller
      */
     public function storeDocument(Request $request, Staff $staff)
     {
+        // Manager cannot access staff documents
+        if (Auth::user()->isManager()) {
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'You do not have permission to manage staff documents.',
+                ], 403);
+            }
+            return redirect()->back()->with('error', 'You do not have permission to manage staff documents.');
+        }
+
         $request->validate([
             'document_type' => 'required|string|max:255',
             'file' => 'required|file|mimes:pdf,jpg,png,doc,docx|max:2048',

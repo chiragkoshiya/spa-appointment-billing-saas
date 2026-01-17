@@ -22,6 +22,11 @@ class RoomController extends Controller
      */
     public function store(Request $request)
     {
+        // Manager can only view rooms, not create
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to create rooms.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:100', 'unique:rooms,name'],
             'is_active' => ['boolean']
@@ -43,6 +48,11 @@ class RoomController extends Controller
      */
     public function update(Request $request, Room $room)
     {
+        // Manager can only view rooms, not edit
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to edit rooms.');
+        }
+
         $request->validate([
             'name' => ['required', 'string', 'max:100', 'unique:rooms,name,' . $room->id],
             'is_active' => ['boolean']
@@ -62,6 +72,11 @@ class RoomController extends Controller
      */
     public function destroy(Room $room)
     {
+        // Manager can only view rooms, not delete
+        if (Auth::user()->isManager()) {
+            return redirect()->back()->with('error', 'You do not have permission to delete rooms.');
+        }
+
         $name = $room->name;
         $room->delete();
         return redirect()->back()->with('success', 'Room ' . $name . ' deleted successfully.');

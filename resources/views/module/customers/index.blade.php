@@ -29,7 +29,7 @@
                         <h5 class="card-title mb-0">Customer List</h5>
                         <div class="d-flex align-items-center gap-2 flex-wrap flex-grow-1 flex-md-grow-0">
                             <form id="customerSearchForm" action="{{ route('customers.index') }}" method="GET"
-                                class="d-flex gap-2 flex-wrap flex-grow-1 flex-md-grow-0">
+                                class="d-flex gap-2 flex-grow-1 flex-md-grow-0">
                                 <select name="type" id="customer_type_filter" class="form-select form-select-sm"
                                     style="min-width: 120px; max-width: 140px;">
                                     <option value="">All Types</option>
@@ -49,11 +49,13 @@
                                     <i class="ri-refresh-line"></i>
                                 </a>
                             </form>
+                            @if(Auth::user()->isAdmin())
                             <button type="button" class="btn btn-success btn-sm add-btn" data-bs-toggle="modal"
                                 data-bs-target="#createModal">
                                 <i class="ri-add-line align-bottom me-1"></i> <span class="d-none d-sm-inline">Add
                                     Customer</span><span class="d-sm-none">Add</span>
                             </button>
+                            @endif
                         </div>
                     </div>
                 </div>
@@ -111,6 +113,7 @@
                                                         <i class="ri-pencil-fill align-bottom text-muted"></i>
                                                     </a>
                                                 </li>
+                                                @if(Auth::user()->isAdmin())
                                                 <li class="list-inline-item">
                                                     <a class="btn btn-link p-0 remove-item-btn" data-bs-toggle="modal"
                                                         data-bs-target="#deleteRecordModal"
@@ -119,6 +122,7 @@
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
                                                 </li>
+                                                @endif
                                             </ul>
                                         </td>
                                     </tr>
@@ -257,6 +261,7 @@
             const customerSearchForm = document.getElementById('customerSearchForm');
             const customerTypeFilter = document.getElementById('customer_type_filter');
             const customerSearchInput = document.getElementById('customer_search_input');
+            const customerSearchBtn = document.getElementById('customer_search_btn');
 
             // Handle type filter change - auto submit when type changes
             if (customerTypeFilter && customerSearchForm) {
@@ -267,6 +272,7 @@
 
             // Allow Enter key to submit search form
             if (customerSearchInput && customerSearchForm) {
+                debugger;
                 customerSearchInput.addEventListener('keypress', function(e) {
                     if (e.key === 'Enter') {
                         e.preventDefault();
@@ -276,12 +282,10 @@
             }
 
             // Ensure search button works (explicit handler for debugging)
-            const customerSearchBtn = document.getElementById('customer_search_btn');
             if (customerSearchBtn && customerSearchForm) {
                 customerSearchBtn.addEventListener('click', function(e) {
-                    // Don't prevent default - let form submit naturally
-                    // This is just for debugging/logging
-                    console.log('Search button clicked');
+                    e.preventDefault();
+                    customerSearchForm.submit();
                 });
             }
 

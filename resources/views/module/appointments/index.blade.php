@@ -463,7 +463,7 @@
                                         </td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
-                                                @if ($appointment->status == 'created' && $appointment->payment_status != 'paid')
+                                                @if ($appointment->status == 'created' && $appointment->payment_status != 'paid' && Auth::user()->isAdmin())
                                                     <li class="list-inline-item">
                                                         <form
                                                             action="{{ route('appointments.updateStatus', $appointment->id) }}"
@@ -479,7 +479,7 @@
                                                         </form>
                                                     </li>
                                                 @endif
-                                                @if (!$appointment->invoice)
+                                                @if (!$appointment->invoice && Auth::user()->isAdmin())
                                                     <li class="list-inline-item">
                                                         <a href="javascript:void(0);"
                                                             class="edit-item-btn btn btn-sm btn-soft-info"
@@ -512,6 +512,7 @@
                                                         </a>
                                                     </li>
                                                 @endif
+                                                @if(Auth::user()->isAdmin())
                                                 <li class="list-inline-item">
                                                     <button type="button"
                                                         class="btn btn-sm btn-soft-danger remove-item-btn"
@@ -522,6 +523,7 @@
                                                         <i class="ri-delete-bin-line"></i>
                                                     </button>
                                                 </li>
+                                                @endif
                                             </ul>
                                         </td>
                                     </tr>
