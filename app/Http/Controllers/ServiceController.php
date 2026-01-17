@@ -11,9 +11,46 @@ class ServiceController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        $services = Service::latest('created_at')->paginate(10);
+        $query = Service::query();
+
+        // Filter by status
+        if ($request->filled('status')) {
+            if ($request->status === 'active') {
+                $query->where('is_active', true);
+            } elseif ($request->status === 'inactive') {
+                $query->where('is_active', false);
+            }
+        }
+
+        // Search filter
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('name', 'like', '%' . $search . '%');
+            });
+        }
+
+        // Price range filter
+        if ($request->filled('price_min')) {
+            $query->where('price', '>=', $request->price_min);
+        }
+
+        if ($request->filled('price_max')) {
+            $query->where('price', '<=', $request->price_max);
+        }
+
+        // Duration range filter
+        if ($request->filled('duration_min')) {
+            $query->where('duration_minutes', '>=', $request->duration_min);
+        }
+
+        if ($request->filled('duration_max')) {
+            $query->where('duration_minutes', '<=', $request->duration_max);
+        }
+
+        $services = $query->latest('created_at')->paginate(10)->withQueryString();
         return view('module.services.index', compact('services'));
     }
 
