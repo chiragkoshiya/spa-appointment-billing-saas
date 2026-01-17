@@ -20,11 +20,17 @@ class AppointmentCompletionService
     {
         return DB::transaction(function () use ($appointment) {
             // Update appointment status and payment status
-            $appointment->update([
-                'status' => 'completed',
-                'payment_status' => 'paid',
-                'updated_by' => Auth::id(),
-            ]);
+            // Use withoutEvents to prevent observer from firing and causing infinite loop
+            Appointment::withoutEvents(function () use ($appointment) {
+                $appointment->update([
+                    'status' => 'completed',
+                    'payment_status' => 'paid',
+                    'updated_by' => Auth::id(),
+                ]);
+            });
+
+            // Refresh appointment to get updated data
+            $appointment->refresh();
 
             // Generate invoice if it doesn't exist
             if (!$appointment->invoice) {
@@ -44,13 +50,31 @@ class AppointmentCompletionService
      */
     public function generateInvoice(Appointment $appointment): Invoice
     {
-        // Prevent duplicate invoice
-        if ($appointment->invoice) {
-            return $appointment->invoice;
+        // Prevent duplicate invoice - check with fresh query to avoid cached state
+        $existingInvoice = Invoice::where('appointment_id', $appointment->id)->first();
+        if ($existingInvoice) {
+            return $existingInvoice;
         }
 
-        // Reload appointment with relationships
-        $appointment->load(['customer.wallet', 'service', 'services.service', 'offer']);
+        // Reload appointment with relationships using fresh instance to avoid infinite loops
+        // Load relationships separately to prevent circular dependency issues
+        $appointmentId = $appointment->id;
+        $appointment = Appointment::findOrFail($appointmentId);
+
+        // Load customer with wallet (but prevent loading customer's appointments)
+        $appointment->load([
+            'customer' => function ($query) {
+                // Only load necessary customer fields, prevent reverse relationship loading
+            }
+        ]);
+
+        // Load wallet separately after customer is loaded
+        if ($appointment->customer) {
+            $appointment->customer->load('wallet');
+        }
+
+        // Load other relationships
+        $appointment->load(['service', 'offer']);
 
         $totalAmount = $appointment->amount;
 
@@ -90,6 +114,17 @@ class AppointmentCompletionService
             $wallet->decrement('balance', $walletDeduction);
         }
 
+        // Map payment_method to payment_mode (invoice enum only accepts 'cash' or 'online')
+        $paymentMethod = strtolower($appointment->payment_method ?? 'cash');
+        $paymentMode = 'cash'; // default
+
+        // Map appointment payment methods to invoice payment_mode enum values
+        if (in_array($paymentMethod, ['card', 'upi', 'online'])) {
+            $paymentMode = 'online';
+        } elseif (in_array($paymentMethod, ['cash'])) {
+            $paymentMode = 'cash';
+        }
+
         // Create invoice
         $invoice = Invoice::create([
             'appointment_id' => $appointment->id,
@@ -97,7 +132,7 @@ class AppointmentCompletionService
             'total_amount' => $totalAmount,
             'wallet_deduction' => $walletDeduction,
             'payable_amount' => $payableAmount,
-            'payment_mode' => $appointment->payment_method ?? 'cash',
+            'payment_mode' => $paymentMode,
             'created_by' => Auth::id() ?? $appointment->created_by,
             'updated_by' => Auth::id() ?? $appointment->updated_by,
         ]);

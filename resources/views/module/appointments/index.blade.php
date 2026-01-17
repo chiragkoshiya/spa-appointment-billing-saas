@@ -465,18 +465,14 @@
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
                                                 @if ($appointment->status == 'created' && $appointment->payment_status != 'paid' && Auth::user()->isAdmin())
                                                     <li class="list-inline-item">
-                                                        <form
-                                                            action="{{ route('appointments.updateStatus', $appointment->id) }}"
-                                                            method="POST" style="display: inline;">
-                                                            @csrf
-                                                            @method('PUT')
-                                                            <input type="hidden" name="status" value="completed">
-                                                            <button type="submit" class="btn btn-sm btn-soft-success"
-                                                                onclick="return confirm('Mark this appointment as completed? Invoice will be generated automatically. Note: After generating invoice, you cannot edit this appointment.')"
-                                                                title="Mark as Completed">
-                                                                <i class="ri-check-line"></i>
-                                                            </button>
-                                                        </form>
+                                                        <button type="button" class="btn btn-sm btn-soft-success"
+                                                            data-bs-toggle="modal"
+                                                            data-bs-target="#completeAppointmentModal"
+                                                            data-appointment-id="{{ $appointment->id }}"
+                                                            data-action="{{ route('appointments.updateStatus', $appointment->id) }}"
+                                                            title="Mark as Completed">
+                                                            <i class="ri-check-line"></i>
+                                                        </button>
                                                     </li>
                                                 @endif
                                                 @if (!$appointment->invoice && Auth::user()->isAdmin())
@@ -512,17 +508,17 @@
                                                         </a>
                                                     </li>
                                                 @endif
-                                                @if(Auth::user()->isAdmin())
-                                                <li class="list-inline-item">
-                                                    <button type="button"
-                                                        class="btn btn-sm btn-soft-danger remove-item-btn"
-                                                        data-bs-toggle="modal" data-bs-target="#deleteRecordModal"
-                                                        data-action="{{ route('appointments.destroy', $appointment->id) }}"
-                                                        data-message="Are you sure you want to delete this appointment?"
-                                                        title="Delete">
-                                                        <i class="ri-delete-bin-line"></i>
-                                                    </button>
-                                                </li>
+                                                @if (Auth::user()->isAdmin())
+                                                    <li class="list-inline-item">
+                                                        <button type="button"
+                                                            class="btn btn-sm btn-soft-danger remove-item-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteRecordModal"
+                                                            data-action="{{ route('appointments.destroy', $appointment->id) }}"
+                                                            data-message="Are you sure you want to delete this appointment?"
+                                                            title="Delete">
+                                                            <i class="ri-delete-bin-line"></i>
+                                                        </button>
+                                                    </li>
                                                 @endif
                                             </ul>
                                         </td>
@@ -981,11 +977,88 @@
         </div>
     </div>
 
+    <!-- Complete Appointment Confirmation Modal -->
+    <div id="completeAppointmentModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                        id="complete-btn-close"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mt-2 text-center">
+                        <div class="avatar-md mx-auto mb-4">
+                            <div class="avatar-title bg-primary-subtle text-primary rounded-circle font-size-24">
+                                <i class="ri-alert-line"></i>
+                            </div>
+                        </div>
+                        <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
+                            <h4>Are you sure ?</h4>
+                            <p class="text-muted mx-4 mb-0" id="complete-message">Mark this appointment as completed?
+                                Invoice will be generated automatically. <strong>Note:</strong> After generating invoice,
+                                you cannot edit this appointment.</p>
+                        </div>
+                    </div>
+                    <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
+                        <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
+                        <form id="complete-appointment-form" method="POST" action="" style="display: inline;">
+                            @csrf
+                            @method('PUT')
+                            <input type="hidden" name="status" value="completed">
+                            <button type="submit" class="btn w-sm btn-success" id="complete-record">Yes, Complete
+                                It!</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div><!-- /.modal-content -->
+    </div><!-- /.modal-dialog -->
+
 @endsection
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Complete Appointment Modal Handler
+            const completeModal = document.getElementById('completeAppointmentModal');
+            const completeForm = document.getElementById('complete-appointment-form');
+
+            if (completeModal && completeForm) {
+                completeModal.addEventListener('show.bs.modal', function(event) {
+                    const button = event.relatedTarget;
+                    const appointmentId = button.getAttribute('data-appointment-id');
+                    const action = button.getAttribute('data-action');
+
+                    // Set form action to the correct route - ensure it's set
+                    if (action) {
+                        completeForm.action = action;
+                    } else if (appointmentId) {
+                        // Fallback: construct action from appointment ID
+                        completeForm.action = `/appointments/${appointmentId}/status`;
+                    }
+                });
+
+                // Handle form submission to ensure proper method spoofing
+                completeForm.addEventListener('submit', function(e) {
+                    // Ensure form has action set before submission
+                    if (!completeForm.action || completeForm.action === '' || completeForm.action === window
+                        .location.href) {
+                        e.preventDefault();
+                        if (typeof showToast === 'function') {
+                            showToast('error', 'Error: Form action not set. Please close and try again.');
+                        } else {
+                            alert('Error: Form action not set. Please close and try again.');
+                        }
+                        return false;
+                    }
+
+                    // Ensure method is POST (Laravel will use @method('PUT') via hidden input)
+                    if (completeForm.method.toLowerCase() !== 'post') {
+                        completeForm.method = 'POST';
+                    }
+                });
+            }
+
             // Edit Modal Handler
             const editModal = document.getElementById('editModal');
             const editForm = document.getElementById('editForm');

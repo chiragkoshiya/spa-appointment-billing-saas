@@ -28,13 +28,14 @@ class AppointmentObserver
     public function updated(Appointment $appointment): void
     {
         // Generate invoice ONLY when payment_status changes to paid
+        // Note: We don't handle status changes here to avoid infinite loops with completeAppointment()
+        // The completeAppointment() service method should be called directly from controllers
         if ($appointment->isDirty('payment_status') && $appointment->payment_status === 'paid') {
-            $this->appointmentService->generateInvoice($appointment);
-        }
-
-        // If status changed to completed, complete the appointment (status + payment + invoice)
-        if ($appointment->isDirty('status') && $appointment->status === 'completed') {
-            $this->appointmentService->completeAppointment($appointment);
+            // Only generate invoice if status is already completed or if we're just marking as paid
+            // Avoid calling completeAppointment here as it causes infinite loops
+            if ($appointment->status === 'completed') {
+                $this->appointmentService->generateInvoice($appointment);
+            }
         }
     }
 
