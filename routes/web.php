@@ -45,6 +45,8 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::put('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');
     Route::resource('customers', CustomerController::class);
     Route::resource('services', ServiceController::class);
+    Route::put('staff/manager/{user}', [StaffController::class, 'updateManager'])->name('staff.manager.update');
+    Route::delete('staff/manager/{user}', [StaffController::class, 'destroyManager'])->name('staff.manager.destroy');
     Route::resource('staff', StaffController::class);
     Route::post('staff/{staff}/documents', [StaffController::class, 'storeDocument'])->name('staff.documents.store');
     Route::resource('rooms', RoomController::class);

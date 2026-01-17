@@ -74,6 +74,59 @@
                                 </tr>
                             </thead>
                             <tbody class="list form-check-all">
+                                @if(isset($managers) && $managers->isNotEmpty())
+                                    @foreach($managers as $manager)
+                                        <tr class="table-info">
+                                            <td class="name">
+                                                <div class="d-flex align-items-center">
+                                                    <div class="flex-grow-1 ms-2 name">
+                                                        {{ $manager->name }} <span class="badge bg-primary ms-1">Manager</span>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td class="phone">{{ $manager->phone ?? 'N/A' }}</td>
+                                            <td class="email">{{ $manager->email }}</td>
+                                            <td class="status">
+                                                <span class="badge bg-success-subtle text-success text-uppercase">Active</span>
+                                            </td>
+                                            <td class="date">{{ $manager->created_at->format('d M, Y') }}</td>
+                                            <td>
+                                                <ul class="list-inline hstack gap-2 mb-0">
+                                                <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                    data-bs-trigger="hover" data-bs-placement="top" title="View Documents">
+                                                    <a href="{{ route('staff.show', $manager->id) }}"
+                                                        class="text-primary d-inline-block">
+                                                        <i class="ri-eye-fill fs-16"></i>
+                                                    </a>
+                                                </li>
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                        data-bs-trigger="hover" data-bs-placement="top" title="Edit Manager">
+                                                        <a href="javascript:void(0);" class="edit-item-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#editModal"
+                                                            data-id="{{ $manager->id }}" 
+                                                            data-name="{{ $manager->name }}"
+                                                            data-phone=""
+                                                            data-email="{{ $manager->email }}"
+                                                            data-address=""
+                                                            data-status="{{ $manager->is_active }}"
+                                                            data-is-manager="true">
+                                                            <i class="ri-pencil-fill align-bottom text-muted"></i>
+                                                        </a>
+                                                    </li>
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                        data-bs-trigger="hover" data-bs-placement="top" title="Remove Manager">
+                                                        <a class="btn btn-link p-0 remove-item-btn" data-bs-toggle="modal"
+                                                            data-bs-target="#deleteRecordModal"
+                                                            data-action="{{ route('staff.manager.destroy', $manager->id) }}"
+                                                            data-message="Are you sure you want to remove manager: {{ $manager->name }}?">
+                                                            <i class="ri-delete-bin-fill align-bottom text-muted"></i>
+                                                        </a>
+                                                    </li>
+                                                </ul>
+                                            </td>
+                                        </tr>
+                                    @endforeach
+                                @endif
                                 @forelse($staff as $member)
                                     <tr>
                                         <td class="name">
@@ -270,8 +323,23 @@
             editModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
+                const isManager = button.getAttribute('data-is-manager') === 'true';
                 const form = document.getElementById('editForm');
-                form.action = `/staff/${id}`;
+                
+                if (isManager) {
+                    form.action = `/staff/manager/${id}`;
+                    // Disable/Hide phone/address for managers as it's not applicable to User model in this context
+                    document.getElementById('edit_phone').closest('.mb-3').style.display = 'none';
+                    document.getElementById('edit_address').closest('.mb-3').style.display = 'none';
+                    document.getElementById('edit_phone').removeAttribute('required');
+                    document.getElementById('edit_address').removeAttribute('required');
+                } else {
+                    form.action = `/staff/${id}`;
+                    document.getElementById('edit_phone').closest('.mb-3').style.display = 'block';
+                    document.getElementById('edit_address').closest('.mb-3').style.display = 'block';
+                    document.getElementById('edit_phone').setAttribute('required', 'required');
+                    document.getElementById('edit_address').setAttribute('required', 'required');
+                }
 
                 document.getElementById('edit_name').value = button.getAttribute('data-name');
                 document.getElementById('edit_phone').value = button.getAttribute('data-phone');

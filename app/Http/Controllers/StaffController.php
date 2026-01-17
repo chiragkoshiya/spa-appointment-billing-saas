@@ -35,7 +35,22 @@ class StaffController extends Controller
         }
 
         $staff = $query->latest('created_at')->paginate(10)->withQueryString();
-        return view('module.staff.index', compact('staff'));
+
+        $managers = collect();
+        if (Auth::user()->isAdmin()) {
+            // Fetch users with 'manager' role
+            $managers = \App\Models\User::whereHas('role', function ($q) {
+                $q->where('name', 'manager');
+            })->when($request->filled('search'), function ($q) use ($request) {
+                $search = $request->search;
+                $q->where(function ($subQ) use ($search) {
+                     $subQ->where('name', 'like', '%' . $search . '%')
+                          ->orWhere('email', 'like', '%' . $search . '%');
+                });
+            })->get();
+        }
+
+        return view('module.staff.index', compact('staff', 'managers'));
     }
 
     /**
@@ -159,5 +174,47 @@ class StaffController extends Controller
         }
 
         return redirect()->back()->with('error', 'Failed to upload document.');
+    }
+
+    /**
+     * Update the specified manager (User) resource.
+     */
+    public function updateManager(Request $request, \App\Models\User $user)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $request->validate([
+            'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+            'email' => ['required', 'email', 'max:255', 'unique:users,email,' . $user->id],
+            'is_active' => ['boolean']
+        ]);
+
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->is_active = $request->has('is_active');
+        $user->save();
+
+        return redirect()->back()->with('success', 'Manager ' . $user->name . ' updated successfully.');
+    }
+
+    /**
+     * Remove the specified manager (User) from storage.
+     */
+    public function destroyManager(\App\Models\User $user)
+    {
+        if (!Auth::user()->isAdmin()) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        if ($user->id === Auth::id()) {
+             return redirect()->back()->with('error', 'You cannot delete yourself.');
+        }
+
+        $name = $user->name;
+        $user->delete();
+
+        return redirect()->back()->with('success', 'Manager ' . $name . ' deleted successfully.');
     }
 }
