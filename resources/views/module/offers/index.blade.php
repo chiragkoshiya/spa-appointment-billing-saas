@@ -67,35 +67,51 @@
                         </div>
                     </div>
                 </div>
-                <!-- Advanced Date Filter -->
-                <div class="card-body border-bottom">
-                    <form id="offerDateFilterForm" action="{{ route('offers.index') }}" method="GET"
-                        class="d-flex gap-2 flex-wrap align-items-end">
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                        <input type="hidden" name="discount_type" value="{{ request('discount_type') }}">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <div class="mb-2" style="min-width: 160px;">
-                            <label class="form-label form-label-sm mb-1">Start Date From</label>
-                            <input type="date" name="date_from" id="offer_date_from" class="form-control form-control-sm"
-                                value="{{ request('date_from') }}">
-                        </div>
-                        <div class="mb-2" style="min-width: 160px;">
-                            <label class="form-label form-label-sm mb-1">End Date To</label>
-                            <input type="date" name="date_to" id="offer_date_to" class="form-control form-control-sm"
-                                value="{{ request('date_to') }}">
-                        </div>
-                        <div class="mb-2">
-                            <button type="submit" class="btn btn-sm btn-outline-primary">
-                                <i class="ri-calendar-line me-1"></i>Filter Dates
-                            </button>
-                            @if (request('date_from') || request('date_to'))
-                                <a href="{{ route('offers.index', array_merge(request()->except(['date_from', 'date_to']))) }}"
-                                    class="btn btn-sm btn-outline-secondary ms-1">
-                                    <i class="ri-close-line"></i>Clear Dates
-                                </a>
-                            @endif
-                        </div>
-                    </form>
+                <!-- Advanced Filters -->
+                <div class="card-header border-0 border-top">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0">Advanced Filters</h5>
+                        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#offerFilterCollapse" aria-expanded="false">
+                            <i class="ri-filter-line"></i> Toggle Filters
+                        </button>
+                    </div>
+                </div>
+                <div class="collapse {{ request()->hasAny(['date_from', 'date_to']) ? 'show' : '' }}"
+                    id="offerFilterCollapse">
+                    <div class="card-body">
+                        <form id="offerDateFilterForm" action="{{ route('offers.index') }}" method="GET">
+                            <input type="hidden" name="status" value="{{ request('status') }}">
+                            <input type="hidden" name="discount_type" value="{{ request('discount_type') }}">
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <label class="form-label">Start Date From</label>
+                                    <input type="date" name="date_from" id="offer_date_from" class="form-control"
+                                        value="{{ request('date_from') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">End Date To</label>
+                                    <input type="date" name="date_to" id="offer_date_to" class="form-control"
+                                        value="{{ request('date_to') }}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label class="form-label">&nbsp;</label>
+                                    <div class="d-flex gap-2">
+                                        <button type="submit" class="btn btn-primary">
+                                            <i class="ri-filter-line me-1"></i> Apply Filters
+                                        </button>
+                                        @if (request('date_from') || request('date_to'))
+                                            <a href="{{ route('offers.index', array_merge(request()->except(['date_from', 'date_to']))) }}"
+                                                class="btn btn-light">
+                                                <i class="ri-refresh-line me-1"></i> Reset
+                                            </a>
+                                        @endif
+                                    </div>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive table-card">

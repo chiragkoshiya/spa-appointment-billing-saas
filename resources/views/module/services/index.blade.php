@@ -58,47 +58,60 @@
                     </div>
                 </div>
                 <!-- Advanced Filters -->
-                <div class="card-body border-bottom">
-                    <form id="serviceAdvancedFilterForm" action="{{ route('services.index') }}" method="GET"
-                        class="d-flex gap-2 flex-wrap align-items-end">
-                        <input type="hidden" name="status" value="{{ request('status') }}">
-                        <input type="hidden" name="search" value="{{ request('search') }}">
-                        <div class="mb-2" style="min-width: 150px;">
-                            <label class="form-label form-label-sm mb-1">Price From (₹)</label>
-                            <input type="number" step="0.01" min="0" name="price_min" id="service_price_min"
-                                class="form-control form-control-sm" placeholder="Min price"
-                                value="{{ request('price_min') }}">
-                        </div>
-                        <div class="mb-2" style="min-width: 150px;">
-                            <label class="form-label form-label-sm mb-1">Price To (₹)</label>
-                            <input type="number" step="0.01" min="0" name="price_max" id="service_price_max"
-                                class="form-control form-control-sm" placeholder="Max price"
-                                value="{{ request('price_max') }}">
-                        </div>
-                        <div class="mb-2" style="min-width: 150px;">
-                            <label class="form-label form-label-sm mb-1">Duration From (Min)</label>
-                            <input type="number" step="1" min="0" name="duration_min" id="service_duration_min"
-                                class="form-control form-control-sm" placeholder="Min duration"
-                                value="{{ request('duration_min') }}">
-                        </div>
-                        <div class="mb-2" style="min-width: 150px;">
-                            <label class="form-label form-label-sm mb-1">Duration To (Min)</label>
-                            <input type="number" step="1" min="0" name="duration_max" id="service_duration_max"
-                                class="form-control form-control-sm" placeholder="Max duration"
-                                value="{{ request('duration_max') }}">
-                        </div>
-                        <div class="mb-2">
-                            <button type="submit" class="btn btn-sm btn-outline-primary">
-                                <i class="ri-filter-line me-1"></i>Apply Filters
-                            </button>
-                            @if (request('price_min') || request('price_max') || request('duration_min') || request('duration_max'))
-                                <a href="{{ route('services.index', array_merge(request()->except(['price_min', 'price_max', 'duration_min', 'duration_max']))) }}"
-                                    class="btn btn-sm btn-outline-secondary ms-1">
-                                    <i class="ri-close-line"></i>Clear Advanced
-                                </a>
-                            @endif
-                        </div>
-                    </form>
+                <div class="card-header border-0 border-top">
+                    <div class="d-flex align-items-center justify-content-between">
+                        <h5 class="card-title mb-0">Advanced Filters</h5>
+                        <button class="btn btn-sm btn-link" type="button" data-bs-toggle="collapse"
+                            data-bs-target="#serviceFilterCollapse" aria-expanded="false">
+                            <i class="ri-filter-line"></i> Toggle Filters
+                        </button>
+                    </div>
+                </div>
+                <div class="collapse {{ request()->hasAny(['price_min', 'price_max', 'duration_min', 'duration_max']) ? 'show' : '' }}"
+                    id="serviceFilterCollapse">
+                    <div class="card-body">
+                        <form id="serviceAdvancedFilterForm" action="{{ route('services.index') }}" method="GET">
+                            <input type="hidden" name="status" value="{{ request('status') }}">
+                            <input type="hidden" name="search" value="{{ request('search') }}">
+                            <div class="row g-3">
+                                <div class="col-md-3">
+                                    <label class="form-label">Price From (₹)</label>
+                                    <input type="number" step="0.01" min="0" name="price_min"
+                                        id="service_price_min" class="form-control" placeholder="Min price"
+                                        value="{{ request('price_min') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Price To (₹)</label>
+                                    <input type="number" step="0.01" min="0" name="price_max"
+                                        id="service_price_max" class="form-control" placeholder="Max price"
+                                        value="{{ request('price_max') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Duration From (Min)</label>
+                                    <input type="number" step="1" min="0" name="duration_min"
+                                        id="service_duration_min" class="form-control" placeholder="Min duration"
+                                        value="{{ request('duration_min') }}">
+                                </div>
+                                <div class="col-md-3">
+                                    <label class="form-label">Duration To (Min)</label>
+                                    <input type="number" step="1" min="0" name="duration_max"
+                                        id="service_duration_max" class="form-control" placeholder="Max duration"
+                                        value="{{ request('duration_max') }}">
+                                </div>
+                                <div class="col-md-12">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="ri-filter-line me-1"></i> Apply Filters
+                                    </button>
+                                    @if (request('price_min') || request('price_max') || request('duration_min') || request('duration_max'))
+                                        <a href="{{ route('services.index', array_merge(request()->except(['price_min', 'price_max', 'duration_min', 'duration_max']))) }}"
+                                            class="btn btn-light ms-1">
+                                            <i class="ri-refresh-line me-1"></i> Reset
+                                        </a>
+                                    @endif
+                                </div>
+                            </div>
+                        </form>
+                    </div>
                 </div>
                 <div class="card-body">
                     <div class="table-responsive table-card mb-4">
@@ -139,11 +152,10 @@
                                                     </a>
                                                 </li>
                                                 <li class="list-inline-item">
-                                                    <a class="btn btn-link p-0 remove-item-btn" 
-                                                       data-bs-toggle="modal" 
-                                                       data-bs-target="#deleteRecordModal" 
-                                                       data-action="{{ route('services.destroy', $service->id) }}"
-                                                       data-message="Are you sure you want to delete the service: {{ $service->name }}?">
+                                                    <a class="btn btn-link p-0 remove-item-btn" data-bs-toggle="modal"
+                                                        data-bs-target="#deleteRecordModal"
+                                                        data-action="{{ route('services.destroy', $service->id) }}"
+                                                        data-message="Are you sure you want to delete the service: {{ $service->name }}?">
                                                         <i class="ri-delete-bin-fill align-bottom text-muted"></i>
                                                     </a>
                                                 </li>

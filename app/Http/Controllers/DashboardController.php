@@ -45,9 +45,9 @@ class DashboardController extends Controller
 
                 // Check if room is currently booked
                 $currentlyBooked = $roomAppointments->filter(function ($apt) use ($currentTime, $today) {
-                    return $apt->appointment_date == $today && 
-                           $apt->start_time <= $currentTime && 
-                           $apt->end_time >= $currentTime;
+                    return $apt->appointment_date == $today &&
+                        $apt->start_time <= $currentTime &&
+                        $apt->end_time >= $currentTime;
                 })->first();
 
                 // Get next appointment
@@ -91,9 +91,9 @@ class DashboardController extends Controller
 
                 // Check if staff is currently busy
                 $currentlyBusy = $staffAppointments->filter(function ($apt) use ($currentTime, $today) {
-                    return $apt->appointment_date == $today && 
-                           $apt->start_time <= $currentTime && 
-                           $apt->end_time >= $currentTime;
+                    return $apt->appointment_date == $today &&
+                        $apt->start_time <= $currentTime &&
+                        $apt->end_time >= $currentTime;
                 })->first();
 
                 // Get next appointment
@@ -135,22 +135,22 @@ class DashboardController extends Controller
                 ->where('status', '!=', 'cancelled')->count(),
             'month_appointments' => Appointment::whereBetween('appointment_date', [$monthStart, $monthEnd])
                 ->where('status', '!=', 'cancelled')->count(),
-            
+
             // Customers
             'total_member_customers' => Customer::where('customer_type', 'member')->count(),
             'total_wallet_balance' => MemberWallet::sum('balance'),
-            
+
             // Invoices
             'total_invoices' => Invoice::count(),
             'total_paid_amount' => Invoice::where('payable_amount', '<=', 0)->sum('total_amount'),
             'total_unpaid_amount' => Invoice::where('payable_amount', '>', 0)->sum('payable_amount'),
-            
+
             // Inventory
             'total_inventory_count' => InventoryItem::count(),
-            
+
             // Offers
             'total_active_offers' => Offer::where('is_active', true)->count(),
-            
+
             // Rooms & Staff
             'total_rooms' => Room::where('is_active', true)->count(),
             'booked_rooms' => $rooms->where('is_booked', true)->count(),
