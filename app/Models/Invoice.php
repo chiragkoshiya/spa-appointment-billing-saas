@@ -9,7 +9,7 @@ class Invoice extends Model
 {
     Use SoftDeletes;
 
-    protected $fillable = ['appointment_id','customer_id','total_amount','wallet_deduction','payable_amount','payment_mode','created_by','updated_by'];
+    protected $fillable = ['appointment_id','customer_id','total_amount','wallet_deduction','payable_amount','payment_mode','status','created_by','updated_by'];
 
     /**
      * Get the appointment for this invoice
@@ -64,6 +64,6 @@ class Invoice extends Model
      */
     public function isPaid()
     {
-        return $this->payable_amount <= 0;
+        return $this->status === 'paid' || $this->payable_amount <= 0;
     }
 }

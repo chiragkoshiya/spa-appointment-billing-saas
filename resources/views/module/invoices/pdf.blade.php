@@ -234,6 +234,7 @@
             gap: 8px;
             transition: all 0.3s ease;
         }
+
         .print-btn:hover {
             background: #354471;
             transform: translateY(-2px);
@@ -242,18 +243,18 @@
 </head>
 
 <body>
-<script>
-    window.onload = function() {
-        if (window.location.search.indexOf('print=1') > -1) {
-            setTimeout(function() {
-                window.print();
-            }, 500);
-            window.onafterprint = function() {
-                window.close();
-            };
+    <script>
+        window.onload = function () {
+            if (window.location.search.indexOf('print=1') > -1) {
+                setTimeout(function () {
+                    window.print();
+                }, 500);
+                window.onafterprint = function () {
+                    window.close();
+                };
+            }
         }
-    }
-</script>
+    </script>
 
     <button onclick="window.print()" class="print-btn no-print">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -269,7 +270,8 @@
         <!-- Header -->
         <div class="header">
             <div>
-                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="Gentle Glow Wellness Spa Logo" class="header-logo">
+                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="Gentle Glow Wellness Spa Logo"
+                    class="header-logo">
             </div>
             <div class="header-title">
                 <h1>Gentle Glow Wellness Spa</h1>
@@ -309,7 +311,8 @@
                 <div class="section-title">Treatment Details</div>
                 <div class="form-row">
                     <span class="form-label">Treatment / Therapy</span>
-                    <span class="form-value">{{ $service->name ?? ($appointment->services->first()->service->name ?? '') }}</span>
+                    <span
+                        class="form-value">{{ $service->name ?? ($appointment->services->first()->service->name ?? '') }}</span>
                 </div>
                 <div class="two-column">
                     <div class="column">
@@ -385,7 +388,8 @@
                 <div class="billing-section">
                     <div class="billing-item">
                         <div class="billing-label">Amount</div>
-                        <div class="billing-value">{{ number_format($appointment->amount ?? $invoice->total_amount, 2) }}</div>
+                        <div class="billing-value">{{ number_format($appointment->amount ?? $invoice->total_amount, 2) }}
+                        </div>
                     </div>
                     <div class="billing-item">
                         <div class="billing-label">Tariff</div>
@@ -457,11 +461,13 @@
                     <span class="form-label">Payment By</span>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <span class="checkbox" style="{{ strtolower($invoice->payment_mode ?? $appointment->payment_method ?? '') == 'cash' ? 'background-color: #000;' : '' }}"></span>
+                            <span class="checkbox"
+                                style="{{ strtolower($invoice->payment_mode ?? $appointment->payment_method ?? '') == 'cash' ? 'background-color: #000;' : '' }}"></span>
                             <span>Cash</span>
                         </div>
                         <div class="checkbox-item">
-                            <span class="checkbox" style="{{ in_array(strtolower($invoice->payment_mode ?? $appointment->payment_method ?? ''), ['card', 'online', 'upi']) ? 'background-color: #000;' : '' }}"></span>
+                            <span class="checkbox"
+                                style="{{ in_array(strtolower($invoice->payment_mode ?? $appointment->payment_method ?? ''), ['card', 'online', 'upi']) ? 'background-color: #000;' : '' }}"></span>
                             <span>Card</span>
                         </div>
                     </div>
@@ -496,7 +502,12 @@
 
             <!-- Disclaimer -->
             <div class="disclaimer">
-                <strong>Disclaimer:</strong> The spa treatment services and/or facilities received or utilized at Wellness Spa or any of subsidiaries brand/unit are intended for general purposes only and are not intended to be a substitute for professional medical treatments, diagnosis, or advice. We are not responsible for any loss or damage to personal belongings. Guests are expected to maintain proper decorum and follow spa etiquette. By using our services, you agree to our terms & conditions, SPA etiquettes, disclaimer & privacy policy. For more information, visit www.thebodycarefamilyspa.com
+                <strong>Disclaimer:</strong> The spa treatment services and/or facilities received or utilized at Wellness
+                Spa or any of subsidiaries brand/unit are intended for general purposes only and are not intended to be a
+                substitute for professional medical treatments, diagnosis, or advice. We are not responsible for any loss or
+                damage to personal belongings. Guests are expected to maintain proper decorum and follow spa etiquette. By
+                using our services, you agree to our terms & conditions, SPA etiquettes, disclaimer & privacy policy. For
+                more information, visit www.thebodycarefamilyspa.com
             </div>
 
             <!-- Client Signature -->
@@ -557,11 +568,13 @@
                     <span class="form-label">Payment By</span>
                     <div class="checkbox-group">
                         <div class="checkbox-item">
-                            <span class="checkbox" style="{{ strtolower($invoice->payment_mode ?? '') == 'cash' ? 'background-color: #000;' : '' }}"></span>
+                            <span class="checkbox"
+                                style="{{ strtolower($invoice->payment_mode ?? '') == 'cash' ? 'background-color: #000;' : '' }}"></span>
                             <span>Cash</span>
                         </div>
                         <div class="checkbox-item">
-                            <span class="checkbox" style="{{ in_array(strtolower($invoice->payment_mode ?? ''), ['card', 'online', 'upi']) ? 'background-color: #000;' : '' }}"></span>
+                            <span class="checkbox"
+                                style="{{ in_array(strtolower($invoice->payment_mode ?? ''), ['card', 'online', 'upi']) ? 'background-color: #000;' : '' }}"></span>
                             <span>Card</span>
                         </div>
                     </div>

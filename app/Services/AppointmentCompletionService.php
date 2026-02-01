@@ -126,13 +126,15 @@ class AppointmentCompletionService
         }
 
         // Create invoice
+        // Store the full payable amount (e.g. 15000) but mark status as paid
         $invoice = Invoice::create([
             'appointment_id' => $appointment->id,
             'customer_id' => $appointment->customer_id,
             'total_amount' => $totalAmount,
             'wallet_deduction' => $walletDeduction,
-            'payable_amount' => $payableAmount,
+            'payable_amount' => $payableAmount, // Store the actual amount to be paid
             'payment_mode' => $paymentMode,
+            'status' => 'paid', // Explicitly mark as paid
             'created_by' => Auth::id() ?? $appointment->created_by,
             'updated_by' => Auth::id() ?? $appointment->updated_by,
         ]);

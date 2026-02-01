@@ -54,15 +54,13 @@ class InvoiceController extends Controller
         if ($request->filled('payment_status')) {
             switch ($request->payment_status) {
                 case 'paid':
-                    $query->where('payable_amount', '<=', 0);
+                    $query->where('status', 'paid');
                     break;
                 case 'partial':
-                    $query->where('payable_amount', '>', 0)
-                          ->where('wallet_deduction', '>', 0);
+                    $query->where('status', 'partial');
                     break;
                 case 'unpaid':
-                    $query->where('payable_amount', '>', 0)
-                          ->where('wallet_deduction', '=', 0);
+                    $query->where('status', 'unpaid');
                     break;
             }
         }
@@ -76,15 +74,15 @@ class InvoiceController extends Controller
         } else {
             $query->latest();
         }
-
+        
         $invoices = $query->paginate(15)->withQueryString();
 
         // Statistics
         $stats = [
             'total_invoices' => Invoice::count(),
             'total_revenue' => Invoice::sum('total_amount'),
-            'total_paid' => Invoice::where('payable_amount', '<=', 0)->sum('total_amount'),
-            'total_pending' => Invoice::where('payable_amount', '>', 0)->sum('payable_amount'),
+            'total_paid' => Invoice::where('status', 'paid')->sum('total_amount'),
+            'total_pending' => Invoice::where('status', '!=', 'paid')->sum('payable_amount'),
             'today_invoices' => Invoice::whereDate('created_at', today())->count(),
             'today_revenue' => Invoice::whereDate('created_at', today())->sum('total_amount'),
             'month_invoices' => Invoice::whereMonth('created_at', now()->month)
@@ -92,7 +90,7 @@ class InvoiceController extends Controller
             'month_revenue' => Invoice::whereMonth('created_at', now()->month)
                                     ->whereYear('created_at', now()->year)->sum('total_amount'),
         ];
-
+        
         return view('module.invoices.index', compact('invoices', 'stats'));
     }
 

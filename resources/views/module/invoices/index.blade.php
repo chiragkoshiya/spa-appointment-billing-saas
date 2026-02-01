@@ -142,7 +142,8 @@
                                     <label class="form-label">Payment Mode</label>
                                     <select name="payment_mode" class="form-select">
                                         <option value="">All</option>
-                                        <option value="cash" {{ request('payment_mode') == 'cash' ? 'selected' : '' }}>Cash
+                                        <option value="cash" {{ request('payment_mode') == 'cash' ? 'selected' : '' }}>
+                                            Cash
                                         </option>
                                         <option value="online" {{ request('payment_mode') == 'online' ? 'selected' : '' }}>
                                             Online</option>
@@ -152,22 +153,29 @@
                                     <label class="form-label">Payment Status</label>
                                     <select name="payment_status" class="form-select">
                                         <option value="">All</option>
-                                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>Paid
+                                        <option value="paid" {{ request('payment_status') == 'paid' ? 'selected' : '' }}>
+                                            Paid
                                         </option>
-                                        <option value="partial" {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
-                                        <option value="unpaid" {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>
+                                        <option value="partial"
+                                            {{ request('payment_status') == 'partial' ? 'selected' : '' }}>Partial</option>
+                                        <option value="unpaid"
+                                            {{ request('payment_status') == 'unpaid' ? 'selected' : '' }}>
                                             Unpaid</option>
                                     </select>
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Sort By</label>
                                     <select name="sort_by" class="form-select">
-                                        <option value="created_at" {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>
+                                        <option value="created_at"
+                                            {{ request('sort_by') == 'created_at' ? 'selected' : '' }}>
                                             Date</option>
-                                        <option value="id" {{ request('sort_by') == 'id' ? 'selected' : '' }}>Invoice ID
+                                        <option value="id" {{ request('sort_by') == 'id' ? 'selected' : '' }}>Invoice
+                                            ID
                                         </option>
-                                        <option value="total_amount" {{ request('sort_by') == 'total_amount' ? 'selected' : '' }}>Amount</option>
-                                        <option value="payable_amount" {{ request('sort_by') == 'payable_amount' ? 'selected' : '' }}>Payable</option>
+                                        <option value="total_amount"
+                                            {{ request('sort_by') == 'total_amount' ? 'selected' : '' }}>Amount</option>
+                                        <option value="payable_amount"
+                                            {{ request('sort_by') == 'payable_amount' ? 'selected' : '' }}>Payable</option>
                                     </select>
                                 </div>
                                 <div class="col-md-2">
@@ -187,14 +195,16 @@
                                 </div>
                                 <div class="col-md-3">
                                     <label class="form-label">Date To</label>
-                                    <input type="date" name="date_to" class="form-control" value="{{ request('date_to') }}">
+                                    <input type="date" name="date_to" class="form-control"
+                                        value="{{ request('date_to') }}">
                                 </div>
                                 <div class="col-md-2">
                                     <label class="form-label">Sort Order</label>
                                     <select name="sort_order" class="form-select">
                                         <option value="desc" {{ request('sort_order') == 'desc' ? 'selected' : '' }}>
                                             Descending</option>
-                                        <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>Ascending
+                                        <option value="asc" {{ request('sort_order') == 'asc' ? 'selected' : '' }}>
+                                            Ascending
                                         </option>
                                     </select>
                                 </div>
@@ -259,20 +269,21 @@
                                             </div>
                                         </td>
                                         <td>
-                                            @if($invoice->appointment && $invoice->appointment->appointment_date)
-                                                @if(is_string($invoice->appointment->appointment_date))
+                                            @if ($invoice->appointment && $invoice->appointment->appointment_date)
+                                                @if (is_string($invoice->appointment->appointment_date))
                                                     {{ \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M, Y') }}
                                                 @else
                                                     {{ $invoice->appointment->appointment_date->format('d M, Y') }}
                                                 @endif
-                                                <br><small class="text-muted">{{ $invoice->appointment->start_time }}</small>
+                                                <br><small
+                                                    class="text-muted">{{ $invoice->appointment->start_time }}</small>
                                             @else
                                                 <span class="text-muted">N/A</span>
                                             @endif
                                         </td>
                                         <td class="fw-semibold">₹{{ number_format($invoice->total_amount, 2) }}</td>
                                         <td>
-                                            @if($invoice->wallet_deduction > 0)
+                                            @if ($invoice->wallet_deduction > 0)
                                                 <span
                                                     class="text-success">-₹{{ number_format($invoice->wallet_deduction, 2) }}</span>
                                             @else
@@ -287,38 +298,42 @@
                                             </span>
                                         </td>
                                         <td>
-                                            @if($invoice->isPaid())
-                                                <span class="badge bg-success-subtle text-success text-uppercase">Paid</span>
-                                            @elseif($invoice->wallet_deduction > 0)
-                                                <span class="badge bg-warning-subtle text-warning text-uppercase">Partial</span>
+                                            @if ($invoice->isPaid())
+                                                <span
+                                                    class="badge bg-success-subtle text-success text-uppercase">Paid</span>
+                                            @elseif($invoice->status == 'partial')
+                                                <span
+                                                    class="badge bg-warning-subtle text-warning text-uppercase">Partial</span>
                                             @else
-                                                <span class="badge bg-danger-subtle text-danger text-uppercase">Unpaid</span>
+                                                <span
+                                                    class="badge bg-danger-subtle text-danger text-uppercase">Unpaid</span>
                                             @endif
                                         </td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
+                                                {{-- <li class="list-inline-item">
+                                                    <a href="{{ route('invoices.show', $invoice->id) }}"
+                                                        class="btn btn-sm btn-soft-primary">
+                                                        <i class="ri-eye-line"></i>
+                                                    </a>
+                                                </li> --}}
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('invoices.show', $invoice->id) }}"
                                                         class="btn btn-sm btn-soft-primary">
                                                         <i class="ri-eye-line"></i>
                                                     </a>
                                                 </li>
-                                                <li class="list-inline-item">
-                                                    <a href="{{ route('invoices.show', $invoice->id) }}"
-                                                        class="btn btn-sm btn-soft-primary">
-                                                        <i class="ri-eye-line"></i>
-                                                    </a>
-                                                </li>
-                                                @if(Auth::user()->isAdmin())
-                                                <li class="list-inline-item">
-                                                    <a href="javascript:void(0);" class="edit-item-btn btn btn-sm btn-soft-info"
-                                                        data-bs-toggle="modal" data-bs-target="#editModal"
-                                                        data-id="{{ $invoice->id }}"
-                                                        data-payment-mode="{{ $invoice->payment_mode }}"
-                                                        data-payable-amount="{{ $invoice->payable_amount }}">
-                                                        <i class="ri-pencil-line"></i>
-                                                    </a>
-                                                </li>
+                                                @if (Auth::user()->isAdmin())
+                                                    <li class="list-inline-item">
+                                                        <a href="javascript:void(0);"
+                                                            class="edit-item-btn btn btn-sm btn-soft-info"
+                                                            data-bs-toggle="modal" data-bs-target="#editModal"
+                                                            data-id="{{ $invoice->id }}"
+                                                            data-payment-mode="{{ $invoice->payment_mode }}"
+                                                            data-payable-amount="{{ $invoice->payable_amount }}">
+                                                            <i class="ri-pencil-line"></i>
+                                                        </a>
+                                                    </li>
                                                 @endif
                                                 <li class="list-inline-item">
                                                     <a href="{{ route('invoices.download', $invoice->id) }}"
@@ -333,16 +348,16 @@
                                                         <i class="ri-share-line"></i>
                                                     </a>
                                                 </li>
-                                                @if(Auth::user()->isAdmin())
-                                                <li class="list-inline-item" data-bs-toggle="tooltip" data-bs-trigger="hover"
-                                                    data-bs-placement="top" title="Remove">
-                                                    <a class="btn btn-sm btn-soft-danger remove-item-btn" data-bs-toggle="modal"
-                                                        data-bs-target="#deleteRecordModal"
-                                                        data-action="{{ route('invoices.destroy', $invoice->id) }}"
-                                                        data-message="Are you sure you want to delete invoice: {{ $invoice->invoice_number }}?">
-                                                        <i class="ri-delete-bin-line"></i>
-                                                    </a>
-                                                </li>
+                                                @if (Auth::user()->isAdmin())
+                                                    <li class="list-inline-item" data-bs-toggle="tooltip"
+                                                        data-bs-trigger="hover" data-bs-placement="top" title="Remove">
+                                                        <a class="btn btn-sm btn-soft-danger remove-item-btn"
+                                                            data-bs-toggle="modal" data-bs-target="#deleteRecordModal"
+                                                            data-action="{{ route('invoices.destroy', $invoice->id) }}"
+                                                            data-message="Are you sure you want to delete invoice: {{ $invoice->invoice_number }}?">
+                                                            <i class="ri-delete-bin-line"></i>
+                                                        </a>
+                                                    </li>
                                                 @endif
                                             </ul>
                                         </td>
@@ -360,7 +375,7 @@
                             </tbody>
                         </table>
                     </div>
-                    @if($invoices->hasPages())
+                    @if ($invoices->hasPages())
                         <div class="pagination-wrapper">
                             {{ $invoices->links() }}
                         </div>
@@ -395,7 +410,8 @@
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Payable Amount (₹) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="payable_amount" id="edit_payable_amount"
+                            <input type="number" step="0.01" min="0" name="payable_amount"
+                                id="edit_payable_amount"
                                 class="form-control @error('payable_amount') is-invalid @enderror" required>
                             @error('payable_amount')
                                 <div class="invalid-feedback">{{ $message }}</div>
@@ -447,23 +463,25 @@
 
 @push('scripts')
     <script>
-        document.addEventListener('DOMContentLoaded', function () {
+        document.addEventListener('DOMContentLoaded', function() {
             // Edit Modal Handler
             const editModal = document.getElementById('editModal');
-            editModal.addEventListener('show.bs.modal', function (event) {
+            editModal.addEventListener('show.bs.modal', function(event) {
                 const button = event.relatedTarget;
                 const id = button.getAttribute('data-id');
                 const form = document.getElementById('editForm');
                 form.action = `/invoices/${id}`;
 
-                document.getElementById('edit_payment_mode').value = button.getAttribute('data-payment-mode') || 'cash';
-                document.getElementById('edit_payable_amount').value = button.getAttribute('data-payable-amount') || '0';
+                document.getElementById('edit_payment_mode').value = button.getAttribute(
+                    'data-payment-mode') || 'cash';
+                document.getElementById('edit_payable_amount').value = button.getAttribute(
+                    'data-payable-amount') || '0';
             });
 
             // Share Invoice Handler
             const shareModal = document.getElementById('shareModal');
             document.querySelectorAll('.share-invoice-btn').forEach(btn => {
-                btn.addEventListener('click', function () {
+                btn.addEventListener('click', function() {
                     const invoiceId = this.getAttribute('data-invoice-id');
 
                     fetch(`/invoices/${invoiceId}/share`)
@@ -485,7 +503,7 @@
             });
 
             // Copy Share Link
-            document.getElementById('copy_share_link').addEventListener('click', function () {
+            document.getElementById('copy_share_link').addEventListener('click', function() {
                 const shareUrl = document.getElementById('share_url');
                 shareUrl.select();
                 shareUrl.setSelectionRange(0, 99999); // For mobile devices
@@ -494,7 +512,7 @@
             });
 
             // Reset modals on close
-            editModal.addEventListener('hidden.bs.modal', function () {
+            editModal.addEventListener('hidden.bs.modal', function() {
                 const form = editModal.querySelector('form');
                 if (form) {
                     form.reset();
