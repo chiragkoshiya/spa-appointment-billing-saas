@@ -5,10 +5,10 @@
 <head>
 
     <meta charset="utf-8" />
-    <title>@yield('title') | SPA Management System</title>
+    <title>@yield('title') | Gentle Glow Wellness spa</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Professional SPA Appointment and Billing Management System" name="description" />
-    <meta content="SPA System" name="author" />
+    <meta content="Gentle Glow Wellness spa" name="author" />
     <!-- App favicon -->
     <link rel="shortcut icon" href="{{ asset('assets/images/logo-sm1.png') }}">
 
@@ -110,8 +110,6 @@
             </div>
         </div>
     </div>
-
-    @include('module.layout.customizer')
 
     <!-- JAVASCRIPT -->
     <script src="{{ asset('assets/libs/bootstrap/js/bootstrap.bundle.min.js') }}"></script>

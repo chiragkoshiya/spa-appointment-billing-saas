@@ -237,7 +237,7 @@
         <div class="header">
             <div class="logo-section">
                 {{-- Use absolute path for logo in PDF --}}
-                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="SPA Management System Logo"
+                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="Gentle Glow Wellness spa Logo"
                     style="height: 40px; margin-bottom: 5px;">
                 <p>Wellness & Relaxation Center</p>
             </div>
@@ -252,7 +252,7 @@
             <div class="billing-block">
                 <h3>Bill From</h3>
                 <address>
-                    <strong>SPA Management System</strong><br>
+                    <strong>Gentle Glow Wellness spa</strong><br>
                     123 Wellness Street, Serenity Hub<br>
                     State, Country - 100101<br>
                     Phone: +91 98765 43210
@@ -353,7 +353,7 @@
         </div>
 
         <div class="footer">
-            <p>Thank you for choosing SPA System. We hope to see you again soon!</p>
+            <p>Thank you for choosing Gentle Glow Wellness spa. We hope to see you again soon!</p>
             <p style="margin-top: 5px;">This is a computer-generated invoice and doesn't require a physical signature.
             </p>
         </div>

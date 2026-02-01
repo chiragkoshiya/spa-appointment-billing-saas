@@ -48,7 +48,7 @@
                         <div>
                             <h6 class="mb-3">Bill From:</h6>
                             <address>
-                                <strong>SPA Management System</strong><br>
+                                <strong>Gentle Glow Wellness spa</strong><br>
                                 Your Business Address<br>
                                 City, State, ZIP<br>
                                 <abbr title="Phone">P:</abbr> +91-XXXXXXXXXX

@@ -42,9 +42,9 @@
         <div class="report-header">
             <div class="row align-items-center">
                 <div class="col-6">
-                    <img src="{{ asset('assets/images/logo-light.png') }}" alt="SPA Management System Logo"
+                    <img src="{{ asset('assets/images/logo-light.png') }}" alt="Gentle Glow Wellness spa Logo"
                         style="height: 45px; margin-bottom: 10px;">
-                    <h3 style="margin-top: 10px;">SPA Management System</h3>
+                    <h3 style="margin-top: 10px;">Gentle Glow Wellness spa</h3>
                     <p class="text-muted mb-0">{{ ucwords(str_replace('_', ' ', $reportType)) }} Report</p>
                 </div>
                 <div class="col-6 text-end">

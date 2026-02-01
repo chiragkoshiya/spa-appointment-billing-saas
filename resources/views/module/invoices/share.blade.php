@@ -49,7 +49,7 @@
 
                         <div class="row mb-4">
                             <div class="col-12 text-center">
-                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="SPA Management System Logo"
+                                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="Gentle Glow Wellness spa Logo"
                                     style="height: 50px; margin-bottom: 15px;">
                             </div>
                         </div>
@@ -59,7 +59,7 @@
                                 <div>
                                     <h6 class="mb-3">Bill From:</h6>
                                     <address>
-                                        <strong>SPA Management System</strong><br>
+                                        <strong>Gentle Glow Wellness spa</strong><br>
                                         Your Business Address<br>
                                         City, State, ZIP<br>
                                         <abbr title="Phone">P:</abbr> +91-XXXXXXXXXX

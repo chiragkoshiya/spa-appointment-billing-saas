@@ -52,7 +52,7 @@
                             <p class="mb-0">&copy;
                                 <script>
                                     document.write(new Date().getFullYear())
-                                </script> Velzon. Crafted with <i class="mdi mdi-heart text-danger"></i>
+                                </script> Gentle Glow Wellness spa. Crafted with <i class="mdi mdi-heart text-danger"></i>
                                 by Themesbrand
                             </p>
                         </div>
