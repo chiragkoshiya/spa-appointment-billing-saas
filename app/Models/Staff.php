@@ -9,7 +9,26 @@ class Staff extends Model
 {
      use SoftDeletes;
 
-    protected $fillable = ['name','is_active','email','phone','address','created_by','updated_by'];
+    protected $fillable = [
+        'name',
+        'photo',
+        'is_active',
+        'email',
+        'phone',
+        'dob',
+        'pan_photo',
+        'aadhaar_photo',
+        'address',
+        'city',
+        'work_last_place',
+        'joining_date',
+        'leaving_date',
+        'salary',
+        'has_terms_conditions',
+        'terms_conditions_details',
+        'created_by',
+        'updated_by'
+    ];
 
     public function documents()
     {

@@ -169,7 +169,17 @@ class InvoiceController extends Controller
      */
     public function download(Invoice $invoice)
     {
-        $invoice->load(['customer', 'appointment', 'items', 'appointment.staff', 'appointment.room']);
+        $invoice->load([
+            'customer', 
+            'customer.wallet',
+            'appointment', 
+            'appointment.staff', 
+            'appointment.room', 
+            'appointment.service',
+            'appointment.services.service',
+            'appointment.offer',
+            'items'
+        ]);
         
         // For now, return view - can be converted to PDF using dompdf or similar
         return view('module.invoices.pdf', compact('invoice'));
@@ -203,7 +213,17 @@ class InvoiceController extends Controller
             abort(403, 'Invalid share link');
         }
 
-        $invoice->load(['customer', 'appointment', 'items', 'appointment.staff', 'appointment.room']);
+        $invoice->load([
+            'customer', 
+            'customer.wallet',
+            'appointment', 
+            'appointment.staff', 
+            'appointment.room', 
+            'appointment.service',
+            'appointment.services.service',
+            'appointment.offer',
+            'items'
+        ]);
         return view('module.invoices.share', compact('invoice'));
     }
 }

@@ -5,6 +5,7 @@
 <head>
 
     <meta charset="utf-8" />
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title') | Gentle Glow Wellness spa</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta content="Professional SPA Appointment and Billing Management System" name="description" />
@@ -22,6 +23,9 @@
     <link href="{{ asset('assets/css/app.min.css') }}" rel="stylesheet" type="text/css" />
     <!-- custom Css-->
     <link href="{{ asset('assets/css/custom.min.css') }}" rel="stylesheet" type="text/css" />
+
+    <!-- Fancybox Css -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.css" />
 
     <!-- Toastify Css-->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
@@ -144,7 +148,7 @@
                 style: {
                     background: background,
                 },
-                onClick: function() {}
+                onClick: function () { }
             }).showToast();
         }
 
@@ -172,10 +176,10 @@
         @endif
 
         // Global Delete Modal Handler
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             const deleteModal = document.getElementById('deleteRecordModal');
             if (deleteModal) {
-                deleteModal.addEventListener('show.bs.modal', function(event) {
+                deleteModal.addEventListener('show.bs.modal', function (event) {
                     const button = event.relatedTarget;
                     const action = button.getAttribute('data-action');
                     const message = button.getAttribute('data-message');
@@ -194,6 +198,14 @@
 
     <!-- App js -->
     <script src="{{ asset('assets/js/app.js') }}"></script>
+
+    <!-- Fancybox Js -->
+    <script src="https://cdn.jsdelivr.net/npm/@fancyapps/ui@5.0/dist/fancybox/fancybox.umd.js"></script>
+    <script>
+        Fancybox.bind("[data-fancybox]", {
+            // Your custom options
+        });
+    </script>
 </body>
 
 </html>

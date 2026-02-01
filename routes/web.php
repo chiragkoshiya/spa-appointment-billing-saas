@@ -41,10 +41,12 @@ Route::middleware(['auth', 'prevent-back-history'])->group(function () {
     Route::post('/lock-screen/unlock', [LockScreenController::class, 'unlock'])->name('lock-screen.unlock');
 
     Route::get('appointments/availability', [AppointmentController::class, 'getAvailability'])->name('appointments.availability');
+    Route::post('appointments/create-customer', [AppointmentController::class, 'createCustomer'])->name('appointments.create-customer');
     Route::resource('appointments', AppointmentController::class);
     Route::put('appointments/{appointment}/status', [AppointmentController::class, 'updateStatus'])->name('appointments.updateStatus');
     Route::resource('customers', CustomerController::class);
     Route::resource('services', ServiceController::class);
+    Route::get('staff/manager/{user}', [StaffController::class, 'showManager'])->name('staff.manager.show');
     Route::put('staff/manager/{user}', [StaffController::class, 'updateManager'])->name('staff.manager.update');
     Route::delete('staff/manager/{user}', [StaffController::class, 'destroyManager'])->name('staff.manager.destroy');
     Route::resource('staff', StaffController::class);

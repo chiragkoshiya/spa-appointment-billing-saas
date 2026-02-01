@@ -49,13 +49,6 @@
                                     <i class="ri-refresh-line"></i>
                                 </a>
                             </form>
-                            @if(Auth::user()->isAdmin())
-                            <button type="button" class="btn btn-success btn-sm add-btn" data-bs-toggle="modal"
-                                data-bs-target="#createModal">
-                                <i class="ri-add-line align-bottom me-1"></i> <span class="d-none d-sm-inline">Add
-                                    Customer</span><span class="d-sm-none">Add</span>
-                            </button>
-                            @endif
                         </div>
                     </div>
                 </div>
@@ -145,58 +138,6 @@
                         </div>
                     @endif
                 </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Create Modal -->
-    <div class="modal fade" id="createModal" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Add New Customer</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <form action="{{ route('customers.store') }}" method="POST">
-                    @csrf
-                    <div class="modal-body">
-                        <div class="mb-3">
-                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" id="create_name" class="form-control"
-                                placeholder="Enter name">
-                            <div class="invalid-feedback"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                            <input type="text" name="phone" id="create_phone" class="form-control"
-                                placeholder="Enter phone number (10 digits)">
-                            <div class="invalid-feedback"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Email (Optional)</label>
-                            <input type="email" name="email" id="create_email" class="form-control"
-                                placeholder="Enter email">
-                            <div class="invalid-feedback"></div>
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Customer Type <span class="text-danger">*</span></label>
-                            <select name="customer_type" id="create_customer_type" class="form-select">
-                                <option value="normal">Normal</option>
-                                <option value="member">Member (Premium)</option>
-                            </select>
-                            <div class="invalid-feedback"></div>
-                        </div>
-                        <div class="mb-3 d-none" id="wallet_balance_div">
-                            <label class="form-label">Wallet Membership Amount (RS)</label>
-                            <input type="number" step="0.01" name="wallet_balance" class="form-control"
-                                placeholder="Enter initial wallet amount">
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
-                        <button type="submit" class="btn btn-success">Save Customer</button>
-                    </div>
-                </form>
             </div>
         </div>
     </div>
@@ -313,55 +254,6 @@
                 field.nextElementSibling.textContent = '';
             }
 
-            // Create form validation
-            const createForm = document.querySelector('form[action="{{ route('customers.store') }}"]');
-            if (createForm) {
-                createForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    let isValid = true;
-
-                    const nameField = document.getElementById('create_name');
-                    const phoneField = document.getElementById('create_phone');
-                    const emailField = document.getElementById('create_email');
-                    const typeField = document.getElementById('create_customer_type');
-
-                    clearFieldError(nameField);
-                    clearFieldError(phoneField);
-                    clearFieldError(emailField);
-                    clearFieldError(typeField);
-
-                    if (!nameField.value.trim()) {
-                        setFieldError(nameField, 'Name is required.');
-                        isValid = false;
-                    } else if (!validateName(nameField.value)) {
-                        setFieldError(nameField, 'Name must contain only alphabets and spaces.');
-                        isValid = false;
-                    }
-
-                    if (!phoneField.value.trim()) {
-                        setFieldError(phoneField, 'Phone number is required.');
-                        isValid = false;
-                    } else if (!validatePhone(phoneField.value)) {
-                        setFieldError(phoneField, 'Phone number must be exactly 10 digits.');
-                        isValid = false;
-                    }
-
-                    if (emailField.value && !validateEmail(emailField.value)) {
-                        setFieldError(emailField, 'Please enter a valid email address.');
-                        isValid = false;
-                    }
-
-                    if (!typeField.value) {
-                        setFieldError(typeField, 'Customer type is required.');
-                        isValid = false;
-                    }
-
-                    if (isValid) {
-                        createForm.submit();
-                    }
-                });
-            }
-
             // Edit form validation
             const editModal = document.getElementById('editModal');
             const editForm = document.getElementById('editForm');
@@ -424,20 +316,7 @@
                 });
             }
 
-            // Wallet balance toggle
-            const createTypeSelect = document.getElementById('create_customer_type');
-            const walletBalanceDiv = document.getElementById('wallet_balance_div');
-
-            if (createTypeSelect) {
-                createTypeSelect.addEventListener('change', function() {
-                    if (this.value === 'member') {
-                        walletBalanceDiv.classList.remove('d-none');
-                    } else {
-                        walletBalanceDiv.classList.add('d-none');
-                    }
-                });
-            }
-
+            // Wallet balance toggle for edit form
             const editTypeSelect = document.getElementById('edit_type');
             const editWalletBalanceDiv = document.getElementById('edit_wallet_balance_div');
 
@@ -452,9 +331,9 @@
             }
 
             // Real-time validation
-            const nameFields = ['create_name', 'edit_name'];
-            const phoneFields = ['create_phone', 'edit_phone'];
-            const emailFields = ['create_email', 'edit_email'];
+            const nameFields = ['edit_name'];
+            const phoneFields = ['edit_phone'];
+            const emailFields = ['edit_email'];
 
             nameFields.forEach(id => {
                 const field = document.getElementById(id);

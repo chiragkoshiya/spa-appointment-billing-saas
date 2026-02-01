@@ -223,6 +223,9 @@
                                 title="Refresh/Reset Filters">
                                 <i class="ri-refresh-line"></i>
                             </a>
+                            <button class="btn btn-primary me-1" data-bs-toggle="modal" data-bs-target="#adjustItemModal">
+                                <i class="ri-add-subtract-line align-bottom me-1"></i> Adjust
+                            </button>
                             <button class="btn btn-success add-btn" data-bs-toggle="modal" data-bs-target="#createModal">
                                 <i class="ri-add-line align-bottom me-1"></i> Add Item
                             </button>
@@ -411,6 +414,74 @@
         </div>
     </div>
 
+    <!-- Adjust Item Modal (New - with dropdown) -->
+    <div class="modal fade" id="adjustItemModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adjust Item Quantity</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="adjustItemForm" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Item Name <span class="text-danger">*</span></label>
+                            <select name="inventory_item_id" id="adjust_item_select" class="form-select" required>
+                                <option value="">-- Select Item --</option>
+                                @foreach($allItems as $item)
+                                    <option value="{{ $item->id }}" data-quantity="{{ $item->quantity }}"
+                                        data-price="{{ $item->amount }}">
+                                        {{ $item->name }} (Qty: {{ $item->quantity }} | Price:
+                                        ₹{{ number_format($item->amount, 2) }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="row" id="item_details_row" style="display: none;">
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Total Quantity</label>
+                                <div class="alert alert-info mb-0 py-2">
+                                    <i class="ri-information-line me-1"></i>
+                                    <strong id="total_quantity_value">0</strong>
+                                </div>
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label text-muted">Unit Price (₹)</label>
+                                <div class="alert alert-primary mb-0 py-2">
+                                    <i class="ri-money-rupee-circle-line me-1"></i>
+                                    <strong id="item_price_value">₹0.00</strong>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Initial Quantity <span class="text-danger">*</span></label>
+                            <input type="number" step="1" min="0" name="quantity" id="adjust_initial_quantity"
+                                class="form-control @error('quantity') is-invalid @enderror" required
+                                placeholder="Enter quantity">
+                            @error('quantity')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Reason <span class="text-danger">*</span></label>
+                            <textarea name="reason" class="form-control @error('reason') is-invalid @enderror" rows="3"
+                                required placeholder="Enter reason for adjustment"></textarea>
+                            @error('reason')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Adjust Stock</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
     <!-- Adjust Quantity Modal -->
     <div class="modal fade" id="adjustModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog">
@@ -588,11 +659,11 @@
                                 const date = new Date(movement.created_at).toLocaleString();
 
                                 row.innerHTML = `
-                                        <td>${date}</td>
-                                        <td>${movement.user ? movement.user.name : 'N/A'}</td>
-                                        <td class="${changeClass} fw-semibold">${changeIcon}${movement.change_qty}</td>
-                                        <td>${movement.reason || 'N/A'}</td>
-                                    `;
+                                                    <td>${date}</td>
+                                                    <td>${movement.user ? movement.user.name : 'N/A'}</td>
+                                                    <td class="${changeClass} fw-semibold">${changeIcon}${movement.change_qty}</td>
+                                                    <td>${movement.reason || 'N/A'}</td>
+                                                `;
                                 tbody.appendChild(row);
                             });
                         } else {
@@ -607,6 +678,144 @@
                         document.getElementById('movement_loading').innerHTML = '<p class="text-danger">Error loading movement history</p>';
                     });
             });
+
+            // Adjust Item Modal Handler (New - with dropdown)
+            const adjustItemModal = document.getElementById('adjustItemModal');
+            const adjustItemSelect = document.getElementById('adjust_item_select');
+            const adjustInitialQuantity = document.getElementById('adjust_initial_quantity');
+            const itemDetailsRow = document.getElementById('item_details_row');
+            const totalQuantityValue = document.getElementById('total_quantity_value');
+            const itemPriceValue = document.getElementById('item_price_value');
+            const adjustItemForm = document.getElementById('adjustItemForm');
+
+            // Handle item selection in adjust item modal
+            if (adjustItemSelect) {
+                adjustItemSelect.addEventListener('change', function () {
+                    const selectedOption = this.options[this.selectedIndex];
+                    const currentQuantity = parseInt(selectedOption.getAttribute('data-quantity')) || 0;
+                    const currentPrice = parseFloat(selectedOption.getAttribute('data-price')) || 0;
+
+                    if (this.value) {
+                        // Show item details
+                        itemDetailsRow.style.display = 'flex';
+                        totalQuantityValue.textContent = currentQuantity;
+                        itemPriceValue.textContent = '₹' + currentPrice.toLocaleString('en-IN', { minimumFractionDigits: 2 });
+
+                        // Auto-set Initial Quantity to current quantity
+                        adjustInitialQuantity.value = currentQuantity;
+                    } else {
+                        itemDetailsRow.style.display = 'none';
+                        adjustInitialQuantity.value = '';
+                    }
+                });
+            }
+
+            // Handle form submission - calculate change_qty
+            if (adjustItemForm) {
+                adjustItemForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+
+                    const itemId = adjustItemSelect.value;
+                    const selectedOption = adjustItemSelect.options[adjustItemSelect.selectedIndex];
+                    const currentQuantity = parseInt(selectedOption.getAttribute('data-quantity')) || 0;
+                    const newQuantity = parseInt(adjustInitialQuantity.value) || 0;
+                    const changeQty = newQuantity - currentQuantity;
+                    const reason = this.querySelector('textarea[name="reason"]').value;
+
+                    if (!itemId) {
+                        showToast('error', 'Please select an item.');
+                        return false;
+                    }
+
+                    if (!reason.trim()) {
+                        showToast('error', 'Please enter a reason.');
+                        return false;
+                    }
+
+                    if (newQuantity < 0) {
+                        showToast('error', 'Quantity cannot be negative.');
+                        return false;
+                    }
+
+                    // Disable submit button
+                    const submitBtn = this.querySelector('button[type="submit"]');
+                    const originalBtnText = submitBtn.innerHTML;
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Adjusting...';
+
+                    // Submit via AJAX
+                    fetch(`/inventory/${itemId}/adjust`, {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')?.getAttribute('content') || '',
+                            'X-Requested-With': 'XMLHttpRequest'
+                        },
+                        body: JSON.stringify({
+                            change_qty: changeQty,
+                            reason: reason
+                        })
+                    })
+                        .then(response => response.json())
+                        .then(data => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+
+                            if (data.success || data.message) {
+                                // Close modal
+                                const modal = bootstrap.Modal.getInstance(adjustItemModal);
+                                if (modal) {
+                                    modal.hide();
+                                }
+
+                                // Show success message
+                                if (typeof showToast === 'function') {
+                                    showToast('success', data.message || 'Stock adjusted successfully.');
+                                } else {
+                                    alert(data.message || 'Stock adjusted successfully.');
+                                }
+
+                                // Reload page after short delay
+                                setTimeout(() => {
+                                    window.location.reload();
+                                }, 1000);
+                            } else {
+                                // Show error
+                                if (typeof showToast === 'function') {
+                                    showToast('error', data.message || 'Error adjusting stock.');
+                                } else {
+                                    alert(data.message || 'Error adjusting stock.');
+                                }
+                            }
+                        })
+                        .catch(error => {
+                            submitBtn.disabled = false;
+                            submitBtn.innerHTML = originalBtnText;
+                            console.error('Error:', error);
+                            if (typeof showToast === 'function') {
+                                showToast('error', 'An error occurred. Please try again.');
+                            } else {
+                                alert('An error occurred. Please try again.');
+                            }
+                        });
+                });
+            }
+
+            // Reset adjust item modal on close
+            if (adjustItemModal) {
+                adjustItemModal.addEventListener('hidden.bs.modal', function () {
+                    if (adjustItemForm) {
+                        adjustItemForm.reset();
+                        adjustItemForm.querySelectorAll('.is-invalid').forEach(el => {
+                            el.classList.remove('is-invalid');
+                        });
+                        itemDetailsRow.style.display = 'none';
+                        adjustInitialQuantity.value = '';
+                        totalQuantityValue.textContent = '0';
+                        itemPriceValue.textContent = '₹0.00';
+                    }
+                });
+            }
 
             // Reset modals on close
             [editModal, adjustModal].forEach(modal => {

@@ -68,16 +68,37 @@ class StaffController extends Controller
             'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
             'email' => ['required', 'email', 'max:255', 'unique:staff,email'],
             'address' => ['required', 'string', 'max:500'],
-            'is_active' => ['boolean']
+            'city' => ['nullable', 'string', 'max:100'],
+            'dob' => ['nullable', 'date'],
+            'work_last_place' => ['nullable', 'string', 'max:255'],
+            'joining_date' => ['nullable', 'date'],
+            'leaving_date' => ['nullable', 'date'],
+            'salary' => ['nullable', 'numeric', 'min:0'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'pan_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'aadhaar_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'is_active' => ['boolean'],
+            'has_terms_conditions' => ['boolean']
         ], [
             'name.regex' => 'Name must contain only alphabets and spaces.',
             'phone.regex' => 'Phone number must be exactly 10 digits.',
         ]);
 
-        $data = $request->except('documents');
+        $data = $request->except(['documents', 'photo', 'pan_photo', 'aadhaar_photo']);
         $data['created_by'] = Auth::id();
         $data['updated_by'] = Auth::id();
         $data['is_active'] = $request->has('is_active');
+        $data['has_terms_conditions'] = $request->has('has_terms_conditions');
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('staff_photos', 'public');
+        }
+        if ($request->hasFile('pan_photo')) {
+            $data['pan_photo'] = $request->file('pan_photo')->store('staff_documents/pan', 'public');
+        }
+        if ($request->hasFile('aadhaar_photo')) {
+            $data['aadhaar_photo'] = $request->file('aadhaar_photo')->store('staff_documents/aadhaar', 'public');
+        }
 
         $staff = Staff::create($data);
 
@@ -91,6 +112,19 @@ class StaffController extends Controller
     {
         $staff->load('documents');
         return view('module.staff.show', compact('staff'));
+    }
+
+    /**
+     * Display the specified manager (User).
+     */
+    public function showManager(\App\Models\User $user)
+    {
+        if (!Auth::user()->isAdmin() && Auth::id() !== $user->id) {
+            return redirect()->back()->with('error', 'Unauthorized action.');
+        }
+
+        $user->load('role');
+        return view('module.profile.index', compact('user'));
     }
 
     /**
@@ -108,15 +142,36 @@ class StaffController extends Controller
             'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/'],
             'email' => ['required', 'email', 'max:255', 'unique:staff,email,' . $staff->id],
             'address' => ['required', 'string', 'max:500'],
-            'is_active' => ['boolean']
+            'city' => ['nullable', 'string', 'max:100'],
+            'dob' => ['nullable', 'date'],
+            'work_last_place' => ['nullable', 'string', 'max:255'],
+            'joining_date' => ['nullable', 'date'],
+            'leaving_date' => ['nullable', 'date'],
+            'salary' => ['nullable', 'numeric', 'min:0'],
+            'photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'pan_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'aadhaar_photo' => ['nullable', 'image', 'mimes:jpeg,png,jpg,gif', 'max:2048'],
+            'is_active' => ['boolean'],
+            'has_terms_conditions' => ['boolean']
         ], [
             'name.regex' => 'Name must contain only alphabets and spaces.',
             'phone.regex' => 'Phone number must be exactly 10 digits.',
         ]);
 
-        $data = $request->all();
+        $data = $request->except(['photo', 'pan_photo', 'aadhaar_photo']);
         $data['updated_by'] = Auth::id();
         $data['is_active'] = $request->has('is_active');
+        $data['has_terms_conditions'] = $request->has('has_terms_conditions');
+
+        if ($request->hasFile('photo')) {
+            $data['photo'] = $request->file('photo')->store('staff_photos', 'public');
+        }
+        if ($request->hasFile('pan_photo')) {
+            $data['pan_photo'] = $request->file('pan_photo')->store('staff_documents/pan', 'public');
+        }
+        if ($request->hasFile('aadhaar_photo')) {
+            $data['aadhaar_photo'] = $request->file('aadhaar_photo')->store('staff_documents/aadhaar', 'public');
+        }
 
         $staff->update($data);
 

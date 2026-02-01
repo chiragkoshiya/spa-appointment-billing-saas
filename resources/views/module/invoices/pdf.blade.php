@@ -6,192 +6,213 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Invoice #{{ $invoice->invoice_number }}</title>
     <style>
-        body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            font-size: 14px;
-            color: #333;
-            line-height: 1.6;
+        * {
             margin: 0;
             padding: 0;
-            background-color: #f8f9fa;
+            box-sizing: border-box;
         }
 
-        .container {
+        body {
+            font-family: Arial, sans-serif;
+            font-size: 12px;
+            color: #000;
+            line-height: 1.4;
+            background-color: #fff;
+            padding: 20px;
+        }
+
+        .invoice-container {
             max-width: 800px;
-            margin: 40px auto;
-            padding: 40px;
+            margin: 0 auto;
             background: #fff;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            border-radius: 8px;
+            border: 1px solid #ddd;
+            padding: 20px;
         }
 
         .header {
             display: flex;
             justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 40px;
-            border-bottom: 2px solid #f0f0f0;
-            padding-bottom: 20px;
+            align-items: center;
+            margin-bottom: 20px;
+            border-bottom: 2px solid #000;
+            padding-bottom: 10px;
         }
 
-        .logo-section h1 {
-            color: #405189;
-            margin: 0;
-            font-size: 28px;
-            font-weight: 800;
-            letter-spacing: -0.5px;
+        .header-logo {
+            height: 50px;
         }
 
-        .logo-section p {
-            margin: 5px 0 0;
-            color: #666;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .invoice-info {
+        .header-title {
             text-align: right;
         }
 
-        .invoice-info h2 {
-            margin: 0;
-            color: #333;
-            font-size: 20px;
+        .header h1 {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .invoice-info p {
-            margin: 5px 0;
-            color: #666;
+        .section {
+            margin-bottom: 15px;
         }
 
-        .billing-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px;
-            margin-bottom: 40px;
+        .section-title {
+            font-weight: bold;
+            font-size: 11px;
+            margin-bottom: 5px;
+            text-decoration: underline;
         }
 
-        .billing-block h3 {
-            font-size: 12px;
-            text-transform: uppercase;
-            color: #999;
-            margin-bottom: 10px;
-            letter-spacing: 1px;
-        }
-
-        .billing-block p {
-            margin: 0;
-            font-weight: 500;
-        }
-
-        .billing-block address {
-            font-style: normal;
-            color: #555;
-        }
-
-        .table-container {
-            margin-bottom: 30px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-
-        th {
-            background-color: #f8f9fa;
-            text-align: left;
-            padding: 12px 15px;
-            font-weight: 600;
-            color: #405189;
-            border-bottom: 2px solid #e9ecef;
-        }
-
-        td {
-            padding: 15px;
-            border-bottom: 1px solid #e9ecef;
-        }
-
-        .text-right {
-            text-align: right;
-        }
-
-        .totals-section {
+        .form-row {
             display: flex;
-            justify-content: flex-end;
+            margin-bottom: 8px;
+            border-bottom: 1px dotted #ccc;
+            padding-bottom: 5px;
+        }
+
+        .form-label {
+            font-weight: bold;
+            min-width: 120px;
+            display: inline-block;
+        }
+
+        .form-value {
+            flex: 1;
+            border-bottom: 1px dotted #000;
+            min-height: 18px;
+            padding-left: 5px;
+        }
+
+        .form-value-empty {
+            border-bottom: 1px dotted #ccc;
+            min-height: 18px;
+        }
+
+        .two-column {
+            display: flex;
+            gap: 30px;
+        }
+
+        .two-column .column {
+            flex: 1;
+        }
+
+        .billing-section {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .billing-item {
+            text-align: center;
+        }
+
+        .billing-label {
+            font-size: 10px;
+            font-weight: bold;
+            margin-bottom: 5px;
+        }
+
+        .billing-value {
+            border-bottom: 2px solid #000;
+            min-height: 20px;
+            padding: 2px;
+            font-weight: bold;
+        }
+
+        .checkbox-group {
+            display: flex;
+            gap: 20px;
+            margin-top: 5px;
+        }
+
+        .checkbox-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .checkbox {
+            width: 15px;
+            height: 15px;
+            border: 1px solid #000;
+            display: inline-block;
+        }
+
+        .signature-section {
+            display: flex;
+            justify-content: space-between;
             margin-top: 20px;
         }
 
-        .totals-table {
-            width: 300px;
+        .signature-box {
+            width: 200px;
         }
 
-        .totals-table tr td {
-            padding: 8px 0;
-            border-bottom: none;
+        .signature-label {
+            font-weight: bold;
+            margin-bottom: 5px;
         }
 
-        .totals-table tr.total td {
-            border-top: 2px solid #405189;
-            padding-top: 15px;
-            font-weight: 800;
-            font-size: 18px;
-            color: #405189;
+        .signature-line {
+            border-bottom: 1px solid #000;
+            min-height: 40px;
+            margin-bottom: 5px;
         }
 
-        .footer {
-            margin-top: 60px;
+        .signature-sub-label {
+            font-size: 10px;
             text-align: center;
-            border-top: 1px solid #f0f0f0;
-            padding-top: 20px;
-            color: #999;
-            font-size: 12px;
         }
 
-        .badge {
-            display: inline-block;
-            padding: 3px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-            text-transform: uppercase;
+        .feedback-section {
+            margin-top: 15px;
         }
 
-        .badge-success {
-            background: #d1f2e1;
-            color: #188a53;
+        .feedback-options {
+            display: flex;
+            gap: 15px;
+            margin-top: 5px;
         }
 
-        .badge-warning {
-            background: #fff3cd;
-            color: #856404;
+        .disclaimer {
+            font-size: 8px;
+            line-height: 1.3;
+            margin-top: 15px;
+            text-align: justify;
+            border: 1px solid #ddd;
+            padding: 8px;
         }
 
-        .badge-danger {
-            background: #f8d7da;
-            color: #721c24;
+        .client-signature {
+            margin-top: 20px;
+            text-align: center;
         }
 
-        .badge-primary {
-            background: #e0e7ff;
-            color: #4338ca;
+        .client-signature-line {
+            border-bottom: 1px solid #000;
+            width: 300px;
+            margin: 10px auto;
+            min-height: 30px;
         }
 
         @media print {
-            body {
-                background-color: #fff;
+            @page {
+                margin: 0;
             }
 
-            .container {
-                box-shadow: none;
-                margin: 0;
-                width: 100%;
-                max-width: 100%;
+            body {
+                padding: 1cm;
+            }
+
+            .invoice-container {
+                border: none;
+                padding: 15px;
             }
 
             .no-print {
-                display: none;
+                display: none !important;
             }
         }
 
@@ -213,7 +234,6 @@
             gap: 8px;
             transition: all 0.3s ease;
         }
-
         .print-btn:hover {
             background: #354471;
             transform: translateY(-2px);
@@ -222,6 +242,18 @@
 </head>
 
 <body>
+<script>
+    window.onload = function() {
+        if (window.location.search.indexOf('print=1') > -1) {
+            setTimeout(function() {
+                window.print();
+            }, 500);
+            window.onafterprint = function() {
+                window.close();
+            };
+        }
+    }
+</script>
 
     <button onclick="window.print()" class="print-btn no-print">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
@@ -233,130 +265,309 @@
         Print / Download PDF
     </button>
 
-    <div class="container">
+    <div class="invoice-container">
+        <!-- Header -->
         <div class="header">
-            <div class="logo-section">
-                {{-- Use absolute path for logo in PDF --}}
-                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="Gentle Glow Wellness spa Logo"
-                    style="height: 40px; margin-bottom: 5px;">
-                <p>Wellness & Relaxation Center</p>
+            <div>
+                <img src="{{ asset('assets/images/logo-dark.png') }}" alt="Gentle Glow Wellness Spa Logo" class="header-logo">
             </div>
-            <div class="invoice-info">
-                <h2>INVOICE</h2>
-                <p>#{{ $invoice->invoice_number }}</p>
-                <p>Date: {{ $invoice->created_at->format('d M, Y') }}</p>
+            <div class="header-title">
+                <h1>Gentle Glow Wellness Spa</h1>
             </div>
         </div>
 
-        <div class="billing-grid">
-            <div class="billing-block">
-                <h3>Bill From</h3>
-                <address>
-                    <strong>Gentle Glow Wellness spa</strong><br>
-                    123 Wellness Street, Serenity Hub<br>
-                    State, Country - 100101<br>
-                    Phone: +91 98765 43210
-                </address>
-            </div>
-            <div class="billing-block" style="text-align: right;">
-                <h3>Bill To</h3>
-                <address>
-                    <strong>{{ $invoice->customer->name }}</strong><br>
-                    @if ($invoice->customer->email)
-                        {{ $invoice->customer->email }}<br>
-                    @endif
-                    Phone: {{ $invoice->customer->phone }}<br>
-                    <span
-                        class="badge {{ $invoice->customer->customer_type == 'member' ? 'badge-primary' : 'badge-success' }}">
-                        {{ ucfirst($invoice->customer->customer_type) }} Customer
-                    </span>
-                </address>
-            </div>
-        </div>
+        @if($invoice->appointment)
+            @php
+                $appointment = $invoice->appointment;
+                $customer = $invoice->customer;
+                $service = $appointment->service;
+                $staff = $appointment->staff;
+                $room = $appointment->room;
+            @endphp
 
-        <div class="table-container">
-            <table>
-                <thead>
-                    <tr>
-                        <th style="width: 50px;">#</th>
-                        <th>Description</th>
-                        <th class="text-right" style="width: 150px;">Amount</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach ($invoice->items as $index => $item)
-                        <tr>
-                            <td>{{ $index + 1 }}</td>
-                            <td>
-                                <strong>{{ $item->description }}</strong>
-                                @if ($invoice->appointment && $loop->first)
-                                    <div style="font-size: 11px; color: #888; margin-top: 4px;">
-                                        APT #{{ str_pad($invoice->appointment->id, 4, '0', STR_PAD_LEFT) }} |
-                                        {{ \Carbon\Carbon::parse($invoice->appointment->appointment_date)->format('d M, Y') }}
-                                        |
-                                        {{ $invoice->appointment->start_time }}
-                                    </div>
-                                @endif
-                            </td>
-                            <td class="text-right">₹{{ number_format($item->amount, 2) }}</td>
-                        </tr>
-                    @endforeach
-                </tbody>
-            </table>
-        </div>
-
-        <div class="totals-section">
-            <table class="totals-table">
-                <tr>
-                    <td>Sub Total</td>
-                    <td class="text-right">₹{{ number_format($invoice->total_amount, 2) }}</td>
-                </tr>
-                @if ($invoice->wallet_deduction > 0)
-                    <tr>
-                        <td>Wallet Deduction</td>
-                        <td class="text-right text-success">-₹{{ number_format($invoice->wallet_deduction, 2) }}</td>
-                    </tr>
-                @endif
-                <tr class="total">
-                    <td>Payable Amount</td>
-                    <td class="text-right">₹{{ number_format($invoice->payable_amount, 2) }}</td>
-                </tr>
-            </table>
-        </div>
-
-        <div style="margin-top: 40px; border-top: 1px solid #f0f0f0; padding-top: 20px;">
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
-                <div>
-                    <h3 style="font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Payment
-                        Status</h3>
-                    <p>
-                        @if ($invoice->isPaid())
-                            <span class="badge badge-success">Fully Paid</span>
-                        @elseif($invoice->wallet_deduction > 0)
-                            <span class="badge badge-warning">Partial Payment</span>
+            <!-- Guest Information -->
+            <div class="section">
+                <div class="section-title">Guest Information</div>
+                <div class="form-row">
+                    <span class="form-label">Guest Name:</span>
+                    <span class="form-value">{{ $customer->name ?? '' }}</span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Membership No.:</span>
+                    <span class="form-value">
+                        @if($customer && $customer->customer_type == 'member')
+                            #M{{ str_pad($customer->id, 4, '0', STR_PAD_LEFT) }}
                         @else
-                            <span class="badge badge-danger">Unpaid</span>
+                            &nbsp;
                         @endif
-                        <span style="margin-left: 10px; color: #666; font-size: 12px;">Method:
-                            {{ ucfirst($invoice->payment_mode) }}</span>
-                    </p>
-                </div>
-                <div style="text-align: right;">
-                    @if ($invoice->appointment && $invoice->appointment->staff)
-                        <h3 style="font-size: 12px; text-transform: uppercase; color: #999; margin-bottom: 10px;">Served
-                            By
-                        </h3>
-                        <p><strong>{{ $invoice->appointment->staff->name }}</strong></p>
-                    @endif
+                    </span>
                 </div>
             </div>
-        </div>
 
-        <div class="footer">
-            <p>Thank you for choosing Gentle Glow Wellness spa. We hope to see you again soon!</p>
-            <p style="margin-top: 5px;">This is a computer-generated invoice and doesn't require a physical signature.
-            </p>
-        </div>
+            <!-- Treatment Details -->
+            <div class="section">
+                <div class="section-title">Treatment Details</div>
+                <div class="form-row">
+                    <span class="form-label">Treatment / Therapy</span>
+                    <span class="form-value">{{ $service->name ?? ($appointment->services->first()->service->name ?? '') }}</span>
+                </div>
+                <div class="two-column">
+                    <div class="column">
+                        <div class="form-row">
+                            <span class="form-label">S.NO.</span>
+                            <span class="form-value">{{ $appointment->id ?? '' }}</span>
+                        </div>
+                        <div class="form-row">
+                            <span class="form-label">Date:</span>
+                            <span class="form-value">
+                                @if($appointment->appointment_date)
+                                    {{ $appointment->appointment_date->format('d/m/Y') }}
+                                @endif
+                            </span>
+                        </div>
+                        <div class="form-row">
+                            <span class="form-label">Contact No.</span>
+                            <span class="form-value">{{ $appointment->phone ?? $customer->phone ?? '' }}</span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="form-row">
+                            <span class="form-label">Time In:</span>
+                            <span class="form-value">{{ $appointment->start_time ?? '' }}</span>
+                        </div>
+                        <div class="form-row">
+                            <span class="form-label">Time Out:</span>
+                            <span class="form-value">{{ $appointment->end_time ?? '' }}</span>
+                        </div>
+                        <div class="form-row">
+                            <span class="form-label">Duration:</span>
+                            <span class="form-value">
+                                @if($appointment->duration)
+                                    {{ $appointment->duration }}m
+                                @elseif($appointment->start_time && $appointment->end_time)
+                                    @php
+                                        $start = \Carbon\Carbon::parse($appointment->start_time);
+                                        $end = \Carbon\Carbon::parse($appointment->end_time);
+                                        $duration = $start->diffInMinutes($end);
+                                    @endphp
+                                    {{ $duration }}m
+                                @else
+                                    &nbsp;
+                                @endif
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Service Provider -->
+            <div class="section">
+                <div class="section-title">Service Provider</div>
+                <div class="two-column">
+                    <div class="column">
+                        <div class="form-row">
+                            <span class="form-label">Name:</span>
+                            <span class="form-value">{{ $staff->name ?? '' }}</span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="form-row">
+                            <span class="form-label">Sign:</span>
+                            <span class="form-value-empty">&nbsp;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Billing Information -->
+            <div class="section">
+                <div class="section-title">Billing Information</div>
+                <div class="billing-section">
+                    <div class="billing-item">
+                        <div class="billing-label">Amount</div>
+                        <div class="billing-value">{{ number_format($appointment->amount ?? $invoice->total_amount, 2) }}</div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Tariff</div>
+                        <div class="billing-value">
+                            @if($service)
+                                {{ number_format($service->price ?? $appointment->amount ?? 0, 2) }}
+                            @else
+                                {{ number_format($appointment->amount ?? 0, 2) }}
+                            @endif
+                        </div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Disc</div>
+                        <div class="billing-value">
+                            @if($appointment->offer)
+                                @if($appointment->offer->discount_type == 'percentage')
+                                    {{ number_format(($appointment->amount * $appointment->offer->discount_value / 100), 2) }}
+                                @else
+                                    {{ number_format($appointment->offer->discount_value, 2) }}
+                                @endif
+                            @else
+                                0.00
+                            @endif
+                        </div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Tax</div>
+                        <div class="billing-value">0.00</div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Total</div>
+                        <div class="billing-value">{{ number_format($invoice->payable_amount, 2) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Preparation and Checking -->
+            <div class="section">
+                <div class="two-column">
+                    <div class="column">
+                        <div class="section-title">Prepared By</div>
+                        <div class="form-row">
+                            <span class="form-label">Name:</span>
+                            <span class="form-value-empty">&nbsp;</span>
+                        </div>
+                        <div class="form-row">
+                            <span class="form-label">Sign:</span>
+                            <span class="form-value-empty">&nbsp;</span>
+                        </div>
+                    </div>
+                    <div class="column">
+                        <div class="section-title">Checked by</div>
+                        <div class="form-row">
+                            <span class="form-label">Name:</span>
+                            <span class="form-value-empty">&nbsp;</span>
+                        </div>
+                        <div class="form-row">
+                            <span class="form-label">Sign.:</span>
+                            <span class="form-value-empty">&nbsp;</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment -->
+            <div class="section">
+                <div class="section-title">Payment</div>
+                <div class="form-row">
+                    <span class="form-label">Payment By</span>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <span class="checkbox" style="{{ strtolower($invoice->payment_mode ?? $appointment->payment_method ?? '') == 'cash' ? 'background-color: #000;' : '' }}"></span>
+                            <span>Cash</span>
+                        </div>
+                        <div class="checkbox-item">
+                            <span class="checkbox" style="{{ in_array(strtolower($invoice->payment_mode ?? $appointment->payment_method ?? ''), ['card', 'online', 'upi']) ? 'background-color: #000;' : '' }}"></span>
+                            <span>Card</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Guest Feedback -->
+            <div class="section feedback-section">
+                <div class="section-title">Guest Feedback</div>
+                <div class="form-row">
+                    <span class="form-label">How do you feel our Service?</span>
+                </div>
+                <div class="feedback-options">
+                    <div class="checkbox-item">
+                        <span class="checkbox"></span>
+                        <span>1. Excellent</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox"></span>
+                        <span>2. Very Good</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox"></span>
+                        <span>3. Good</span>
+                    </div>
+                    <div class="checkbox-item">
+                        <span class="checkbox"></span>
+                        <span>4. Poor</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Disclaimer -->
+            <div class="disclaimer">
+                <strong>Disclaimer:</strong> The spa treatment services and/or facilities received or utilized at Wellness Spa or any of subsidiaries brand/unit are intended for general purposes only and are not intended to be a substitute for professional medical treatments, diagnosis, or advice. We are not responsible for any loss or damage to personal belongings. Guests are expected to maintain proper decorum and follow spa etiquette. By using our services, you agree to our terms & conditions, SPA etiquettes, disclaimer & privacy policy. For more information, visit www.thebodycarefamilyspa.com
+            </div>
+
+            <!-- Client Signature -->
+            <div class="client-signature">
+                <div class="client-signature-line"></div>
+                <div style="font-weight: bold; margin-top: 5px;">CLIENT SIGNATURE</div>
+            </div>
+
+        @else
+            <!-- Fallback if no appointment -->
+            <div class="section">
+                <div class="section-title">Guest Information</div>
+                <div class="form-row">
+                    <span class="form-label">Guest Name:</span>
+                    <span class="form-value">{{ $invoice->customer->name ?? '' }}</span>
+                </div>
+                <div class="form-row">
+                    <span class="form-label">Membership No.:</span>
+                    <span class="form-value">
+                        @if($invoice->customer && $invoice->customer->customer_type == 'member')
+                            #M{{ str_pad($invoice->customer->id, 4, '0', STR_PAD_LEFT) }}
+                        @else
+                            &nbsp;
+                        @endif
+                    </span>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Billing Information</div>
+                <div class="billing-section">
+                    <div class="billing-item">
+                        <div class="billing-label">Amount</div>
+                        <div class="billing-value">{{ number_format($invoice->total_amount, 2) }}</div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Tariff</div>
+                        <div class="billing-value">{{ number_format($invoice->total_amount, 2) }}</div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Disc</div>
+                        <div class="billing-value">0.00</div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Tax</div>
+                        <div class="billing-value">0.00</div>
+                    </div>
+                    <div class="billing-item">
+                        <div class="billing-label">Total</div>
+                        <div class="billing-value">{{ number_format($invoice->payable_amount, 2) }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="section">
+                <div class="section-title">Payment</div>
+                <div class="form-row">
+                    <span class="form-label">Payment By</span>
+                    <div class="checkbox-group">
+                        <div class="checkbox-item">
+                            <span class="checkbox" style="{{ strtolower($invoice->payment_mode ?? '') == 'cash' ? 'background-color: #000;' : '' }}"></span>
+                            <span>Cash</span>
+                        </div>
+                        <div class="checkbox-item">
+                            <span class="checkbox" style="{{ in_array(strtolower($invoice->payment_mode ?? ''), ['card', 'online', 'upi']) ? 'background-color: #000;' : '' }}"></span>
+                            <span>Card</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 
 </body>

@@ -307,58 +307,108 @@
                     <div class="row g-3">
                         @forelse($rooms as $room)
                             <div class="col-md-6">
-                                <div class="card border {{ $room['is_booked'] ? 'border-danger' : 'border-success' }}">
+                                <div
+                                    class="card border {{ $room['is_booked'] ? 'border-danger' : ($room['total_bookings_today'] > 0 ? 'border-warning' : 'border-success') }}">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <h6 class="mb-0">{{ $room['name'] }}</h6>
-                                            @if ($room['is_booked'])
-                                                <span class="badge bg-danger-subtle text-danger">
-                                                    <i class="ri-time-line me-1"></i>Booked
-                                                </span>
-                                            @else
-                                                <span class="badge bg-success-subtle text-success">
-                                                    <i class="ri-checkbox-circle-line me-1"></i>Available
-                                                </span>
-                                            @endif
+                                            <h6 class="mb-0 fw-bold fs-15">{{ $room['name'] }}</h6>
+                                            <div class="d-flex gap-1">
+                                                @if ($room['is_booked'])
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        <i class="ri-time-line me-1"></i>Currently Booked
+                                                    </span>
+                                                @elseif($room['total_bookings_today'] > 0)
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        <i class="ri-calendar-event-line me-1"></i>Has Bookings Today
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success-subtle text-success">
+                                                        <i class="ri-checkbox-circle-line me-1"></i>Fully Available
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
 
                                         @if ($room['current_appointment'])
-                                            <div class="mt-2 p-2 bg-light rounded">
-                                                <p class="text-muted mb-1 small">
+                                            <div class="mt-2 p-2 bg-danger-subtle border border-danger-subtle rounded">
+                                                <p class="mb-1 small">
                                                     <i class="ri-user-line me-1"></i>
-                                                    <strong>Customer:</strong>
-                                                    {{ $room['current_appointment']['customer'] }}
+                                                    <strong>Current:</strong> {{ $room['current_appointment']['customer'] }}
                                                 </p>
-                                                <p class="text-muted mb-1 small">
+                                                <p class="mb-1 small">
                                                     <i class="ri-service-line me-1"></i>
                                                     <strong>Service:</strong> {{ $room['current_appointment']['service'] }}
                                                 </p>
-                                                <p class="text-muted mb-1 small">
+                                                <p class="mb-0 small">
                                                     <i class="ri-time-line me-1"></i>
                                                     <strong>Time:</strong>
                                                     {{ \Carbon\Carbon::parse($room['current_appointment']['start_time'])->format('h:i A') }}
                                                     -
                                                     {{ \Carbon\Carbon::parse($room['current_appointment']['end_time'])->format('h:i A') }}
                                                 </p>
-                                                <p class="text-muted mb-0 small">
-                                                    <i class="ri-user-settings-line me-1"></i>
-                                                    <strong>Staff:</strong> {{ $room['current_appointment']['staff'] }}
-                                                </p>
                                             </div>
                                         @elseif($room['next_appointment'])
-                                            <div class="mt-2">
-                                                <p class="text-info mb-0 small">
-                                                    <i class="ri-arrow-right-line me-1"></i>
-                                                    <strong>Next:</strong> {{ $room['next_appointment']['service'] }} at
+                                            <div class="mt-2 p-2 bg-info-subtle border border-info-subtle rounded">
+                                                <p class="mb-0 small">
+                                                    <i class="ri-arrow-right-circle-line me-1"></i>
+                                                    <strong>Next Appointment:</strong> {{ $room['next_appointment']['service'] }} at
                                                     {{ \Carbon\Carbon::parse($room['next_appointment']['start_time'])->format('h:i A') }}
                                                 </p>
                                             </div>
                                         @else
-                                            <p class="text-muted mb-0 small">No bookings scheduled</p>
+                                            <div class="mt-2 text-center py-2 bg-light rounded">
+                                                <p class="text-muted mb-0 small">No current or upcoming bookings</p>
+                                            </div>
                                         @endif
-                                        <div class="mt-2">
-                                            <small class="text-muted">Total bookings today:
-                                                {{ $room['total_bookings_today'] }}</small>
+
+                                        @if(count($room['all_appointments']) > 0)
+                                            <div class="mt-3">
+                                                <h6 class="fs-12 text-uppercase fw-semibold text-muted mb-2">Today's Slots</h6>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach($room['all_appointments'] as $apt)
+                                                        <button
+                                                            class="btn btn-sm btn-outline-{{ $room['current_appointment'] && $room['current_appointment']['id'] == $apt['id'] ? 'danger' : 'secondary' }} d-flex align-items-center gap-1"
+                                                            data-bs-toggle="tooltip"
+                                                            title="{{ $apt['customer'] }} - {{ $apt['service'] }} ({{ \Carbon\Carbon::parse($apt['start_time'])->format('h:i A') }} - {{ \Carbon\Carbon::parse($apt['end_time'])->format('h:i A') }})">
+                                                            <i class="ri-calendar-slot-line"></i>
+                                                            {{ \Carbon\Carbon::parse($apt['start_time'])->format('h:i A') }}
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">Total bookings today: <span
+                                                    class="fw-bold">{{ $room['total_bookings_today'] }}</span></small>
+                                            @if($room['total_bookings_today'] > 0)
+                                                <button class="btn btn-link btn-sm p-0 text-primary" type="button"
+                                                    data-bs-toggle="collapse" data-bs-target="#roomSchedule{{ $room['id'] }}">
+                                                    View All Slots <i class="ri-arrow-down-s-line"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        <div class="collapse mt-2" id="roomSchedule{{ $room['id'] }}">
+                                            <div class="list-group list-group-flush border-top">
+                                                @foreach($room['all_appointments'] as $apt)
+                                                    <div class="list-group-item px-0 py-2">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="mb-0 fs-13">{{ $apt['customer'] }}</h6>
+                                                                <p class="text-muted mb-0 small">{{ $apt['service'] }} (with
+                                                                    {{ $apt['staff'] }})</p>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <span
+                                                                    class="badge bg-light text-dark">{{ \Carbon\Carbon::parse($apt['start_time'])->format('h:i A') }}
+                                                                    -
+                                                                    {{ \Carbon\Carbon::parse($apt['end_time'])->format('h:i A') }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -398,68 +448,114 @@
                     <div class="row g-3">
                         @forelse($staff as $staffMember)
                             <div class="col-md-6">
-                                <div class="card border {{ $staffMember['is_busy'] ? 'border-warning' : 'border-success' }}">
+                                <div
+                                    class="card border {{ $staffMember['is_busy'] ? 'border-danger' : ($staffMember['total_appointments_today'] > 0 ? 'border-warning' : 'border-success') }}">
                                     <div class="card-body p-3">
                                         <div class="d-flex align-items-center justify-content-between mb-2">
-                                            <h6 class="mb-0">{{ $staffMember['name'] }}</h6>
-                                            @if ($staffMember['is_busy'])
-                                                <span class="badge bg-warning-subtle text-warning">
-                                                    <i class="ri-time-line me-1"></i>Busy
-                                                </span>
-                                            @else
-                                                <span class="badge bg-success-subtle text-success">
-                                                    <i class="ri-checkbox-circle-line me-1"></i>Available
-                                                </span>
-                                            @endif
+                                            <h6 class="mb-0 fw-bold fs-15">{{ $staffMember['name'] }}</h6>
+                                            <div class="d-flex gap-1">
+                                                @if ($staffMember['is_busy'])
+                                                    <span class="badge bg-danger-subtle text-danger">
+                                                        <i class="ri-time-line me-1"></i>Currently Busy
+                                                    </span>
+                                                @elseif($staffMember['total_appointments_today'] > 0)
+                                                    <span class="badge bg-warning-subtle text-warning">
+                                                        <i class="ri-calendar-event-line me-1"></i>Has Appointments
+                                                    </span>
+                                                @else
+                                                    <span class="badge bg-success-subtle text-success">
+                                                        <i class="ri-checkbox-circle-line me-1"></i>Available
+                                                    </span>
+                                                @endif
+                                            </div>
                                         </div>
 
                                         @if ($staffMember['current_appointment'])
-                                            <div class="mt-2 p-2 bg-light rounded">
-                                                <p class="text-muted mb-1 small">
+                                            <div class="mt-2 p-2 bg-danger-subtle border border-danger-subtle rounded">
+                                                <p class="mb-1 small">
                                                     <i class="ri-user-line me-1"></i>
-                                                    <strong>Customer:</strong>
-                                                    {{ $staffMember['current_appointment']['customer'] }}
+                                                    <strong>Customer:</strong> {{ $staffMember['current_appointment']['customer'] }}
                                                 </p>
-                                                <p class="text-muted mb-1 small">
+                                                <p class="mb-1 small">
                                                     <i class="ri-service-line me-1"></i>
-                                                    <strong>Service:</strong>
-                                                    {{ $staffMember['current_appointment']['service'] }}
+                                                    <strong>Service:</strong> {{ $staffMember['current_appointment']['service'] }}
                                                 </p>
-                                                <p class="text-muted mb-1 small">
+                                                <p class="mb-1 small">
                                                     <i class="ri-time-line me-1"></i>
                                                     <strong>Time:</strong>
                                                     {{ \Carbon\Carbon::parse($staffMember['current_appointment']['start_time'])->format('h:i A') }}
                                                     -
                                                     {{ \Carbon\Carbon::parse($staffMember['current_appointment']['end_time'])->format('h:i A') }}
                                                 </p>
-                                                @if ($staffMember['current_appointment']['duration'])
-                                                    <p class="text-muted mb-1 small">
-                                                        <i class="ri-timer-line me-1"></i>
-                                                        <strong>Duration:</strong>
-                                                        {{ $staffMember['current_appointment']['duration'] }} min
-                                                    </p>
-                                                @endif
-                                                <p class="text-muted mb-0 small">
+                                                <p class="mb-0 small">
                                                     <i class="ri-home-4-line me-1"></i>
-                                                    <strong>Room:</strong>
-                                                    {{ $staffMember['current_appointment']['room'] }}
+                                                    <strong>Room:</strong> {{ $staffMember['current_appointment']['room'] }}
                                                 </p>
                                             </div>
                                         @elseif($staffMember['next_appointment'])
-                                            <div class="mt-2">
-                                                <p class="text-info mb-0 small">
-                                                    <i class="ri-arrow-right-line me-1"></i>
-                                                    <strong>Next:</strong>
+                                            <div class="mt-2 p-2 bg-info-subtle border border-info-subtle rounded">
+                                                <p class="mb-0 small">
+                                                    <i class="ri-arrow-right-circle-line me-1"></i>
+                                                    <strong>Next Appointment:</strong>
                                                     {{ $staffMember['next_appointment']['service'] }} at
                                                     {{ \Carbon\Carbon::parse($staffMember['next_appointment']['start_time'])->format('h:i A') }}
                                                 </p>
                                             </div>
                                         @else
-                                            <p class="text-muted mb-0 small">No appointments scheduled</p>
+                                            <div class="mt-2 text-center py-2 bg-light rounded">
+                                                <p class="text-muted mb-0 small">No current or upcoming appointments</p>
+                                            </div>
                                         @endif
-                                        <div class="mt-2">
-                                            <small class="text-muted">Total appointments today:
-                                                {{ $staffMember['total_appointments_today'] }}</small>
+
+                                        @if(count($staffMember['all_appointments']) > 0)
+                                            <div class="mt-3">
+                                                <h6 class="fs-12 text-uppercase fw-semibold text-muted mb-2">Today's Slots</h6>
+                                                <div class="d-flex flex-wrap gap-2">
+                                                    @foreach($staffMember['all_appointments'] as $apt)
+                                                        <button
+                                                            class="btn btn-sm btn-outline-{{ $staffMember['current_appointment'] && $staffMember['current_appointment']['id'] == $apt['id'] ? 'danger' : 'secondary' }} d-flex align-items-center gap-1"
+                                                            data-bs-toggle="tooltip"
+                                                            title="{{ $apt['customer'] }} - {{ $apt['service'] }} ({{ \Carbon\Carbon::parse($apt['start_time'])->format('h:i A') }} - {{ \Carbon\Carbon::parse($apt['end_time'])->format('h:i A') }})">
+                                                            <i class="ri-calendar-slot-line"></i>
+                                                            {{ \Carbon\Carbon::parse($apt['start_time'])->format('h:i A') }}
+                                                        </button>
+                                                    @endforeach
+                                                </div>
+                                            </div>
+                                        @endif
+
+                                        <div class="mt-3 d-flex justify-content-between align-items-center">
+                                            <small class="text-muted">Total appointments today: <span
+                                                    class="fw-bold">{{ $staffMember['total_appointments_today'] }}</span></small>
+                                            @if($staffMember['total_appointments_today'] > 0)
+                                                <button class="btn btn-link btn-sm p-0 text-primary" type="button"
+                                                    data-bs-toggle="collapse"
+                                                    data-bs-target="#staffSchedule{{ $staffMember['id'] }}">
+                                                    View All Slots <i class="ri-arrow-down-s-line"></i>
+                                                </button>
+                                            @endif
+                                        </div>
+
+                                        <div class="collapse mt-2" id="staffSchedule{{ $staffMember['id'] }}">
+                                            <div class="list-group list-group-flush border-top">
+                                                @foreach($staffMember['all_appointments'] as $apt)
+                                                    <div class="list-group-item px-0 py-2">
+                                                        <div class="d-flex justify-content-between align-items-center">
+                                                            <div class="flex-grow-1">
+                                                                <h6 class="mb-0 fs-13">{{ $apt['customer'] }}</h6>
+                                                                <p class="text-muted mb-0 small">{{ $apt['service'] }} (in
+                                                                    {{ $apt['room'] }})</p>
+                                                            </div>
+                                                            <div class="text-end">
+                                                                <span
+                                                                    class="badge bg-light text-dark">{{ \Carbon\Carbon::parse($apt['start_time'])->format('h:i A') }}
+                                                                    -
+                                                                    {{ \Carbon\Carbon::parse($apt['end_time'])->format('h:i A') }}</span>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                @endforeach
+                                            </div>
                                         </div>
                                     </div>
                                 </div>

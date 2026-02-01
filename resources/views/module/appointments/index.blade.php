@@ -463,18 +463,7 @@
                                         </td>
                                         <td>
                                             <ul class="list-inline hstack gap-2 mb-0 justify-content-end">
-                                                @if ($appointment->status == 'created' && $appointment->payment_status != 'paid' && Auth::user()->isAdmin())
-                                                    <li class="list-inline-item">
-                                                        <button type="button" class="btn btn-sm btn-soft-success"
-                                                            data-bs-toggle="modal"
-                                                            data-bs-target="#completeAppointmentModal"
-                                                            data-appointment-id="{{ $appointment->id }}"
-                                                            data-action="{{ route('appointments.updateStatus', $appointment->id) }}"
-                                                            title="Mark as Completed">
-                                                            <i class="ri-check-line"></i>
-                                                        </button>
-                                                    </li>
-                                                @endif
+
                                                 @if (!$appointment->invoice && Auth::user()->isAdmin())
                                                     <li class="list-inline-item">
                                                         <a href="javascript:void(0);"
@@ -564,198 +553,381 @@
                             <ul class="mb-0" id="createErrorList"></ul>
                         </div>
                         <div class="row g-3">
-                            <!-- Customer Selection -->
+                            <!-- Customer Selection Section -->
                             <div class="col-lg-12">
-                                <h6 class="mb-3"><i class="ri-user-line me-1"></i> Customer Information</h6>
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Select Registered Customer <span
-                                        class="text-muted">(Optional)</span></label>
-                                <select name="customer_id" id="customer_select" class="form-select">
-                                    <option value="">-- New / Walk-in Customer --</option>
-                                    @foreach ($customers as $c)
-                                        <option value="{{ $c->id }}" data-phone="{{ $c->phone }}"
-                                            data-email="{{ $c->email }}" data-type="{{ $c->customer_type }}"
-                                            data-balance="{{ $c->wallet->balance ?? 0 }}">
-                                            {{ $c->name }}
-                                            @if ($c->customer_type == 'member')
-                                                (Member - Bal: ₹{{ number_format($c->wallet->balance ?? 0, 2) }})
-                                            @else
-                                                (Normal)
-                                            @endif
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-6" id="new_cust_name_div">
-                                <label class="form-label">Customer Name (New)</label>
-                                <input type="text" name="customer_name" id="new_customer_name" class="form-control"
-                                    placeholder="Enter customer name">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-6" id="new_cust_email_div">
-                                <label class="form-label">Email Address</label>
-                                <input type="email" name="customer_email" id="new_customer_email" class="form-control"
-                                    placeholder="Enter email address">
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" id="customer_phone" class="form-control"
-                                    placeholder="Enter phone number">
-                                <div class="invalid-feedback"></div>
-                            </div>
+                                <div class="card border-light shadow-none mb-0">
+                                    <div class="card-header bg-light-subtle py-2">
+                                        <h6 class="card-title mb-0"><i
+                                                class="ri-user-heart-line me-2 align-middle text-primary"></i>1. Customer
+                                            Information</h6>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <!-- Customer Type Selection -->
+                                            <div class="col-lg-12">
+                                                <div class="p-2 border rounded bg-light-subtle mb-3">
+                                                    <label class="form-label d-block mb-2 fw-semibold">Are you booking for
+                                                        an Existing or New Customer?</label>
+                                                    <div class="d-flex gap-4">
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input border-primary" type="radio"
+                                                                name="customer_type_radio" id="existing_customer_radio"
+                                                                value="existing">
+                                                            <label class="form-check-label fw-medium"
+                                                                for="existing_customer_radio">
+                                                                <i class="ri-user-search-line me-1"></i> Existing Customer
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check form-check-inline">
+                                                            <input class="form-check-input border-primary" type="radio"
+                                                                name="customer_type_radio" id="new_customer_radio"
+                                                                value="new">
+                                                            <label class="form-check-label fw-medium"
+                                                                for="new_customer_radio">
+                                                                <i class="ri-user-add-line me-1"></i> New Customer
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
 
-                            <!-- Appointment Details -->
-                            <div class="col-lg-12 mt-3">
-                                <h6 class="mb-3"><i class="ri-calendar-line me-1"></i> Appointment Details</h6>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Service (Therapy) <span class="text-danger">*</span></label>
-                                <select name="service_id" id="service_select" class="form-select">
-                                    <option value="">Select Service</option>
-                                    @foreach ($services as $s)
-                                        <option value="{{ $s->id }}" data-price="{{ $s->price }}"
-                                            data-duration="{{ $s->duration_minutes }}">
-                                            {{ $s->name }} - ₹{{ number_format($s->price, 2) }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Staff <span class="text-danger">*</span></label>
-                                <select name="staff_id" id="staff_select" class="form-select">
-                                    <option value="">Select Staff</option>
-                                    @foreach ($staff as $st)
-                                        <option value="{{ $st->id }}">{{ $st->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Room <span class="text-danger">*</span></label>
-                                <select name="room_id" id="room_select" class="form-select">
-                                    <option value="">Select Room</option>
-                                    @foreach ($rooms as $r)
-                                        <option value="{{ $r->id }}" data-room-name="{{ $r->name }}">
-                                            {{ $r->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div id="roomAvailabilityStatus" class="mt-2" style="display: none;"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
-                                <input type="date" name="appointment_date" id="appointment_date" class="form-control"
-                                    value="{{ date('Y-m-d') }}" min="{{ date('Y-m-d') }}">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Start Time <span class="text-danger">*</span></label>
-                                <input type="time" name="start_time" id="start_time" class="form-control">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">End Time <span class="text-danger">*</span></label>
-                                <input type="time" name="end_time" id="end_time" class="form-control">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Duration (Minutes)</label>
-                                <input type="number" name="duration" id="duration" class="form-control"
-                                    placeholder="Auto-calculated" min="1">
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="amount" id="amount" class="form-control"
-                                    placeholder="0.00" min="0" readonly>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Offer (Optional)</label>
-                                <select name="offer_id" id="offer_select" class="form-select">
-                                    <option value="">-- Select Offer --</option>
-                                    @foreach ($offers as $offer)
-                                        <option value="{{ $offer->id }}"
-                                            data-discount-type="{{ $offer->discount_type }}"
-                                            data-discount-value="{{ $offer->discount_value }}">
-                                            {{ $offer->name }}
-                                            ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-12 mt-2">
-                                <div id="memberWalletInfo" class="alert alert-info py-2 mb-0" style="display: none;">
-                                    <small>
-                                        <i class="ri-wallet-line"></i>
-                                        <strong>Member Wallet Balance:</strong>
-                                        <span id="memberBalance">₹0.00</span>
-                                    </small>
-                                </div>
-                            </div>
-                            <div class="col-lg-12 mt-2">
-                                <div id="amountBreakdown" class="card border-primary mb-0" style="display: none;">
-                                    <div class="card-body py-2">
-                                        <h6 class="card-title mb-2"><i class="ri-calculator-line"></i> Amount Breakdown
-                                        </h6>
-                                        <div class="row">
-                                            <div class="col-6">
-                                                <small class="text-muted">Service Amount:</small>
-                                                <div class="fw-bold" id="serviceAmount">₹0.00</div>
+                                            <!-- Existing Customer Sub-Type (shown when Existing Customer is selected) -->
+                                            <div class="col-lg-12" id="existing_customer_type_div"
+                                                style="display: block;">
+                                                <div class="p-2 border border-dashed rounded mb-3">
+                                                    <label class="form-label d-block mb-2 text-muted">Filter customer by
+                                                        type:</label>
+                                                    <div class="d-flex gap-3">
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="existing_customer_type_radio"
+                                                                id="customer_type_normal" value="customer">
+                                                            <label class="form-check-label" for="customer_type_normal">
+                                                                Standard Customer
+                                                            </label>
+                                                        </div>
+                                                        <div class="form-check">
+                                                            <input class="form-check-input" type="radio"
+                                                                name="existing_customer_type_radio"
+                                                                id="customer_type_member" value="member">
+                                                            <label class="form-check-label text-primary fw-medium"
+                                                                for="customer_type_member">
+                                                                <i class="ri-vip-crown-line me-1"></i> Member Customer
+                                                            </label>
+                                                        </div>
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div class="col-6">
-                                                <small class="text-muted">Member Wallet Used:</small>
-                                                <div class="fw-bold text-warning" id="walletUsed">₹0.00</div>
-                                            </div>
-                                            <div class="col-6 mt-2">
-                                                <small class="text-muted">Offer Discount:</small>
-                                                <div class="fw-bold text-success" id="offerDiscount">₹0.00</div>
-                                            </div>
-                                            <div class="col-6 mt-2">
-                                                <small class="text-muted">Final Amount:</small>
-                                                <div class="fw-bold text-primary fs-5" id="finalAmount">₹0.00</div>
-                                            </div>
-                                            <div class="col-12 mt-2" id="remainingBalanceDiv" style="display: none;">
-                                                <small class="text-muted">Remaining Wallet Balance:</small>
-                                                <div class="fw-bold text-info" id="remainingBalance">₹0.00</div>
+
+                                            <!-- Form Fields Container -->
+                                            <div class="col-lg-12">
+                                                <div class="row g-3">
+                                                    <!-- Existing Customer Select Dropdown -->
+                                                    <div class="col-lg-6" id="existing_customer_select_div"
+                                                        style="display: block;">
+                                                        <label class="form-label fw-semibold">Search Registered
+                                                            Customer</label>
+                                                        <select name="customer_id" id="customer_select"
+                                                            class="form-select border-info shadow-none">
+                                                            <option value="">-- Start typing or select --</option>
+                                                            @foreach ($customers as $c)
+                                                                <option value="{{ $c->id }}"
+                                                                    data-name="{{ $c->name }}"
+                                                                    data-phone="{{ $c->phone }}"
+                                                                    data-email="{{ $c->email }}"
+                                                                    data-type="{{ $c->customer_type }}"
+                                                                    data-balance="{{ $c->wallet->balance ?? 0 }}">
+                                                                    {{ $c->name }}
+                                                                    @if ($c->customer_type == 'member')
+                                                                        (Member - Balance:
+                                                                        ₹{{ number_format($c->wallet->balance ?? 0, 2) }})
+                                                                    @else
+                                                                        (Normal)
+                                                                    @endif
+                                                                </option>
+                                                            @endforeach
+                                                        </select>
+                                                    </div>
+
+                                                    <!-- New Customer Add Icon Button (shown when New Customer is selected) -->
+                                                    <div class="col-lg-6" id="new_customer_add_icon_div"
+                                                        style="display: none;">
+                                                        <label class="form-label d-block text-muted">Create Profile
+                                                            First?</label>
+                                                        <button type="button" class="btn btn-outline-primary w-100"
+                                                            id="add_new_customer_btn">
+                                                            <i class="ri-user-add-line align-bottom me-1"></i> Register New
+                                                            Customer Profile
+                                                        </button>
+                                                    </div>
+
+                                                    <!-- New Customer Fields -->
+                                                    <div class="col-lg-6" id="new_cust_name_div" style="display: block;">
+                                                        <label class="form-label fw-semibold">Customer Full Name <span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-light"><i
+                                                                    class="ri-user-line text-primary"></i></span>
+                                                            <input type="text" name="customer_name"
+                                                                id="new_customer_name" class="form-control"
+                                                                placeholder="Enter customer name">
+                                                        </div>
+                                                        <div class="invalid-feedback"></div>
+                                                    </div>
+                                                    <div class="col-lg-6" id="new_cust_email_div"
+                                                        style="display: block;">
+                                                        <label class="form-label">Email Address <span
+                                                                class="text-muted small">(Optional)</span></label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-light"><i
+                                                                    class="ri-mail-line text-muted"></i></span>
+                                                            <input type="email" name="customer_email"
+                                                                id="new_customer_email" class="form-control"
+                                                                placeholder="Enter email address">
+                                                        </div>
+                                                    </div>
+
+                                                    <div class="col-lg-6">
+                                                        <label class="form-label fw-semibold">Contact Phone Number <span
+                                                                class="text-danger">*</span></label>
+                                                        <div class="input-group">
+                                                            <span class="input-group-text bg-light"><i
+                                                                    class="ri-phone-line text-success"></i></span>
+                                                            <input type="text" name="phone" id="customer_phone"
+                                                                class="form-control" placeholder="Enter phone number">
+                                                        </div>
+                                                        <div class="invalid-feedback"></div>
+                                                    </div>
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
 
-                            <!-- Payment Information -->
-                            <div class="col-lg-12 mt-3">
-                                <h6 class="mb-3"><i class="ri-money-rupee-circle-line me-1"></i> Payment Information
-                                </h6>
+                            <!-- Appointment Details Section -->
+                            <div class="col-lg-12 mt-2">
+                                <div class="card border-light shadow-none mb-0">
+                                    <div class="card-header bg-light-subtle py-2">
+                                        <h6 class="card-title mb-0"><i
+                                                class="ri-calendar-event-line me-2 align-middle text-info"></i>2.
+                                            Appointment Details</h6>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Service (Therapy) <span
+                                                        class="text-danger">*</span></label>
+                                                <select name="service_id" id="service_select"
+                                                    class="form-select border-info-subtle">
+                                                    <option value="">Select Service</option>
+                                                    @foreach ($services as $s)
+                                                        <option value="{{ $s->id }}"
+                                                            data-price="{{ $s->price }}"
+                                                            data-duration="{{ $s->duration_minutes }}">
+                                                            {{ $s->name }} - ₹{{ number_format($s->price, 2) }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Staff <span class="text-danger">*</span></label>
+                                                <select name="staff_id" id="staff_select"
+                                                    class="form-select border-info-subtle">
+                                                    <option value="">Select Staff</option>
+                                                    @foreach ($staff as $st)
+                                                        <option value="{{ $st->id }}">{{ $st->name }}</option>
+                                                    @endforeach
+                                                </select>
+                                                <div id="staffAvailabilityStatus" class="mt-2" style="display: none;">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Room <span class="text-danger">*</span></label>
+                                                <select name="room_id" id="room_select"
+                                                    class="form-select border-info-subtle">
+                                                    <option value="">Select Room</option>
+                                                    @foreach ($rooms as $r)
+                                                        <option value="{{ $r->id }}"
+                                                            data-room-name="{{ $r->name }}">
+                                                            {{ $r->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div id="roomAvailabilityStatus" class="mt-2" style="display: none;">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Date <span class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-calendar-line"></i></span>
+                                                    <input type="date" name="appointment_date" id="appointment_date"
+                                                        class="form-control" value="{{ date('Y-m-d') }}"
+                                                        min="{{ date('Y-m-d') }}">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Time In <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-history-line"></i></span>
+                                                    <input type="time" name="start_time" id="start_time"
+                                                        class="form-control">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Time Out <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-time-line"></i></span>
+                                                    <input type="time" name="end_time" id="end_time"
+                                                        class="form-control">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Duration</label>
+                                                <div class="input-group">
+                                                    <input type="number" name="duration" id="duration"
+                                                        class="form-control bg-light" placeholder="Auto" min="1"
+                                                        readonly>
+                                                    <span class="input-group-text">Min</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Net Amount (₹) <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-success-subtle text-success">₹</span>
+                                                    <input type="number" step="0.01" name="amount" id="amount"
+                                                        class="form-control bg-light fw-bold" placeholder="0.00"
+                                                        min="0" readonly>
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label text-success">Offer Tag</label>
+                                                <select name="offer_id" id="offer_select"
+                                                    class="form-select border-success-subtle">
+                                                    <option value="">-- No Offer --</option>
+                                                    @foreach ($offers as $offer)
+                                                        <option value="{{ $offer->id }}"
+                                                            data-discount-type="{{ $offer->discount_type }}"
+                                                            data-discount-value="{{ $offer->discount_value }}">
+                                                            {{ $offer->name }}
+                                                            ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                            <!-- Dynamic Calculation Info -->
+                                            <div class="col-lg-12">
+                                                <div id="memberWalletInfo"
+                                                    class="alert alert-info py-2 mb-2 shadow-sm border-info-subtle"
+                                                    style="display: none;">
+                                                    <div class="d-flex align-items-center">
+                                                        <i class="ri-wallet-3-line fs-18 me-2"></i>
+                                                        <span class="fw-medium">Member Balance: </span>
+                                                        <span id="memberBalance" class="ms-1 fw-bold">₹0.00</span>
+                                                    </div>
+                                                </div>
+                                                <div id="amountBreakdown"
+                                                    class="card border-primary-subtle bg-primary-subtle bg-opacity-10 mb-0"
+                                                    style="display: none;">
+                                                    <div class="card-body p-3">
+                                                        <div class="row align-items-center">
+                                                            <div class="col-sm-3 border-end">
+                                                                <small
+                                                                    class="text-muted d-block text-uppercase fw-semibold">Subtotal</small>
+                                                                <div class="fw-bold fs-16" id="serviceAmount">₹0.00</div>
+                                                            </div>
+                                                            <div class="col-sm-3 border-end">
+                                                                <small
+                                                                    class="text-muted d-block text-uppercase fw-semibold">Wallet
+                                                                    Deduction</small>
+                                                                <div class="fw-bold text-danger fs-16" id="walletUsed">
+                                                                    ₹0.00
+                                                                </div>
+                                                            </div>
+                                                            <div class="col-sm-3 border-end">
+                                                                <small
+                                                                    class="text-muted d-block text-uppercase fw-semibold">Offer
+                                                                    Disc.</small>
+                                                                <div class="fw-bold text-success fs-16"
+                                                                    id="offerDiscount">
+                                                                    ₹0.00</div>
+                                                            </div>
+                                                            <div class="col-sm-3">
+                                                                <small
+                                                                    class="text-primary d-block text-uppercase fw-bold">Grand
+                                                                    Total</small>
+                                                                <div class="fw-bold text-primary fs-20" id="finalAmount">
+                                                                    ₹0.00</div>
+                                                            </div>
+                                                            <div class="col-12 mt-2 pt-2 border-top"
+                                                                id="remainingBalanceDiv" style="display: none;">
+                                                                <small class="text-muted fw-medium">Remaining Wallet
+                                                                    Balance
+                                                                    after this booking: <span class="text-info fw-bold"
+                                                                        id="remainingBalance">₹0.00</span></small>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Payment Method</label>
-                                <select name="payment_method" class="form-select">
-                                    <option value="Cash">Cash</option>
-                                    <option value="Card">Card</option>
-                                    <option value="UPI">UPI</option>
-                                    <option value="Online">Online</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Payment Status <span class="text-danger">*</span></label>
-                                <select name="payment_status" id="payment_status" class="form-select">
-                                    <option value="pending">Pending</option>
-                                    <option value="paid">Paid</option>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Sleep / Notes</label>
-                                <input type="text" name="sleep" class="form-control"
-                                    placeholder="Additional notes">
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">&nbsp;</label>
-                                <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox" name="is_member" value="1"
-                                        id="isMemberSwitch">
-                                    <label class="form-check-label" for="isMemberSwitch">Is Member Customer?</label>
+
+                            <!-- Payment Section Section -->
+                            <div class="col-lg-12 mt-2">
+                                <div class="card border-light shadow-none mb-0">
+                                    <div class="card-header bg-light-subtle py-2">
+                                        <h6 class="card-title mb-0"><i
+                                                class="ri-money-rupee-circle-line me-2 align-middle text-success"></i>3.
+                                            Payment & Remarks</h6>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Payment Method</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-wallet-line"></i></span>
+                                                    <select name="payment_method" class="form-select shadow-none">
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Card">Card</option>
+                                                        <option value="UPI">UPI</option>
+                                                        <option value="Online">Online</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-8">
+                                                <label class="form-label">Special Notes / Sleep Remarks</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-sticky-note-line"></i></span>
+                                                    <input type="text" name="sleep" class="form-control shadow-none"
+                                                        placeholder="Any specific requirements or notes...">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <div class="form-check form-switch form-switch-lg mt-1">
+                                                    <input class="form-check-input" type="checkbox" name="is_member"
+                                                        value="1" id="isMemberSwitch">
+                                                    <label class="form-check-label fw-medium ms-1"
+                                                        for="isMemberSwitch">Tag
+                                                        as Member Transaction</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -767,6 +939,58 @@
                     <div class="modal-footer">
                         <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
                         <button type="submit" class="btn btn-success">Create Appointment</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add New Customer Modal -->
+    <div class="modal fade" id="addCustomerModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Customer</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="addCustomerForm" method="POST">
+                    @csrf
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label">Full Name <span class="text-danger">*</span></label>
+                            <input type="text" name="name" id="add_customer_name" class="form-control"
+                                placeholder="Enter name">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Phone Number <span class="text-danger">*</span></label>
+                            <input type="text" name="phone" id="add_customer_phone" class="form-control"
+                                placeholder="Enter phone number (10 digits)">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Email (Optional)</label>
+                            <input type="email" name="email" id="add_customer_email" class="form-control"
+                                placeholder="Enter email">
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Customer Type <span class="text-danger">*</span></label>
+                            <select name="customer_type" id="add_customer_type" class="form-select">
+                                <option value="normal">Normal</option>
+                                <option value="member">Member (Premium)</option>
+                            </select>
+                            <div class="invalid-feedback"></div>
+                        </div>
+                        <div class="mb-3 d-none" id="add_customer_wallet_balance_div">
+                            <label class="form-label">Wallet Membership Amount (RS)</label>
+                            <input type="number" step="0.01" name="wallet_balance" id="add_customer_wallet_balance"
+                                class="form-control" placeholder="Enter initial wallet amount">
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-light" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-success">Save Customer</button>
                     </div>
                 </form>
             </div>
@@ -792,133 +1016,235 @@
                             <ul class="mb-0" id="editErrorList"></ul>
                         </div>
                         <div class="row g-3">
+                            <!-- Customer Information Section -->
                             <div class="col-lg-12">
-                                <h6 class="mb-3"><i class="ri-user-line me-1"></i> Customer Information</h6>
+                                <div class="card border-light shadow-none mb-0">
+                                    <div class="card-header bg-light-subtle py-2">
+                                        <h6 class="card-title mb-0"><i
+                                                class="ri-user-settings-line me-2 align-middle text-primary"></i>1.
+                                            Customer
+                                            Information</h6>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-lg-6">
+                                                <label class="form-label fw-semibold">Customer <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-user-line text-primary"></i></span>
+                                                    <select name="customer_id" id="edit_customer_id"
+                                                        class="form-select shadow-none">
+                                                        <div class="invalid-feedback"></div>
+                                                        @foreach ($customers as $c)
+                                                            <option value="{{ $c->id }}">{{ $c->name }}
+                                                            </option>
+                                                        @endforeach
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-6">
+                                                <label class="form-label fw-semibold">Phone Number <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-phone-line text-success"></i></span>
+                                                    <input type="text" name="phone" id="edit_phone"
+                                                        class="form-control shadow-none" placeholder="Contact number">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Customer <span class="text-danger">*</span></label>
-                                <select name="customer_id" id="edit_customer_id" class="form-select">
-                                    <div class="invalid-feedback"></div>
-                                    @foreach ($customers as $c)
-                                        <option value="{{ $c->id }}">{{ $c->name }}</option>
-                                    @endforeach
-                                </select>
+                            <!-- Appointment Details Section -->
+                            <div class="col-lg-12 mt-2">
+                                <div class="card border-light shadow-none mb-0">
+                                    <div class="card-header bg-light-subtle py-2">
+                                        <h6 class="card-title mb-0"><i
+                                                class="ri-calendar-event-line me-2 align-middle text-info"></i>2.
+                                            Appointment Details</h6>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Service <span
+                                                        class="text-danger">*</span></label>
+                                                <select name="service_id" id="edit_service_id"
+                                                    class="form-select border-info-subtle">
+                                                    <option value="">Select Service</option>
+                                                    @foreach ($services as $s)
+                                                        <option value="{{ $s->id }}"
+                                                            data-price="{{ $s->price }}">
+                                                            {{ $s->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Staff <span
+                                                        class="text-danger">*</span></label>
+                                                <select name="staff_id" id="edit_staff_id"
+                                                    class="form-select border-info-subtle">
+                                                    <option value="">Select Staff</option>
+                                                    @foreach ($staff as $st)
+                                                        <option value="{{ $st->id }}">{{ $st->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="invalid-feedback"></div>
+                                                <div id="editStaffAvailabilityStatus" class="mt-2"
+                                                    style="display: none;">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Room <span
+                                                        class="text-danger">*</span></label>
+                                                <select name="room_id" id="edit_room_id"
+                                                    class="form-select border-info-subtle">
+                                                    <option value="">Select Room</option>
+                                                    @foreach ($rooms as $r)
+                                                        <option value="{{ $r->id }}"
+                                                            data-room-name="{{ $r->name }}">
+                                                            {{ $r->name }}
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                                <div class="invalid-feedback"></div>
+                                                <div id="editRoomAvailabilityStatus" class="mt-2"
+                                                    style="display: none;">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Date <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-calendar-line"></i></span>
+                                                    <input type="date" name="appointment_date"
+                                                        id="edit_appointment_date" class="form-control shadow-none">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Time In <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-history-line"></i></span>
+                                                    <input type="time" name="start_time" id="edit_start_time"
+                                                        class="form-control shadow-none">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Time Out <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-time-line"></i></span>
+                                                    <input type="time" name="end_time" id="edit_end_time"
+                                                        class="form-control shadow-none">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Duration</label>
+                                                <div class="input-group">
+                                                    <input type="number" name="duration" id="edit_duration"
+                                                        class="form-control shadow-none" min="1">
+                                                    <span class="input-group-text">Min</span>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Net Amount (₹) <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span
+                                                        class="input-group-text bg-success-subtle text-success fw-bold">₹</span>
+                                                    <input type="number" step="0.01" name="amount" id="edit_amount"
+                                                        class="form-control shadow-none fw-bold" min="0">
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label">Offer Tag</label>
+                                                <select name="offer_id" id="edit_offer_select"
+                                                    class="form-select border-success-subtle">
+                                                    <option value="">-- No Offer --</option>
+                                                    @foreach ($offers as $offer)
+                                                        <option value="{{ $offer->id }}"
+                                                            data-discount-type="{{ $offer->discount_type }}"
+                                                            data-discount-value="{{ $offer->discount_value }}">
+                                                            {{ $offer->name }}
+                                                            ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
+                                                        </option>
+                                                    @endforeach
+                                                </select>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
                             </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" id="edit_phone" class="form-control">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-12 mt-3">
-                                <h6 class="mb-3"><i class="ri-calendar-line me-1"></i> Appointment Details</h6>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Service <span class="text-danger">*</span></label>
-                                <select name="service_id" id="edit_service_id" class="form-select">
-                                    <option value="">Select Service</option>
-                                    @foreach ($services as $s)
-                                        <option value="{{ $s->id }}" data-price="{{ $s->price }}">
-                                            {{ $s->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Staff <span class="text-danger">*</span></label>
-                                <select name="staff_id" id="edit_staff_id" class="form-select">
-                                    <option value="">Select Staff</option>
-                                    @foreach ($staff as $st)
-                                        <option value="{{ $st->id }}">{{ $st->name }}</option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Room <span class="text-danger">*</span></label>
-                                <select name="room_id" id="edit_room_id" class="form-select">
-                                    <option value="">Select Room</option>
-                                    @foreach ($rooms as $r)
-                                        <option value="{{ $r->id }}" data-room-name="{{ $r->name }}">
-                                            {{ $r->name }}
-                                        </option>
-                                    @endforeach
-                                </select>
-                                <div class="invalid-feedback"></div>
-                                <div id="editRoomAvailabilityStatus" class="mt-2" style="display: none;"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Appointment Date <span class="text-danger">*</span></label>
-                                <input type="date" name="appointment_date" id="edit_appointment_date"
-                                    class="form-control">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Start Time <span class="text-danger">*</span></label>
-                                <input type="time" name="start_time" id="edit_start_time" class="form-control">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">End Time <span class="text-danger">*</span></label>
-                                <input type="time" name="end_time" id="edit_end_time" class="form-control">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Duration (Minutes)</label>
-                                <input type="number" name="duration" id="edit_duration" class="form-control"
-                                    min="1">
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Amount (₹) <span class="text-danger">*</span></label>
-                                <input type="number" step="0.01" name="amount" id="edit_amount"
-                                    class="form-control" min="0">
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-4">
-                                <label class="form-label">Offer (Optional)</label>
-                                <select name="offer_id" id="edit_offer_select" class="form-select">
-                                    <option value="">-- Select Offer --</option>
-                                    @foreach ($offers as $offer)
-                                        <option value="{{ $offer->id }}"
-                                            data-discount-type="{{ $offer->discount_type }}"
-                                            data-discount-value="{{ $offer->discount_value }}">
-                                            {{ $offer->name }}
-                                            ({{ $offer->discount_type == 'percentage' ? $offer->discount_value . '%' : '₹' . number_format($offer->discount_value, 2) }})
-                                        </option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="col-lg-12 mt-3">
-                                <h6 class="mb-3"><i class="ri-money-rupee-circle-line me-1"></i> Payment Information
-                                </h6>
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Payment Method</label>
-                                <select name="payment_method" id="edit_payment_method" class="form-select">
-                                    <option value="Cash">Cash</option>
-                                    <option value="Card">Card</option>
-                                    <option value="UPI">UPI</option>
-                                    <option value="Online">Online</option>
-                                </select>
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Payment Status <span class="text-danger">*</span></label>
-                                <select name="payment_status" id="edit_payment_status" class="form-select">
-                                    <option value="pending">Pending</option>
-                                    <option value="paid">Paid</option>
-                                </select>
-                                <div class="invalid-feedback"></div>
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">Sleep / Notes</label>
-                                <input type="text" name="sleep" id="edit_sleep" class="form-control">
-                            </div>
-                            <div class="col-lg-6">
-                                <label class="form-label">&nbsp;</label>
-                                <div class="form-check form-switch mt-2">
-                                    <input class="form-check-input" type="checkbox" name="is_member" value="1"
-                                        id="edit_is_member">
-                                    <label class="form-check-label" for="edit_is_member">Is Member Customer?</label>
+                            <!-- Payment Section Section -->
+                            <div class="col-lg-12 mt-2">
+                                <div class="card border-light shadow-none mb-0">
+                                    <div class="card-header bg-light-subtle py-2">
+                                        <h6 class="card-title mb-0"><i
+                                                class="ri-money-rupee-circle-line me-2 align-middle text-success"></i>3.
+                                            Payment & Remarks</h6>
+                                    </div>
+                                    <div class="card-body p-3">
+                                        <div class="row g-3">
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Payment Method</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-wallet-line text-muted"></i></span>
+                                                    <select name="payment_method" id="edit_payment_method"
+                                                        class="form-select shadow-none">
+                                                        <option value="Cash">Cash</option>
+                                                        <option value="Card">Card</option>
+                                                        <option value="UPI">UPI</option>
+                                                        <option value="Online">Online</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Current Audit Status <span
+                                                        class="text-danger">*</span></label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-checkbox-circle-line text-info"></i></span>
+                                                    <select name="payment_status" id="edit_payment_status"
+                                                        class="form-select shadow-none">
+                                                        <option value="pending">Pending</option>
+                                                        <option value="paid">Paid</option>
+                                                    </select>
+                                                </div>
+                                                <div class="invalid-feedback"></div>
+                                            </div>
+                                            <div class="col-lg-4">
+                                                <label class="form-label fw-semibold">Special Notes</label>
+                                                <div class="input-group">
+                                                    <span class="input-group-text bg-light"><i
+                                                            class="ri-sticky-note-line text-muted"></i></span>
+                                                    <input type="text" name="sleep" id="edit_sleep"
+                                                        class="form-control shadow-none" placeholder="Notes...">
+                                                </div>
+                                            </div>
+                                            <div class="col-lg-12">
+                                                <div class="form-check form-switch form-switch-lg mt-1">
+                                                    <input class="form-check-input" type="checkbox" name="is_member"
+                                                        value="1" id="edit_is_member">
+                                                    <label class="form-check-label fw-medium ms-1"
+                                                        for="edit_is_member">Member Ledger Account Entry</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -977,87 +1303,14 @@
         </div>
     </div>
 
-    <!-- Complete Appointment Confirmation Modal -->
-    <div id="completeAppointmentModal" class="modal fade zoomIn" tabindex="-1" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        id="complete-btn-close"></button>
-                </div>
-                <div class="modal-body">
-                    <div class="mt-2 text-center">
-                        <div class="avatar-md mx-auto mb-4">
-                            <div class="avatar-title bg-primary-subtle text-primary rounded-circle font-size-24">
-                                <i class="ri-alert-line"></i>
-                            </div>
-                        </div>
-                        <div class="mt-4 pt-2 fs-15 mx-4 mx-sm-5">
-                            <h4>Are you sure ?</h4>
-                            <p class="text-muted mx-4 mb-0" id="complete-message">Mark this appointment as completed?
-                                Invoice will be generated automatically. <strong>Note:</strong> After generating invoice,
-                                you cannot edit this appointment.</p>
-                        </div>
-                    </div>
-                    <div class="d-flex gap-2 justify-content-center mt-4 mb-2">
-                        <button type="button" class="btn w-sm btn-light" data-bs-dismiss="modal">Close</button>
-                        <form id="complete-appointment-form" method="POST" action="" style="display: inline;">
-                            @csrf
-                            @method('PUT')
-                            <input type="hidden" name="status" value="completed">
-                            <button type="submit" class="btn w-sm btn-success" id="complete-record">Yes, Complete
-                                It!</button>
-                        </form>
-                    </div>
-                </div>
-            </div>
-        </div><!-- /.modal-content -->
-    </div><!-- /.modal-dialog -->
+
 
 @endsection
 
 @push('scripts')
     <script>
         document.addEventListener('DOMContentLoaded', function() {
-            // Complete Appointment Modal Handler
-            const completeModal = document.getElementById('completeAppointmentModal');
-            const completeForm = document.getElementById('complete-appointment-form');
 
-            if (completeModal && completeForm) {
-                completeModal.addEventListener('show.bs.modal', function(event) {
-                    const button = event.relatedTarget;
-                    const appointmentId = button.getAttribute('data-appointment-id');
-                    const action = button.getAttribute('data-action');
-
-                    // Set form action to the correct route - ensure it's set
-                    if (action) {
-                        completeForm.action = action;
-                    } else if (appointmentId) {
-                        // Fallback: construct action from appointment ID
-                        completeForm.action = `/appointments/${appointmentId}/status`;
-                    }
-                });
-
-                // Handle form submission to ensure proper method spoofing
-                completeForm.addEventListener('submit', function(e) {
-                    // Ensure form has action set before submission
-                    if (!completeForm.action || completeForm.action === '' || completeForm.action === window
-                        .location.href) {
-                        e.preventDefault();
-                        if (typeof showToast === 'function') {
-                            showToast('error', 'Error: Form action not set. Please close and try again.');
-                        } else {
-                            alert('Error: Form action not set. Please close and try again.');
-                        }
-                        return false;
-                    }
-
-                    // Ensure method is POST (Laravel will use @method('PUT') via hidden input)
-                    if (completeForm.method.toLowerCase() !== 'post') {
-                        completeForm.method = 'POST';
-                    }
-                });
-            }
 
             // Edit Modal Handler
             const editModal = document.getElementById('editModal');
@@ -1103,6 +1356,13 @@
                 // Store original payment status
                 const originalPaymentStatus = button.getAttribute('data-payment_status') || 'pending';
                 editForm.setAttribute('data-original-payment-status', originalPaymentStatus);
+
+                // Initial availability check
+                setTimeout(() => {
+                    if (typeof checkEditAvailability === 'function') {
+                        checkEditAvailability();
+                    }
+                }, 200);
             });
 
             // Payment Status Change Confirmation
@@ -1492,6 +1752,8 @@
                 document.getElementById('editConflictWarning').style.display = 'none';
                 document.getElementById('editRoomAvailabilityStatus').style.display = 'none';
                 document.getElementById('editRoomAvailabilityStatus').innerHTML = '';
+                document.getElementById('editStaffAvailabilityStatus').style.display = 'none';
+                document.getElementById('editStaffAvailabilityStatus').innerHTML = '';
             });
 
             // Create Modal Customer Logic
@@ -1503,65 +1765,483 @@
             const newCustomerEmail = document.getElementById('new_customer_email');
             const isMemberSwitch = document.getElementById('isMemberSwitch');
 
-            // Payment status change handler
-            const paymentStatusSelect = document.getElementById('payment_status');
 
-            function updateCustomerNameRequirement() {
-                const paymentStatus = paymentStatusSelect.value;
-                const customerId = customerSelect.value;
+            // Customer Type Radio Buttons
+            const existingCustomerRadio = document.getElementById('existing_customer_radio');
+            const newCustomerRadio = document.getElementById('new_customer_radio');
+            const existingCustomerTypeDiv = document.getElementById('existing_customer_type_div');
+            const existingCustomerSelectDiv = document.getElementById('existing_customer_select_div');
+            const newCustomerAddIconDiv = document.getElementById('new_customer_add_icon_div');
+            const customerTypeNormal = document.getElementById('customer_type_normal');
+            const customerTypeMember = document.getElementById('customer_type_member');
 
-                // Logic simplified: just manage visibility if needed, or do nothing for 'required' attribute
-                if (paymentStatus === 'paid' || customerId === '') {
-                    newCustNameDiv.style.display = 'block';
+            // Handle Customer Type Radio Button Changes (Existing/New Customer)
+            if (existingCustomerRadio && newCustomerRadio) {
+                existingCustomerRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Show existing customer options
+                        existingCustomerTypeDiv.style.display = 'block';
+                        existingCustomerSelectDiv.style.display = 'block';
+                        // Keep name and email visible as requested
+                        newCustNameDiv.style.display = 'block';
+                        newCustEmailDiv.style.display = 'block';
+                        // Hide the "Register New" button when Existing is selected
+                        if (newCustomerAddIconDiv) newCustomerAddIconDiv.style.display = 'none';
+
+                        if (newCustomerName) {
+                            newCustomerName.required = false;
+                        }
+                        // Show all options in customer select but dont clear value if already set
+                        if (customerSelect) {
+                            const allOptions = customerSelect.querySelectorAll('option');
+                            allOptions.forEach(option => {
+                                option.style.display = '';
+                            });
+                        }
+                        // Clear fields initially when switch
+                        if (newCustomerName) newCustomerName.value = '';
+                        if (newCustomerEmail) newCustomerEmail.value = '';
+                        if (customerPhone) customerPhone.value = '';
+                    }
+                });
+
+                newCustomerRadio.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Show new customer options
+                        newCustomerAddIconDiv.style.display = 'block';
+                        newCustNameDiv.style.display = 'block';
+                        newCustEmailDiv.style.display = 'block';
+                        // Hide existing customer options
+                        existingCustomerTypeDiv.style.display = 'none';
+                        existingCustomerSelectDiv.style.display = 'none';
+                        // Reset customer select
+                        if (customerSelect) {
+                            customerSelect.value = '';
+                            const allOptions = customerSelect.querySelectorAll('option');
+                            allOptions.forEach(option => {
+                                option.style.display = '';
+                            });
+                        }
+                        // Clear customer type radio buttons
+                        if (customerTypeNormal) customerTypeNormal.checked = false;
+                        if (customerTypeMember) customerTypeMember.checked = false;
+                        // Clear customer phone
+                        if (customerPhone) customerPhone.value = '';
+                    }
+                });
+            }
+
+            // Handle Existing Customer Type Radio Button Changes (Customer/Member Customer)
+            if (customerTypeNormal && customerTypeMember) {
+                customerTypeNormal.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Filter customer select to show only normal customers
+                        filterCustomerSelect('normal');
+                    }
+                });
+
+                customerTypeMember.addEventListener('change', function() {
+                    if (this.checked) {
+                        // Filter customer select to show only member customers
+                        filterCustomerSelect('member');
+                    }
+                });
+            }
+
+            // Function to filter customer select dropdown based on customer type
+            function filterCustomerSelect(type) {
+                if (!customerSelect) return;
+
+                const currentValue = customerSelect.value;
+                const allOptions = customerSelect.querySelectorAll('option');
+                let foundMatch = false;
+
+                allOptions.forEach(option => {
+                    if (option.value === '') {
+                        option.style.display = '';
+                    } else {
+                        const customerType = option.getAttribute('data-type');
+                        if (customerType === type) {
+                            option.style.display = '';
+                            if (option.value === currentValue) foundMatch = true;
+                        } else {
+                            option.style.display = 'none';
+                        }
+                    }
+                });
+
+                // Reset selection only if the current selection is now hidden
+                if (!foundMatch && currentValue !== '') {
+                    customerSelect.value = '';
+                    customerSelect.dispatchEvent(new Event('change'));
                 }
             }
 
-            paymentStatusSelect.addEventListener('change', updateCustomerNameRequirement);
+            // Add Customer Modal Handler
+            const addCustomerBtn = document.getElementById('add_new_customer_btn');
+            const addCustomerModal = document.getElementById('addCustomerModal');
+            const addCustomerForm = document.getElementById('addCustomerForm');
+            const addCustomerTypeSelect = document.getElementById('add_customer_type');
+            const addCustomerWalletBalanceDiv = document.getElementById('add_customer_wallet_balance_div');
 
-            customerSelect.addEventListener('change', function() {
-                const selectedOption = this.options[this.selectedIndex];
-
-                if (this.value === "") {
-                    newCustNameDiv.style.display = 'block';
-                    newCustEmailDiv.style.display = 'block';
-                    newCustomerName.required = true;
-                    customerPhone.value = "";
-                    isMemberSwitch.checked = false;
-                    // Hide member wallet info
-                    document.getElementById('memberWalletInfo').style.display = 'none';
-                    // Clear member wallet data
-                    window.memberWalletBalance = 0;
-                    calculateFinalAmount();
-                } else {
-                    newCustNameDiv.style.display = 'none';
-                    newCustEmailDiv.style.display = 'none';
-                    // Check if payment status requires customer name
-                    const paymentStatus = paymentStatusSelect.value;
-                    newCustomerName.required = paymentStatus === 'paid';
-
-                    customerPhone.value = selectedOption.getAttribute('data-phone') || "";
-                    newCustomerEmail.value = selectedOption.getAttribute('data-email') || "";
-                    const isMember = selectedOption.getAttribute('data-type') === 'member';
-                    isMemberSwitch.checked = isMember;
-
-                    // Handle member wallet display
-                    const memberWalletBalance = parseFloat(selectedOption.getAttribute('data-balance') ||
-                        0);
-                    window.memberWalletBalance = isMember ? memberWalletBalance : 0;
-
-                    if (isMember && memberWalletBalance > 0) {
-                        document.getElementById('memberWalletInfo').style.display = 'block';
-                        document.getElementById('memberBalance').textContent = '₹' + memberWalletBalance
-                            .toFixed(2);
-                    } else {
-                        document.getElementById('memberWalletInfo').style.display = 'none';
+            // Open modal when Add Customer button is clicked
+            if (addCustomerBtn && addCustomerModal) {
+                addCustomerBtn.addEventListener('click', function() {
+                    // Pre-set to Member and disable selection as requested
+                    if (addCustomerTypeSelect) {
+                        addCustomerTypeSelect.value = 'member';
+                        addCustomerTypeSelect.disabled = true;
+                        addCustomerTypeSelect.dispatchEvent(new Event('change'));
                     }
-                    calculateFinalAmount();
-                }
+                    const modal = new bootstrap.Modal(addCustomerModal);
+                    modal.show();
+                });
+            }
 
-                // Update customer name requirement based on payment status
-                updateCustomerNameRequirement();
-            });
+            // Wallet balance toggle for add customer modal
+            if (addCustomerTypeSelect && addCustomerWalletBalanceDiv) {
+                addCustomerTypeSelect.addEventListener('change', function() {
+                    if (this.value === 'member') {
+                        addCustomerWalletBalanceDiv.classList.remove('d-none');
+                    } else {
+                        addCustomerWalletBalanceDiv.classList.add('d-none');
+                    }
+                });
+            }
+
+            // Validation functions for add customer form
+            function validateName(name) {
+                return /^[a-zA-Z\s]+$/.test(name) && name.trim().length > 0;
+            }
+
+            function validatePhone(phone) {
+                return /^[0-9]{10}$/.test(phone);
+            }
+
+            function validateEmail(email) {
+                if (!email) return true; // Optional
+                return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+            }
+
+            function setFieldError(field, message) {
+                field.classList.add('is-invalid');
+                const feedback = field.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = message;
+                }
+            }
+
+            function clearFieldError(field) {
+                field.classList.remove('is-invalid');
+                const feedback = field.nextElementSibling;
+                if (feedback && feedback.classList.contains('invalid-feedback')) {
+                    feedback.textContent = '';
+                }
+            }
+
+            // Add Customer Form Submission
+            if (addCustomerForm) {
+                addCustomerForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    let isValid = true;
+
+                    const nameField = document.getElementById('add_customer_name');
+                    const phoneField = document.getElementById('add_customer_phone');
+                    const emailField = document.getElementById('add_customer_email');
+                    const typeField = document.getElementById('add_customer_type');
+
+                    clearFieldError(nameField);
+                    clearFieldError(phoneField);
+                    clearFieldError(emailField);
+                    clearFieldError(typeField);
+
+                    if (!nameField.value.trim()) {
+                        setFieldError(nameField, 'Name is required.');
+                        isValid = false;
+                    } else if (!validateName(nameField.value)) {
+                        setFieldError(nameField, 'Name must contain only alphabets and spaces.');
+                        isValid = false;
+                    }
+
+                    if (!phoneField.value.trim()) {
+                        setFieldError(phoneField, 'Phone number is required.');
+                        isValid = false;
+                    } else if (!validatePhone(phoneField.value)) {
+                        setFieldError(phoneField, 'Phone number must be exactly 10 digits.');
+                        isValid = false;
+                    }
+
+                    if (emailField.value && !validateEmail(emailField.value)) {
+                        setFieldError(emailField, 'Please enter a valid email address.');
+                        isValid = false;
+                    }
+
+                    if (!typeField.value) {
+                        setFieldError(typeField, 'Customer type is required.');
+                        isValid = false;
+                    }
+
+                    if (isValid) {
+                        // Disable submit button
+                        const submitBtn = addCustomerForm.querySelector('button[type="submit"]');
+                        const originalBtnText = submitBtn.innerHTML;
+                        submitBtn.disabled = true;
+                        submitBtn.innerHTML =
+                            '<span class="spinner-border spinner-border-sm me-1"></span> Saving...';
+
+                        // Prepare form data
+                        // Temporarily enable for FormData collection if it was disabled
+                        const typeWasDisabled = typeField.disabled;
+                        if (typeWasDisabled) typeField.disabled = false;
+
+                        const formData = new FormData(addCustomerForm);
+
+                        // Re-disable if it was disabled
+                        if (typeWasDisabled) typeField.disabled = true;
+
+                        // Submit via AJAX
+                        fetch('{{ route('appointments.create-customer') }}', {
+                                method: 'POST',
+                                body: formData,
+                                headers: {
+                                    'X-Requested-With': 'XMLHttpRequest',
+                                    'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]')
+                                        ?.getAttribute('content') || formData.get('_token')
+                                }
+                            })
+                            .then(response => response.json())
+                            .then(result => {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+
+                                if (result.success) {
+                                    // Add customer to dropdown
+                                    const customer = result.customer;
+                                    const option = document.createElement('option');
+                                    option.value = customer.id;
+                                    option.setAttribute('data-name', customer.name || '');
+                                    option.setAttribute('data-phone', customer.phone || '');
+                                    option.setAttribute('data-email', customer.email || '');
+                                    option.setAttribute('data-type', customer.customer_type);
+                                    option.setAttribute('data-balance', customer.wallet?.balance || 0);
+
+                                    let displayText = customer.name;
+                                    if (customer.customer_type === 'member') {
+                                        displayText +=
+                                            ` (Member - Bal: ₹${parseFloat(customer.wallet?.balance || 0).toFixed(2)})`;
+                                    } else {
+                                        displayText += ' (Normal)';
+                                    }
+                                    option.textContent = displayText;
+
+                                    // Add to dropdown (before the last option if there's a default empty option)
+                                    if (customerSelect) {
+                                        customerSelect.appendChild(option);
+
+                                        // 1. Switch radio first
+                                        if (existingCustomerRadio && !existingCustomerRadio.checked) {
+                                            existingCustomerRadio.checked = true;
+                                            existingCustomerRadio.dispatchEvent(new Event('change'));
+                                        }
+
+                                        // 2. Set type
+                                        if (customer.customer_type === 'member' && customerTypeMember) {
+                                            customerTypeMember.checked = true;
+                                            customerTypeMember.dispatchEvent(new Event('change'));
+                                        } else if (customer.customer_type === 'normal' &&
+                                            customerTypeNormal) {
+                                            customerTypeNormal.checked = true;
+                                            customerTypeNormal.dispatchEvent(new Event('change'));
+                                        }
+
+                                        // 3. Select customer
+                                        customerSelect.value = customer.id;
+                                        customerSelect.dispatchEvent(new Event('change'));
+                                    }
+
+                                    // Close modal
+                                    const modal = bootstrap.Modal.getInstance(addCustomerModal);
+                                    if (modal) {
+                                        modal.hide();
+                                    }
+
+                                    // Show success message
+                                    if (typeof showToast === 'function') {
+                                        showToast('success',
+                                            'Customer created successfully and selected.');
+                                    } else {
+                                        alert('Customer created successfully and selected.');
+                                    }
+                                } else {
+                                    // Handle validation errors
+                                    if (result.errors) {
+                                        Object.keys(result.errors).forEach(field => {
+                                            const fieldElement = document.getElementById(
+                                                'add_customer_' + field);
+                                            if (fieldElement) {
+                                                setFieldError(fieldElement, result.errors[field]
+                                                    [0]);
+                                            }
+                                        });
+                                    }
+
+                                    if (result.message) {
+                                        if (typeof showToast === 'function') {
+                                            showToast('error', result.message);
+                                        } else {
+                                            alert(result.message);
+                                        }
+                                    }
+                                }
+                            })
+                            .catch(error => {
+                                submitBtn.disabled = false;
+                                submitBtn.innerHTML = originalBtnText;
+                                console.error('Error:', error);
+                                if (typeof showToast === 'function') {
+                                    showToast('error', 'An error occurred. Please try again.');
+                                } else {
+                                    alert('An error occurred. Please try again.');
+                                }
+                            });
+                    }
+                });
+            }
+
+            // Real-time validation for add customer form
+            const addCustomerNameField = document.getElementById('add_customer_name');
+            const addCustomerPhoneField = document.getElementById('add_customer_phone');
+            const addCustomerEmailField = document.getElementById('add_customer_email');
+
+            if (addCustomerNameField) {
+                addCustomerNameField.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        if (!validateName(this.value)) {
+                            setFieldError(this, 'Name must contain only alphabets and spaces.');
+                        } else {
+                            clearFieldError(this);
+                        }
+                    }
+                });
+            }
+
+            if (addCustomerPhoneField) {
+                addCustomerPhoneField.addEventListener('input', function() {
+                    this.value = this.value.replace(/[^0-9]/g, '');
+                });
+                addCustomerPhoneField.addEventListener('blur', function() {
+                    if (this.value.trim()) {
+                        if (!validatePhone(this.value)) {
+                            setFieldError(this, 'Phone number must be exactly 10 digits.');
+                        } else {
+                            clearFieldError(this);
+                        }
+                    }
+                });
+            }
+
+            if (addCustomerEmailField) {
+                addCustomerEmailField.addEventListener('blur', function() {
+                    if (this.value && !validateEmail(this.value)) {
+                        setFieldError(this, 'Please enter a valid email address.');
+                    } else {
+                        clearFieldError(this);
+                    }
+                });
+            }
+
+            // Reset add customer form when modal is closed
+            if (addCustomerModal) {
+                addCustomerModal.addEventListener('hidden.bs.modal', function() {
+                    if (addCustomerForm) {
+                        addCustomerForm.reset();
+                        addCustomerForm.querySelectorAll('.is-invalid').forEach(el => el.classList.remove(
+                            'is-invalid'));
+                        addCustomerForm.querySelectorAll('.invalid-feedback').forEach(el => el.textContent =
+                            '');
+
+                        // Re-enable type select for next time
+                        if (addCustomerTypeSelect) {
+                            addCustomerTypeSelect.disabled = false;
+                        }
+
+                        if (addCustomerWalletBalanceDiv) {
+                            addCustomerWalletBalanceDiv.classList.add('d-none');
+                        }
+                    }
+                });
+            }
+
+            function updateCustomerNameRequirement() {
+                const isNewCustomer = newCustomerRadio ? newCustomerRadio.checked : false;
+                const isExistingCustomer = existingCustomerRadio ? existingCustomerRadio.checked : false;
+                const customerId = customerSelect ? customerSelect.value : '';
+
+                // Name and Email should be visible if either New or Existing is selected
+                if (isNewCustomer || isExistingCustomer) {
+                    if (newCustNameDiv) newCustNameDiv.style.display = 'block';
+                    if (newCustEmailDiv) newCustEmailDiv.style.display = 'block';
+
+                    // Required only for new customer
+                    if (newCustomerName) {
+                        newCustomerName.required = isNewCustomer;
+                    }
+                } else {
+                    // Hide if no customer type selected yet
+                    if (newCustNameDiv) newCustNameDiv.style.display = 'none';
+                    if (newCustEmailDiv) newCustEmailDiv.style.display = 'none';
+                    if (newCustomerName) newCustomerName.required = false;
+                }
+            }
+
+
+            if (customerSelect) {
+                customerSelect.addEventListener('change', function() {
+                    const selectedOption = this.options[this.selectedIndex];
+
+                    if (this.value === "") {
+                        if (newCustomerName) newCustomerName.value = "";
+                        customerPhone.value = "";
+                        if (newCustomerEmail) newCustomerEmail.value = "";
+                        isMemberSwitch.checked = false;
+                        // Hide member wallet info
+                        document.getElementById('memberWalletInfo').style.display = 'none';
+                        // Clear member wallet data
+                        window.memberWalletBalance = 0;
+                        calculateFinalAmount();
+                    } else {
+                        // Check if payment status requires customer name
+                        const paymentStatus = 'paid';
+
+                        if (newCustomerName) newCustomerName.value = selectedOption.getAttribute(
+                            'data-name') || "";
+                        customerPhone.value = selectedOption.getAttribute('data-phone') || "";
+                        if (newCustomerEmail) newCustomerEmail.value = selectedOption.getAttribute(
+                            'data-email') || "";
+
+                        const isMember = selectedOption.getAttribute('data-type') === 'member';
+                        isMemberSwitch.checked = isMember;
+
+                        // Handle member wallet display
+                        const memberWalletBalance = parseFloat(selectedOption.getAttribute(
+                                'data-balance') ||
+                            0);
+                        window.memberWalletBalance = isMember ? memberWalletBalance : 0;
+
+                        if (isMember && memberWalletBalance > 0) {
+                            document.getElementById('memberWalletInfo').style.display = 'block';
+                            document.getElementById('memberBalance').textContent = '₹' + memberWalletBalance
+                                .toFixed(2);
+                        } else {
+                            document.getElementById('memberWalletInfo').style.display = 'none';
+                        }
+                        calculateFinalAmount();
+                    }
+
+                    // Update customer name requirement based on payment status
+                    updateCustomerNameRequirement();
+                });
+            }
 
             // Service selection - auto-fill price and duration
             const serviceSelect = document.getElementById('service_select');
@@ -1622,10 +2302,36 @@
                 document.getElementById('appointment_date').value = new Date().toISOString().split('T')[0];
                 document.getElementById('appointment_date').min = new Date().toISOString().split('T')[0];
                 document.getElementById('isMemberSwitch').checked = false;
-                document.getElementById('customer_select').value = '';
-                document.getElementById('payment_status').value = 'pending';
-                document.getElementById('new_cust_name_div').style.display = 'block';
-                document.getElementById('new_cust_email_div').style.display = 'block';
+
+                // Default to Existing Customer
+                if (existingCustomerRadio) {
+                    existingCustomerRadio.checked = true;
+                    existingCustomerRadio.dispatchEvent(new Event('change'));
+                }
+
+                if (customerTypeNormal) customerTypeNormal.checked = false;
+                if (customerTypeMember) customerTypeMember.checked = false;
+
+                // Show basic fields by default
+                if (newCustNameDiv) newCustNameDiv.style.display = 'block';
+                if (newCustEmailDiv) newCustEmailDiv.style.display = 'block';
+
+                // Show existing customer select by default
+                if (existingCustomerTypeDiv) existingCustomerTypeDiv.style.display = 'block';
+                if (existingCustomerSelectDiv) existingCustomerSelectDiv.style.display = 'block';
+
+                // Hide register profile button by default (can still toggle if needed)
+                if (newCustomerAddIconDiv) newCustomerAddIconDiv.style.display = 'none';
+
+                // Reset customer select and show all options
+                if (customerSelect) {
+                    customerSelect.value = '';
+                    const allOptions = customerSelect.querySelectorAll('option');
+                    allOptions.forEach(option => {
+                        option.style.display = '';
+                    });
+                }
+
                 document.getElementById('new_customer_name').classList.remove('is-invalid');
 
                 // Update customer name requirement
@@ -1642,6 +2348,8 @@
                 document.getElementById('conflictWarning').style.display = 'none';
                 document.getElementById('roomAvailabilityStatus').style.display = 'none';
                 document.getElementById('roomAvailabilityStatus').innerHTML = '';
+                document.getElementById('staffAvailabilityStatus').style.display = 'none';
+                document.getElementById('staffAvailabilityStatus').innerHTML = '';
                 document.getElementById('memberWalletInfo').style.display = 'none';
                 document.getElementById('amountBreakdown').style.display = 'none';
                 window.serviceAmount = 0;
@@ -1716,11 +2424,11 @@
                 }
 
                 // Customer name validation
-                const paymentStatus = paymentStatusSelect.value;
+                const paymentStatus = 'paid';
                 const customerId = customerSelect.value;
                 const customerName = newCustomerName.value.trim();
 
-                if ((paymentStatus === 'paid' || customerId === '') && !customerName) {
+                if ((paymentStatus === 'paid' && customerId === '') && !customerName) {
                     const errorMsg = paymentStatus === 'paid' ?
                         'Customer name is required when payment status is paid.' :
                         'Customer name is required.';
@@ -1818,14 +2526,6 @@
                 }
 
                 // Payment status validation
-                if (!paymentStatus) {
-                    errors.payment_status = ['Payment status is required.'];
-                    setFieldError(paymentStatusSelect, 'Payment status is required.');
-                    isValid = false;
-                } else {
-                    clearFieldError(paymentStatusSelect);
-                }
-
                 // Customer email validation (if provided)
                 const customerEmail = newCustomerEmail.value.trim();
                 if (customerEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customerEmail)) {
@@ -1942,10 +2642,16 @@
                                 modal.hide();
                             }
 
+                            // Automatically open invoice for printing if generated
+                            if (result.data.appointment && result.data.appointment.invoice) {
+                                const invoiceId = result.data.appointment.invoice.id;
+                                window.open(`/invoices/${invoiceId}/download?print=1`, '_blank');
+                            }
+
                             // Reload page to show new appointment
                             setTimeout(() => {
                                 window.location.reload();
-                            }, 500);
+                            }, 1000); // Increased delay slightly to allow popup to open first
                         } else if (result.status === 422) {
                             // Validation errors
                             if (result.data.errors) {
@@ -2031,9 +2737,9 @@
                     document.getElementById('remainingBalanceDiv').style.display = 'none';
                 }
 
-                // Update amount input (this will be the final payable amount)
-                if (amountInput && finalAmount >= 0) {
-                    amountInput.value = finalAmount.toFixed(2);
+                // Update amount input (this should be the base service amount before wallet/offers for server processing)
+                if (amountInput && serviceAmount >= 0) {
+                    amountInput.value = serviceAmount.toFixed(2);
                 }
             }
 
@@ -2043,73 +2749,89 @@
             const roomSelect = document.getElementById('room_select');
             const startTime = document.getElementById('start_time');
             const endTime = document.getElementById('end_time');
-            const conflictWarning = document.getElementById('conflictWarning');
-            const roomAvailabilityStatus = document.getElementById('roomAvailabilityStatus');
+            const staffAvailabilityStatus = document.getElementById('staffAvailabilityStatus');
             const availableRoomsCount = document.getElementById('availableRoomsCount');
             const availableRoomsText = document.getElementById('availableRoomsText');
 
-            let roomAvailabilityData = null;
+            let availabilityData = null;
 
-            function checkRoomAvailability() {
+            function checkAvailability() {
                 const date = appointmentDate.value;
                 const start = startTime.value;
                 const end = endTime.value;
 
                 if (date && start && end) {
                     // Show loading
-                    roomAvailabilityStatus.innerHTML =
-                        '<small class="text-info"><i class="ri-loader-4-line spin"></i> Checking availability...</small>';
-                    roomAvailabilityStatus.style.display = 'block';
+                    [roomAvailabilityStatus, staffAvailabilityStatus].forEach(status => {
+                        status.innerHTML =
+                            '<small class="text-info"><i class="ri-loader-4-line spin"></i> Checking availability...</small>';
+                        status.style.display = 'block';
+                    });
 
                     fetch(`/appointments/availability?date=${date}&start_time=${start}&end_time=${end}`)
                         .then(response => response.json())
                         .then(data => {
-                            roomAvailabilityData = data;
+                            availabilityData = data;
 
-                            // Update available rooms count card
-                            availableRoomsCount.textContent = data.available_rooms.length;
-                            availableRoomsText.textContent =
+                            // Update available rooms count card if it exists
+                            if (availableRoomsCount) availableRoomsCount.textContent = data.available_rooms
+                                .length;
+                            if (availableRoomsText) availableRoomsText.textContent =
                                 `${data.available_rooms.length} of ${data.total_rooms} rooms available`;
 
-                            // Update room dropdown with availability status
+                            // Update dropdowns
                             updateRoomDropdown(data.available_rooms, data.unavailable_rooms);
+                            updateStaffDropdown(data.available_staff, data.unavailable_staff);
 
-                            // Show room availability status
+                            // Show Room Availability Status
                             if (data.available_rooms.length > 0) {
                                 let statusHtml =
-                                    '<div class="mt-2"><small class="text-success"><i class="ri-checkbox-circle-line"></i> <strong>Available Rooms:</strong> ';
-                                statusHtml += data.available_rooms.map(r => r.name).join(', ');
-                                statusHtml += '</small></div>';
-
+                                    '<div class="mt-2"><small class="text-success"><i class="ri-checkbox-circle-line"></i> <strong>Available Rooms:</strong> ' +
+                                    data.available_rooms.map(r => r.name).join(', ') + '</small></div>';
                                 if (data.unavailable_rooms.length > 0) {
                                     statusHtml +=
-                                        '<div class="mt-1"><small class="text-danger"><i class="ri-close-circle-line"></i> <strong>Unavailable:</strong> ';
-                                    statusHtml += data.unavailable_rooms.map(r => {
-                                        let msg = r.name;
-                                        if (r.conflict_time) msg += ` (${r.conflict_time})`;
-                                        return msg;
-                                    }).join(', ');
-                                    statusHtml += '</small></div>';
+                                        '<div class="mt-1"><small class="text-danger"><i class="ri-close-circle-line"></i> <strong>Unavailable:</strong> ' +
+                                        data.unavailable_rooms.map(r => r.name + (r.conflict_time ?
+                                            ` (${r.conflict_time})` : '')).join(', ') + '</small></div>';
                                 }
-
                                 roomAvailabilityStatus.innerHTML = statusHtml;
                             } else {
                                 roomAvailabilityStatus.innerHTML =
                                     '<div class="alert alert-danger py-2 mb-0"><small><i class="ri-alert-line"></i> No rooms available at this time!</small></div>';
                             }
 
-                            // Check for conflicts with selected room
-                            checkSelectedRoomConflict(data);
+                            // Show Staff Availability Status
+                            if (data.available_staff.length > 0) {
+                                let statusHtml =
+                                    '<div class="mt-2"><small class="text-success"><i class="ri-checkbox-circle-line"></i> <strong>Available Staff:</strong> ' +
+                                    data.available_staff.map(s => s.name).join(', ') + '</small></div>';
+                                if (data.unavailable_staff.length > 0) {
+                                    statusHtml +=
+                                        '<div class="mt-1"><small class="text-danger"><i class="ri-close-circle-line"></i> <strong>Busy:</strong> ' +
+                                        data.unavailable_staff.map(s => s.name + (s.conflict_time ?
+                                            ` (${s.conflict_time})` : '')).join(', ') + '</small></div>';
+                                }
+                                staffAvailabilityStatus.innerHTML = statusHtml;
+                            } else {
+                                staffAvailabilityStatus.innerHTML =
+                                    '<div class="alert alert-danger py-2 mb-0"><small><i class="ri-alert-line"></i> No staff available at this time!</small></div>';
+                            }
+
+                            // Check for conflicts with currently selected room/staff
+                            checkSelectedConflicts(data);
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            roomAvailabilityStatus.innerHTML =
-                                '<small class="text-danger">Error checking availability</small>';
+                            [roomAvailabilityStatus, staffAvailabilityStatus].forEach(status => {
+                                status.innerHTML =
+                                    '<small class="text-danger">Error checking availability</small>';
+                            });
                         });
                 } else {
                     roomAvailabilityStatus.style.display = 'none';
-                    availableRoomsCount.textContent = '{{ $stats['active_rooms'] }}';
-                    availableRoomsText.textContent = 'Select date & time to check';
+                    staffAvailabilityStatus.style.display = 'none';
+                    if (availableRoomsCount) availableRoomsCount.textContent = '{{ $stats['active_rooms'] }}';
+                    if (availableRoomsText) availableRoomsText.textContent = 'Select date & time to check';
                 }
             }
 
@@ -2163,50 +2885,90 @@
                 }
             }
 
-            function checkSelectedRoomConflict(data) {
-                const selectedRoomId = roomSelect.value;
-                if (!selectedRoomId) return;
-
-                const selectedRoom = [...data.available_rooms, ...data.unavailable_rooms].find(r => r.id ==
-                    selectedRoomId);
-
-                if (selectedRoom && data.unavailable_rooms.find(r => r.id == selectedRoomId)) {
-                    // Selected room is unavailable
-                    conflictWarning.style.display = 'block';
-                    conflictWarning.querySelector('#conflictMessage').textContent =
-                        `Selected room "${selectedRoom.name}" is not available at this time. Please select an available room.`;
-                    roomSelect.classList.add('is-invalid');
-                } else {
-                    conflictWarning.style.display = 'none';
-                    roomSelect.classList.remove('is-invalid');
+            function updateStaffDropdown(availableStaff, unavailableStaff) {
+                const currentValue = staffSelect.value;
+                while (staffSelect.options.length > 1) {
+                    staffSelect.remove(1);
+                }
+                availableStaff.forEach(staff => {
+                    const option = document.createElement('option');
+                    option.value = staff.id;
+                    option.textContent = staff.name + ' - Available';
+                    option.style.color = '#198754';
+                    staffSelect.appendChild(option);
+                });
+                unavailableStaff.forEach(staff => {
+                    const option = document.createElement('option');
+                    option.value = staff.id;
+                    option.textContent = staff.name + ' - Busy';
+                    option.style.color = '#dc3545';
+                    option.disabled = true;
+                    staffSelect.appendChild(option);
+                });
+                if (currentValue) {
+                    if (availableStaff.some(s => s.id == currentValue)) {
+                        staffSelect.value = currentValue;
+                    } else {
+                        staffSelect.value = '';
+                    }
                 }
             }
 
-            // Check availability when date/time changes - automatically update room dropdown
-            [appointmentDate, startTime, endTime].forEach(el => {
+            function checkSelectedConflicts(data) {
+                // Check Room Conflict
+                const selectedRoomId = roomSelect.value;
+                let roomConflict = false;
+                if (selectedRoomId) {
+                    const selectedRoom = [...data.available_rooms, ...data.unavailable_rooms].find(r => r.id ==
+                        selectedRoomId);
+                    if (selectedRoom && data.unavailable_rooms.find(r => r.id == selectedRoomId)) {
+                        roomConflict = true;
+                        roomSelect.classList.add('is-invalid');
+                    } else {
+                        roomSelect.classList.remove('is-invalid');
+                    }
+                }
+
+                // Check Staff Conflict
+                const selectedStaffId = staffSelect.value;
+                let staffConflict = false;
+                if (selectedStaffId) {
+                    const selectedStaff = [...data.available_staff, ...data.unavailable_staff].find(s => s.id ==
+                        selectedStaffId);
+                    if (selectedStaff && data.unavailable_staff.find(s => s.id == selectedStaffId)) {
+                        staffConflict = true;
+                        staffSelect.classList.add('is-invalid');
+                    } else {
+                        staffSelect.classList.remove('is-invalid');
+                    }
+                }
+
+                if (roomConflict || staffConflict) {
+                    conflictWarning.style.display = 'block';
+                    let messages = [];
+                    if (roomConflict) messages.push('Selected room is not available.');
+                    if (staffConflict) messages.push('Selected staff is busy.');
+                    conflictWarning.querySelector('#conflictMessage').textContent = messages.join(' ');
+                } else {
+                    conflictWarning.style.display = 'none';
+                }
+            }
+
+            // Check availability when date/time/room/staff changes
+            [appointmentDate, startTime, endTime, roomSelect, staffSelect].forEach(el => {
                 if (el) {
-                    el.addEventListener('change', function() {
-                        // Small delay to ensure all values are set
-                        setTimeout(checkRoomAvailability, 100);
-                    });
+                    el.addEventListener('change', checkAvailability);
                 }
             });
 
-            // Also check on input event for real-time updates
+            // Also check on input event for real-time updates (with debounce)
             [startTime, endTime].forEach(el => {
                 if (el) {
                     el.addEventListener('input', function() {
                         if (appointmentDate.value && startTime.value && endTime.value) {
-                            setTimeout(checkRoomAvailability, 300); // Debounce
+                            setTimeout(checkAvailability, 500);
                         }
                     });
-                }
-            });
-
-            // Check for conflicts when room is selected
-            roomSelect.addEventListener('change', function() {
-                if (roomAvailabilityData) {
-                    checkSelectedRoomConflict(roomAvailabilityData);
                 }
             });
 
@@ -2225,15 +2987,18 @@
                 }
             }
 
-            // Edit Modal Room Availability
+            // Edit Modal Availability
             const editAppointmentDate = document.getElementById('edit_appointment_date');
             const editStartTime = document.getElementById('edit_start_time');
             const editEndTime = document.getElementById('edit_end_time');
             const editRoomSelect = document.getElementById('edit_room_id');
+            const editStaffSelect = document.getElementById('edit_staff_id');
             const editRoomAvailabilityStatus = document.getElementById('editRoomAvailabilityStatus');
-            let editRoomAvailabilityData = null;
+            const editStaffAvailabilityStatus = document.getElementById('editStaffAvailabilityStatus');
+            const editConflictWarning = document.getElementById('editConflictWarning');
+            let editAvailabilityData = null;
 
-            function checkEditRoomAvailability() {
+            function checkEditAvailability() {
                 const date = editAppointmentDate.value;
                 const start = editStartTime.value;
                 const end = editEndTime.value;
@@ -2241,51 +3006,69 @@
                 const appointmentId = formAction ? formAction.match(/\/appointments\/(\d+)/)?.[1] : null;
 
                 if (date && start && end) {
-                    editRoomAvailabilityStatus.innerHTML =
-                        '<small class="text-info"><i class="ri-loader-4-line spin"></i> Checking availability...</small>';
-                    editRoomAvailabilityStatus.style.display = 'block';
+                    [editRoomAvailabilityStatus, editStaffAvailabilityStatus].forEach(status => {
+                        status.innerHTML =
+                            '<small class="text-info"><i class="ri-loader-4-line spin"></i> Checking availability...</small>';
+                        status.style.display = 'block';
+                    });
 
                     fetch(
-                            `/appointments/availability?date=${date}&start_time=${start}&end_time=${end}&exclude_appointment_id=${appointmentId || ''}`
-                        )
+                            `/appointments/availability?date=${date}&start_time=${start}&end_time=${end}&exclude_appointment_id=${appointmentId || ''}`)
                         .then(response => response.json())
                         .then(data => {
-                            editRoomAvailabilityData = data;
+                            editAvailabilityData = data;
 
-                            // Update room dropdown
+                            // Update dropdowns
                             updateEditRoomDropdown(data.available_rooms, data.unavailable_rooms);
+                            updateEditStaffDropdown(data.available_staff, data.unavailable_staff);
 
-                            // Show status
+                            // Show Room Status
                             if (data.available_rooms.length > 0) {
                                 let statusHtml =
-                                    '<div class="mt-2"><small class="text-success"><i class="ri-checkbox-circle-line"></i> <strong>Available:</strong> ';
-                                statusHtml += data.available_rooms.map(r => r.name).join(', ');
-                                statusHtml += '</small></div>';
-
+                                    '<div class="mt-2"><small class="text-success"><i class="ri-checkbox-circle-line"></i> <strong>Available Rooms:</strong> ' +
+                                    data.available_rooms.map(r => r.name).join(', ') + '</small></div>';
                                 if (data.unavailable_rooms.length > 0) {
                                     statusHtml +=
-                                        '<div class="mt-1"><small class="text-danger"><i class="ri-close-circle-line"></i> <strong>Unavailable:</strong> ';
-                                    statusHtml += data.unavailable_rooms.map(r => {
-                                        let msg = r.name;
-                                        if (r.conflict_time) msg += ` (${r.conflict_time})`;
-                                        return msg;
-                                    }).join(', ');
-                                    statusHtml += '</small></div>';
+                                        '<div class="mt-1"><small class="text-danger"><i class="ri-close-circle-line"></i> <strong>Unavailable:</strong> ' +
+                                        data.unavailable_rooms.map(r => r.name + (r.conflict_time ?
+                                            ` (${r.conflict_time})` : '')).join(', ') + '</small></div>';
                                 }
-
                                 editRoomAvailabilityStatus.innerHTML = statusHtml;
                             } else {
                                 editRoomAvailabilityStatus.innerHTML =
                                     '<div class="alert alert-danger py-2 mb-0"><small><i class="ri-alert-line"></i> No rooms available!</small></div>';
                             }
+
+                            // Show Staff Status
+                            if (data.available_staff.length > 0) {
+                                let statusHtml =
+                                    '<div class="mt-2"><small class="text-success"><i class="ri-checkbox-circle-line"></i> <strong>Available Staff:</strong> ' +
+                                    data.available_staff.map(s => s.name).join(', ') + '</small></div>';
+                                if (data.unavailable_staff.length > 0) {
+                                    statusHtml +=
+                                        '<div class="mt-1"><small class="text-danger"><i class="ri-close-circle-line"></i> <strong>Busy:</strong> ' +
+                                        data.unavailable_staff.map(s => s.name + (s.conflict_time ?
+                                            ` (${s.conflict_time})` : '')).join(', ') + '</small></div>';
+                                }
+                                editStaffAvailabilityStatus.innerHTML = statusHtml;
+                            } else {
+                                editStaffAvailabilityStatus.innerHTML =
+                                    '<div class="alert alert-danger py-2 mb-0"><small><i class="ri-alert-line"></i> No staff available!</small></div>';
+                            }
+
+                            // Check for conflicts with currently selected room/staff
+                            checkEditSelectedConflicts(data);
                         })
                         .catch(error => {
                             console.error('Error:', error);
-                            editRoomAvailabilityStatus.innerHTML =
-                                '<small class="text-danger">Error checking availability</small>';
+                            [editRoomAvailabilityStatus, editStaffAvailabilityStatus].forEach(status => {
+                                status.innerHTML =
+                                    '<small class="text-danger">Error checking availability</small>';
+                            });
                         });
                 } else {
                     editRoomAvailabilityStatus.style.display = 'none';
+                    editStaffAvailabilityStatus.style.display = 'none';
                 }
             }
 
@@ -2334,11 +3117,84 @@
                 }
             }
 
-            // Check availability when date/time changes in edit modal
-            [editAppointmentDate, editStartTime, editEndTime].forEach(el => {
+            function updateEditStaffDropdown(availableStaff, unavailableStaff) {
+                const currentValue = editStaffSelect.value;
+                while (editStaffSelect.options.length > 1) {
+                    editStaffSelect.remove(1);
+                }
+                availableStaff.forEach(staff => {
+                    const option = document.createElement('option');
+                    option.value = staff.id;
+                    option.textContent = staff.name + ' - Available';
+                    option.style.color = '#198754';
+                    editStaffSelect.appendChild(option);
+                });
+                unavailableStaff.forEach(staff => {
+                    const option = document.createElement('option');
+                    option.value = staff.id;
+                    option.textContent = staff.name + ' - Busy';
+                    option.style.color = '#dc3545';
+                    option.disabled = true;
+                    editStaffSelect.appendChild(option);
+                });
+                if (currentValue) {
+                    if (availableStaff.some(s => s.id == currentValue)) {
+                        editStaffSelect.value = currentValue;
+                    } else {
+                        if (availableStaff.length > 0) {
+                            editStaffSelect.value = availableStaff[0].id;
+                        }
+                    }
+                } else if (availableStaff.length > 0) {
+                    editStaffSelect.value = availableStaff[0].id;
+                }
+            }
+
+            function checkEditSelectedConflicts(data) {
+                // Check Room Conflict
+                const selectedRoomId = editRoomSelect.value;
+                let roomConflict = false;
+                if (selectedRoomId) {
+                    const selectedRoom = [...data.available_rooms, ...data.unavailable_rooms].find(r => r.id ==
+                        selectedRoomId);
+                    if (selectedRoom && data.unavailable_rooms.find(r => r.id == selectedRoomId)) {
+                        roomConflict = true;
+                        editRoomSelect.classList.add('is-invalid');
+                    } else {
+                        editRoomSelect.classList.remove('is-invalid');
+                    }
+                }
+
+                // Check Staff Conflict
+                const selectedStaffId = editStaffSelect.value;
+                let staffConflict = false;
+                if (selectedStaffId) {
+                    const selectedStaff = [...data.available_staff, ...data.unavailable_staff].find(s => s.id ==
+                        selectedStaffId);
+                    if (selectedStaff && data.unavailable_staff.find(s => s.id == selectedStaffId)) {
+                        staffConflict = true;
+                        editStaffSelect.classList.add('is-invalid');
+                    } else {
+                        editStaffSelect.classList.remove('is-invalid');
+                    }
+                }
+
+                if (roomConflict || staffConflict) {
+                    editConflictWarning.style.display = 'block';
+                    let messages = [];
+                    if (roomConflict) messages.push('Selected room is not available.');
+                    if (staffConflict) messages.push('Selected staff is busy.');
+                    editConflictWarning.querySelector('#conflictMessage').textContent = messages.join(' ');
+                } else {
+                    editConflictWarning.style.display = 'none';
+                }
+            }
+
+            // Edit Modal Event Listeners
+            [editAppointmentDate, editStartTime, editEndTime, editRoomSelect, editStaffSelect].forEach(el => {
                 if (el) {
                     el.addEventListener('change', function() {
-                        setTimeout(checkEditRoomAvailability, 100);
+                        setTimeout(checkEditAvailability, 100);
                     });
                 }
             });

@@ -72,6 +72,9 @@ class InventoryItemController extends Controller
         }
 
         $items = $query->paginate(15)->withQueryString();
+        
+        // Get all items for dropdown (for adjust modal)
+        $allItems = InventoryItem::orderBy('name')->get();
 
         // Statistics
         $stats = [
@@ -82,7 +85,7 @@ class InventoryItemController extends Controller
             'total_value' => InventoryItem::sum(DB::raw('quantity * amount')),
         ];
 
-        return view('module.inventory.index', compact('items', 'stats'));
+        return view('module.inventory.index', compact('items', 'allItems', 'stats'));
     }
 
     /**
@@ -177,6 +180,12 @@ class InventoryItemController extends Controller
             $newQuantity = $inventory->quantity + $changeQty;
 
             if ($newQuantity < 0) {
+                if ($request->ajax() || $request->wantsJson()) {
+                    return response()->json([
+                        'success' => false,
+                        'message' => 'Cannot adjust quantity. Resulting quantity would be negative.'
+                    ], 422);
+                }
                 return redirect()->back()->with('error', 'Cannot adjust quantity. Resulting quantity would be negative.');
             }
 
@@ -199,10 +208,28 @@ class InventoryItemController extends Controller
             DB::commit();
 
             $action = $changeQty > 0 ? 'added' : 'deducted';
-            return redirect()->back()->with('success', "Successfully {$action} " . abs($changeQty) . " units from inventory.");
+            $message = "Successfully {$action} " . abs($changeQty) . " units from inventory.";
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => true,
+                    'message' => $message
+                ], 200);
+            }
+            
+            return redirect()->back()->with('success', $message);
         } catch (\Exception $e) {
             DB::rollBack();
-            return redirect()->back()->with('error', 'Error adjusting inventory: ' . $e->getMessage());
+            $errorMessage = 'Error adjusting inventory: ' . $e->getMessage();
+            
+            if ($request->ajax() || $request->wantsJson()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $errorMessage
+                ], 422);
+            }
+            
+            return redirect()->back()->with('error', $errorMessage);
         }
     }
 

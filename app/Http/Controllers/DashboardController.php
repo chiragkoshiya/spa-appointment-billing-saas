@@ -76,6 +76,17 @@ class DashboardController extends Controller
                         'staff' => $nextAppointment->staff->name ?? 'N/A',
                     ] : null,
                     'total_bookings_today' => $roomAppointments->count(),
+                    'all_appointments' => $roomAppointments->map(function($apt) {
+                        return [
+                            'id' => $apt->id,
+                            'customer' => $apt->customer->name ?? 'N/A',
+                            'service' => $apt->service->name ?? 'N/A',
+                            'start_time' => $apt->start_time,
+                            'end_time' => $apt->end_time,
+                            'staff' => $apt->staff->name ?? 'N/A',
+                            'status' => $apt->status,
+                        ];
+                    })->values()->toArray(),
                 ];
             });
 
@@ -123,6 +134,17 @@ class DashboardController extends Controller
                         'room' => $nextAppointment->room->name ?? 'N/A',
                     ] : null,
                     'total_appointments_today' => $staffAppointments->count(),
+                    'all_appointments' => $staffAppointments->map(function($apt) {
+                        return [
+                            'id' => $apt->id,
+                            'customer' => $apt->customer->name ?? 'N/A',
+                            'service' => $apt->service->name ?? 'N/A',
+                            'start_time' => $apt->start_time,
+                            'end_time' => $apt->end_time,
+                            'room' => $apt->room->name ?? 'N/A',
+                            'status' => $apt->status,
+                        ];
+                    })->values()->toArray(),
                 ];
             });
 

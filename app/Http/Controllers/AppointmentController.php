@@ -156,16 +156,15 @@ class AppointmentController extends Controller
                 'start_time' => ['required'],
                 'end_time' => ['required', 'after:start_time'],
                 'duration' => ['nullable', 'integer', 'min:1'],
-                'amount' => ['required', 'numeric', 'min:0.01'],
+                'amount' => ['required', 'numeric', 'min:0'],
                 'payment_method' => ['nullable', 'string'],
-                'payment_status' => ['required', 'in:pending,paid'],
                 'is_member' => ['nullable', 'boolean'],
                 'offer_id' => ['nullable', 'exists:offers,id'],
                 'sleep' => ['nullable', 'string', 'max:255'],
             ], [
-                'customer_name.required_if' => 'Customer name is required when creating a new customer or when payment status is paid.',
+                'customer_name.required_without' => 'Customer name is required when no customer is selected.',
                 'phone.regex' => 'Phone number must be exactly 10 digits.',
-                'amount.min' => 'Amount must be a positive number.',
+                'amount.min' => 'Amount must be greater than or equal to 0.',
             ]);
 
             // Check for conflicts
@@ -234,9 +233,9 @@ class AppointmentController extends Controller
                     'payment_method' => $request->payment_method,
                     'amount' => $amount,
                     'offer_id' => $request->offer_id,
-                    'payment_status' => $request->payment_status,
+                    'payment_status' => 'paid', // Default to paid
                     'sleep' => $request->sleep,
-                    'status' => 'created',
+                    'status' => 'created', 
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ]);
@@ -249,6 +248,9 @@ class AppointmentController extends Controller
                     'created_by' => Auth::id(),
                     'updated_by' => Auth::id(),
                 ]);
+
+                // Auto-complete appointment and generate invoice
+                $this->appointmentService->completeAppointment($appointment);
 
                 DB::commit();
 
@@ -326,7 +328,7 @@ class AppointmentController extends Controller
                 'start_time' => ['required'],
                 'end_time' => ['required', 'after:start_time'],
                 'duration' => ['nullable', 'integer', 'min:1'],
-                'amount' => ['required', 'numeric', 'min:0.01'],
+                'amount' => ['required', 'numeric', 'min:0'],
                 'payment_method' => ['nullable', 'string'],
                 'payment_status' => ['required', 'in:pending,paid'],
                 'is_member' => ['nullable', 'boolean'],
@@ -334,7 +336,7 @@ class AppointmentController extends Controller
                 'sleep' => ['nullable', 'string', 'max:255'],
             ], [
                 'phone.regex' => 'Phone number must be exactly 10 digits.',
-                'amount.min' => 'Amount must be a positive number.',
+                'amount.min' => 'Amount must be greater than or equal to 0.',
             ]);
 
             // Check for conflicts (excluding current appointment)
@@ -589,39 +591,37 @@ class AppointmentController extends Controller
             $roomId = $request->get('room_id');
             $excludeAppointmentId = $request->get('exclude_appointment_id');
 
-            $bookedSlots = [];
             $availableRooms = [];
             $unavailableRooms = [];
+            $availableStaff = [];
+            $unavailableStaff = [];
 
-            // Get all active rooms
+            // Get all active rooms and staff
             $allRooms = Room::where('is_active', true)->get();
+            $allStaff = Staff::where('is_active', true)->get();
 
-            // Check room availability if date and time are provided
+            // Check availability if date and time are provided
             if ($date && $startTime && $endTime) {
+                // Check Room Availability
                 foreach ($allRooms as $room) {
                     $isAvailable = !Appointment::where('room_id', $room->id)
                         ->where('appointment_date', $date)
+                        ->where('status', '!=', 'cancelled')
                         ->where(function ($query) use ($startTime, $endTime) {
-                            // Check if new appointment overlaps with existing appointments
                             $query->where(function ($q) use ($startTime, $endTime) {
-                                // New start time is between existing appointment
                                 $q->where('start_time', '<=', $startTime)
                                     ->where('end_time', '>', $startTime);
                             })->orWhere(function ($q) use ($startTime, $endTime) {
-                                // New end time is between existing appointment
                                 $q->where('start_time', '<', $endTime)
                                     ->where('end_time', '>=', $endTime);
                             })->orWhere(function ($q) use ($startTime, $endTime) {
-                                // New appointment completely contains existing appointment
                                 $q->where('start_time', '>=', $startTime)
                                     ->where('end_time', '<=', $endTime);
                             })->orWhere(function ($q) use ($startTime, $endTime) {
-                                // Existing appointment completely contains new appointment
                                 $q->where('start_time', '<=', $startTime)
                                     ->where('end_time', '>=', $endTime);
                             });
                         })
-                        ->where('status', '!=', 'cancelled')
                         ->when($excludeAppointmentId, function ($q) use ($excludeAppointmentId) {
                             $q->where('id', '!=', $excludeAppointmentId);
                         })
@@ -633,11 +633,10 @@ class AppointmentController extends Controller
                             'name' => $room->name,
                         ];
                     } else {
-                        // Get conflicting appointment details
                         $conflict = Appointment::where('room_id', $room->id)
                             ->where('appointment_date', $date)
+                            ->where('status', '!=', 'cancelled')
                             ->where(function ($query) use ($startTime, $endTime) {
-                                // Check if new appointment overlaps with existing appointments
                                 $query->where(function ($q) use ($startTime, $endTime) {
                                     $q->where('start_time', '<=', $startTime)
                                         ->where('end_time', '>', $startTime);
@@ -652,7 +651,6 @@ class AppointmentController extends Controller
                                         ->where('end_time', '>=', $endTime);
                                 });
                             })
-                            ->where('status', '!=', 'cancelled')
                             ->when($excludeAppointmentId, function ($q) use ($excludeAppointmentId) {
                                 $q->where('id', '!=', $excludeAppointmentId);
                             })
@@ -665,51 +663,77 @@ class AppointmentController extends Controller
                         ];
                     }
                 }
-            }
 
-            // Staff bookings
-            if ($staffId && $date) {
-                $staffBookings = Appointment::where('staff_id', $staffId)
-                    ->where('appointment_date', $date)
-                    ->where('status', '!=', 'cancelled')
-                    ->when($excludeAppointmentId, function ($q) use ($excludeAppointmentId) {
-                        $q->where('id', '!=', $excludeAppointmentId);
-                    })
-                    ->get(['start_time', 'end_time']);
+                // Check Staff Availability
+                foreach ($allStaff as $staff) {
+                    $isAvailable = !Appointment::where('staff_id', $staff->id)
+                        ->where('appointment_date', $date)
+                        ->where('status', '!=', 'cancelled')
+                        ->where(function ($query) use ($startTime, $endTime) {
+                            $query->where(function ($q) use ($startTime, $endTime) {
+                                $q->where('start_time', '<=', $startTime)
+                                    ->where('end_time', '>', $startTime);
+                            })->orWhere(function ($q) use ($startTime, $endTime) {
+                                $q->where('start_time', '<', $endTime)
+                                    ->where('end_time', '>=', $endTime);
+                            })->orWhere(function ($q) use ($startTime, $endTime) {
+                                $q->where('start_time', '>=', $startTime)
+                                    ->where('end_time', '<=', $endTime);
+                            })->orWhere(function ($q) use ($startTime, $endTime) {
+                                $q->where('start_time', '<=', $startTime)
+                                    ->where('end_time', '>=', $endTime);
+                            });
+                        })
+                        ->when($excludeAppointmentId, function ($q) use ($excludeAppointmentId) {
+                            $q->where('id', '!=', $excludeAppointmentId);
+                        })
+                        ->exists();
 
-                foreach ($staffBookings as $booking) {
-                    $bookedSlots[] = [
-                        'type' => 'staff',
-                        'start' => $booking->start_time,
-                        'end' => $booking->end_time,
-                    ];
-                }
-            }
+                    if ($isAvailable) {
+                        $availableStaff[] = [
+                            'id' => $staff->id,
+                            'name' => $staff->name,
+                        ];
+                    } else {
+                        $conflict = Appointment::where('staff_id', $staff->id)
+                            ->where('appointment_date', $date)
+                            ->where('status', '!=', 'cancelled')
+                            ->where(function ($query) use ($startTime, $endTime) {
+                                $query->where(function ($q) use ($startTime, $endTime) {
+                                    $q->where('start_time', '<=', $startTime)
+                                        ->where('end_time', '>', $startTime);
+                                })->orWhere(function ($q) use ($startTime, $endTime) {
+                                    $q->where('start_time', '<', $endTime)
+                                        ->where('end_time', '>=', $endTime);
+                                })->orWhere(function ($q) use ($startTime, $endTime) {
+                                    $q->where('start_time', '>=', $startTime)
+                                        ->where('end_time', '<=', $endTime);
+                                })->orWhere(function ($q) use ($startTime, $endTime) {
+                                    $q->where('start_time', '<=', $startTime)
+                                        ->where('end_time', '>=', $endTime);
+                                });
+                            })
+                            ->when($excludeAppointmentId, function ($q) use ($excludeAppointmentId) {
+                                $q->where('id', '!=', $excludeAppointmentId);
+                            })
+                            ->first();
 
-            // Room bookings
-            if ($roomId && $date) {
-                $roomBookings = Appointment::where('room_id', $roomId)
-                    ->where('appointment_date', $date)
-                    ->where('status', '!=', 'cancelled')
-                    ->when($excludeAppointmentId, function ($q) use ($excludeAppointmentId) {
-                        $q->where('id', '!=', $excludeAppointmentId);
-                    })
-                    ->get(['start_time', 'end_time']);
-
-                foreach ($roomBookings as $booking) {
-                    $bookedSlots[] = [
-                        'type' => 'room',
-                        'start' => $booking->start_time,
-                        'end' => $booking->end_time,
-                    ];
+                        $unavailableStaff[] = [
+                            'id' => $staff->id,
+                            'name' => $staff->name,
+                            'conflict_time' => $conflict ? ($conflict->start_time . ' - ' . $conflict->end_time) : null,
+                        ];
+                    }
                 }
             }
 
             return response()->json([
-                'booked_slots' => $bookedSlots,
                 'available_rooms' => $availableRooms,
                 'unavailable_rooms' => $unavailableRooms,
                 'total_rooms' => $allRooms->count(),
+                'available_staff' => $availableStaff,
+                'unavailable_staff' => $unavailableStaff,
+                'total_staff' => $allStaff->count(),
             ]);
         } catch (\Exception $e) {
             Log::error('Availability check error: ' . $e->getMessage(), [
@@ -725,6 +749,76 @@ class AppointmentController extends Controller
                 'unavailable_rooms' => [],
                 'total_rooms' => 0,
             ], 500);
+        }
+    }
+
+    /**
+     * Create a new customer from appointment flow
+     */
+    public function createCustomer(Request $request)
+    {
+        try {
+            $request->validate([
+                'name' => ['required', 'string', 'max:255', 'regex:/^[a-zA-Z\s]+$/'],
+                'phone' => ['required', 'string', 'regex:/^[0-9]{10}$/', 'unique:customers,phone'],
+                'email' => ['nullable', 'email', 'max:255'],
+                'customer_type' => ['required', 'in:normal,member'],
+                'wallet_balance' => ['nullable', 'numeric', 'min:0'],
+            ], [
+                'name.regex' => 'Name must contain only alphabets and spaces.',
+                'phone.regex' => 'Phone number must be exactly 10 digits.',
+            ]);
+
+            DB::beginTransaction();
+            try {
+                $data = $request->all();
+                $data['created_by'] = Auth::id();
+                $data['updated_by'] = Auth::id();
+
+                $customer = Customer::create($data);
+
+                // Create wallet for member customers
+                if ($customer->customer_type == 'member') {
+                    \App\Models\MemberWallet::create([
+                        'customer_id' => $customer->id,
+                        'balance' => $request->wallet_balance ?? 0,
+                        'created_by' => Auth::id(),
+                        'updated_by' => Auth::id(),
+                    ]);
+                }
+
+                DB::commit();
+
+                // Load wallet relationship
+                $customer->load('wallet');
+
+                return response()->json([
+                    'success' => true,
+                    'message' => 'Customer created successfully.',
+                    'customer' => [
+                        'id' => $customer->id,
+                        'name' => $customer->name,
+                        'phone' => $customer->phone,
+                        'email' => $customer->email,
+                        'customer_type' => $customer->customer_type,
+                        'wallet' => $customer->wallet ? [
+                            'balance' => $customer->wallet->balance
+                        ] : null
+                    ]
+                ], 200);
+            } catch (\Exception $e) {
+                DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Error creating customer: ' . $e->getMessage(),
+                ], 422);
+            }
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validation failed',
+                'errors' => $e->errors()
+            ], 422);
         }
     }
 }
