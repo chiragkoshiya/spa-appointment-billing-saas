@@ -193,34 +193,25 @@
                     <h5 class="modal-title">Add New Service</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('services.store') }}" method="POST">
+                <form id="createForm" action="{{ route('services.store') }}" method="POST">
                     @csrf
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Service Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" class="form-control @error('name') is-invalid @enderror"
-                                placeholder="Enter service name" value="{{ old('name') }}">
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <input type="text" name="name" id="create_name" class="form-control" placeholder="Enter service name">
+                            <div class="invalid-feedback">Service Name is required</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price (₹) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="price"
-                                class="form-control @error('price') is-invalid @enderror" placeholder="Enter price"
-                                value="{{ old('price') }}">
-                            @error('price')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <input type="number" step="0.01" min="0" name="price" id="create_price" class="form-control" placeholder="Enter price">
+                            <div class="invalid-feedback">Price is required</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Duration (Minutes)</label>
-                            <input type="number" step="1" min="1" name="duration_minutes"
-                                class="form-control @error('duration_minutes') is-invalid @enderror"
-                                placeholder="Enter duration in minutes" value="{{ old('duration_minutes') }}">
-                            @error('duration_minutes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label class="form-label">Duration (Minutes) <span class="text-danger">*</span></label>
+                            <input type="number" step="1" min="1" name="duration_minutes" id="create_duration"
+                                class="form-control"
+                                placeholder="Enter duration in minutes">
+                            <div class="invalid-feedback">Duration is required</div>
                         </div>
                         <div class="mb-3">
                             <div class="form-check form-switch">
@@ -255,27 +246,18 @@
                     <div class="modal-body">
                         <div class="mb-3">
                             <label class="form-label">Service Name <span class="text-danger">*</span></label>
-                            <input type="text" name="name" id="edit_name"
-                                class="form-control @error('name') is-invalid @enderror" required>
-                            @error('name')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <input type="text" name="name" id="edit_name" class="form-control">
+                            <div class="invalid-feedback">Service Name is required</div>
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Price (₹) <span class="text-danger">*</span></label>
-                            <input type="number" step="0.01" min="0" name="price" id="edit_price"
-                                class="form-control @error('price') is-invalid @enderror" required>
-                            @error('price')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <input type="number" step="0.01" min="0" name="price" id="edit_price" class="form-control">
+                            <div class="invalid-feedback">Price is required</div>
                         </div>
                         <div class="mb-3">
-                            <label class="form-label">Duration (Minutes)</label>
-                            <input type="number" step="1" min="1" name="duration_minutes"
-                                id="edit_duration" class="form-control @error('duration_minutes') is-invalid @enderror">
-                            @error('duration_minutes')
-                                <div class="invalid-feedback">{{ $message }}</div>
-                            @enderror
+                            <label class="form-label">Duration (Minutes) <span class="text-danger">*</span></label>
+                            <input type="number" step="1" min="1" name="duration_minutes" id="edit_duration" class="form-control">
+                            <div class="invalid-feedback">Duration is required</div>
                         </div>
                         <div class="mb-3">
                             <div class="form-check form-switch">
@@ -372,6 +354,63 @@
                     el.classList.remove('is-invalid');
                 });
             });
+            // Custom Validation Logic
+            function validateFormHelper(formId) {
+                const form = document.getElementById(formId);
+                if (!form) return;
+
+                form.addEventListener('submit', function(e) {
+                    let isValid = true;
+
+                    // Clear previous errors
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+
+                    // Helper to show error
+                    const showError = (input, msg) => {
+                        input.classList.add('is-invalid');
+                        const feedback = input.nextElementSibling;
+                        if (feedback && feedback.classList.contains('invalid-feedback')) {
+                            feedback.textContent = msg;
+                            feedback.style.display = 'block';
+                        }
+                        isValid = false;
+                    };
+
+                    // Validate Name
+                    const name = form.querySelector('input[name="name"]');
+                    if (name && !name.value.trim()) {
+                        showError(name, 'Service Name is required');
+                    }
+
+                    // Validate Price
+                    const price = form.querySelector('input[name="price"]');
+                    if (price) {
+                        if (!price.value.trim()) {
+                            showError(price, 'Price is required');
+                        } else if (parseFloat(price.value) < 0) {
+                            showError(price, 'Price must be non-negative');
+                        }
+                    }
+
+                    // Validate Duration
+                    const duration = form.querySelector('input[name="duration_minutes"]');
+                    if (duration) {
+                        if (!duration.value.trim()) {
+                             showError(duration, 'Duration is required');
+                        } else if (parseInt(duration.value) < 1) {
+                             showError(duration, 'Duration must be at least 1 minute');
+                        }
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            validateFormHelper('createForm');
+            validateFormHelper('editForm');
         });
     </script>
 @endpush

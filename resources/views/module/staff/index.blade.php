@@ -250,7 +250,7 @@
                     <h5 class="modal-title" id="createModalLabel">Add Staff Member</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                <form action="{{ route('staff.store') }}" method="POST" enctype="multipart/form-data">
+                <form id="createForm" action="{{ route('staff.store') }}" method="POST" enctype="multipart/form-data">
                     @csrf
                     <div class="modal-body">
                         <div class="row">
@@ -260,15 +260,21 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" class="form-control" placeholder="Enter name" required>
+                                <input type="text" name="name" id="create_name" class="form-control"
+                                    placeholder="Enter name">
+                                <div class="invalid-feedback">Full Name is required</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" class="form-control" placeholder="Enter phone" required>
+                                <input type="text" name="phone" id="create_phone" class="form-control"
+                                    placeholder="Enter phone" maxlength="10">
+                                <div class="invalid-feedback">Phone Number is required and must be max 10 digits</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" name="email" class="form-control" placeholder="Enter email" required>
+                                <input type="email" name="email" id="create_email" class="form-control"
+                                    placeholder="Enter email">
+                                <div class="invalid-feedback">Email is required</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Date of Birth</label>
@@ -284,8 +290,9 @@
                             </div>
                             <div class="col-lg-12 mb-3">
                                 <label class="form-label">Address <span class="text-danger">*</span></label>
-                                <textarea name="address" class="form-control" placeholder="Enter address" rows="2"
-                                    required></textarea>
+                                <textarea name="address" id="create_address" class="form-control"
+                                    placeholder="Enter address" rows="2"></textarea>
+                                <div class="invalid-feedback">Address is required</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">City</label>
@@ -358,15 +365,18 @@
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Full Name <span class="text-danger">*</span></label>
-                                <input type="text" name="name" id="edit_name" class="form-control" required>
+                                <input type="text" name="name" id="edit_name" class="form-control">
+                                <div class="invalid-feedback">Full Name is required</div>
                             </div>
                             <div class="col-lg-6 mb-3" id="edit_phone_wrapper">
                                 <label class="form-label">Phone Number <span class="text-danger">*</span></label>
-                                <input type="text" name="phone" id="edit_phone" class="form-control" required>
+                                <input type="text" name="phone" id="edit_phone" class="form-control" maxlength="10">
+                                <div class="invalid-feedback">Phone Number is required and must be max 10 digits</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Email <span class="text-danger">*</span></label>
-                                <input type="email" name="email" id="edit_email" class="form-control" required>
+                                <input type="email" name="email" id="edit_email" class="form-control">
+                                <div class="invalid-feedback">Email is required</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">Date of Birth</label>
@@ -382,8 +392,8 @@
                             </div>
                             <div class="col-lg-12 mb-3" id="edit_address_wrapper">
                                 <label class="form-label">Address <span class="text-danger">*</span></label>
-                                <textarea name="address" id="edit_address" class="form-control" rows="2"
-                                    required></textarea>
+                                <textarea name="address" id="edit_address" class="form-control" rows="2"></textarea>
+                                <div class="invalid-feedback">Address is required</div>
                             </div>
                             <div class="col-lg-6 mb-3">
                                 <label class="form-label">City</label>
@@ -488,14 +498,10 @@
                     form.action = `/staff/manager/${id}`;
                     document.getElementById('edit_phone_wrapper').style.display = 'none';
                     document.getElementById('edit_address_wrapper').style.display = 'none';
-                    document.getElementById('edit_phone').removeAttribute('required');
-                    document.getElementById('edit_address').removeAttribute('required');
                 } else {
                     form.action = `/staff/${id}`;
                     document.getElementById('edit_phone_wrapper').style.display = 'block';
                     document.getElementById('edit_address_wrapper').style.display = 'block';
-                    document.getElementById('edit_phone').setAttribute('required', 'required');
-                    document.getElementById('edit_address').setAttribute('required', 'required');
                 }
 
                 document.getElementById('edit_name').value = button.getAttribute('data-name');
@@ -536,6 +542,78 @@
                     }
                 });
             });
+            // Custom Validation Logic
+            function validateFormHelper(formId) {
+                const form = document.getElementById(formId);
+                if (!form) return;
+
+                form.addEventListener('submit', function (e) {
+                    let isValid = true;
+
+                    // Clear previous errors
+                    form.querySelectorAll('.is-invalid').forEach(el => el.classList.remove('is-invalid'));
+                    form.querySelectorAll('.invalid-feedback').forEach(el => el.style.display = 'none');
+
+                    // Helper to show error
+                    const showError = (input, msg) => {
+                        input.classList.add('is-invalid');
+                        const feedback = input.nextElementSibling;
+                        if (feedback && feedback.classList.contains('invalid-feedback')) {
+                            feedback.textContent = msg;
+                            feedback.style.display = 'block';
+                        }
+                        isValid = false;
+                    };
+
+                    // Validate Name
+                    const name = form.querySelector('input[name="name"]');
+                    if (name && !name.value.trim()) {
+                        showError(name, 'Full Name is required');
+                    }
+
+                    // Validate Email
+                    const email = form.querySelector('input[name="email"]');
+                    if (email) {
+                        if (!email.value.trim()) {
+                            showError(email, 'Email is required');
+                        } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email.value)) {
+                            showError(email, 'Enter a valid email address');
+                        }
+                    }
+
+                    // Validate Phone
+                    const phone = form.querySelector('input[name="phone"]');
+                    // Check if phone field is visible
+                    const phoneWrapper = phone ? phone.closest('.col-lg-6') : null;
+                    const isPhoneVisible = !phoneWrapper || phoneWrapper.style.display !== 'none';
+
+                    if (phone && isPhoneVisible) {
+                        if (!phone.value.trim()) {
+                            showError(phone, 'Phone Number is required');
+                        } else if (!/^\d+$/.test(phone.value)) {
+                            showError(phone, 'Phone Number must be numeric');
+                        } else if (phone.value.length > 10) {
+                            showError(phone, 'Phone Number must not exceed 10 digits');
+                        }
+                    }
+
+                    // Validate Address
+                    const address = form.querySelector('textarea[name="address"]');
+                    const addressWrapper = address ? address.closest('.col-lg-12') : null;
+                    const isAddressVisible = !addressWrapper || addressWrapper.style.display !== 'none';
+
+                    if (address && isAddressVisible && !address.value.trim()) {
+                        showError(address, 'Address is required');
+                    }
+
+                    if (!isValid) {
+                        e.preventDefault();
+                    }
+                });
+            }
+
+            validateFormHelper('createForm');
+            validateFormHelper('editForm');
         });
     </script>
 @endpush

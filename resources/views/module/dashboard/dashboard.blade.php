@@ -250,9 +250,11 @@
                                         <i class="ri-home-4-line me-2 text-primary"></i>Rooms Availability
                                     </h6>
                                     <p class="text-muted mb-0 small">
-                                        <span class="badge bg-success-subtle text-success">{{ $stats['available_rooms'] }}
-                                            Available</span>
-                                        <span class="badge bg-danger-subtle text-danger ms-1">{{ $stats['booked_rooms'] }}
+                                        {{-- <span class="badge bg-success-subtle text-success">{{ $stats['available_rooms']
+                                            }}
+                                            Available</span> --}}
+                                        <span
+                                            class="badge bg-danger-subtle text-danger ms-1">{{ $stats['available_rooms'] }}
                                             Booked</span>
                                     </p>
                                 </div>
@@ -274,9 +276,10 @@
                                         <i class="ri-user-line me-2 text-warning"></i>Staff Availability
                                     </h6>
                                     <p class="text-muted mb-0 small">
-                                        <span class="badge bg-success-subtle text-success">{{ $stats['available_staff'] }}
-                                            Available</span>
-                                        <span class="badge bg-warning-subtle text-warning ms-1">{{ $stats['busy_staff'] }}
+                                        {{-- <span class="badge bg-success-subtle text-success">{{ $stats['available_staff'] }}
+                                            Available</span> --}}
+                                        <span
+                                            class="badge bg-warning-subtle text-warning ms-1">{{ $stats['available_staff'] }}
                                             Busy</span>
                                     </p>
                                 </div>
@@ -397,7 +400,8 @@
                                                             <div class="flex-grow-1">
                                                                 <h6 class="mb-0 fs-13">{{ $apt['customer'] }}</h6>
                                                                 <p class="text-muted mb-0 small">{{ $apt['service'] }} (with
-                                                                    {{ $apt['staff'] }})</p>
+                                                                    {{ $apt['staff'] }})
+                                                                </p>
                                                             </div>
                                                             <div class="text-end">
                                                                 <span
@@ -544,7 +548,8 @@
                                                             <div class="flex-grow-1">
                                                                 <h6 class="mb-0 fs-13">{{ $apt['customer'] }}</h6>
                                                                 <p class="text-muted mb-0 small">{{ $apt['service'] }} (in
-                                                                    {{ $apt['room'] }})</p>
+                                                                    {{ $apt['room'] }})
+                                                                </p>
                                                             </div>
                                                             <div class="text-end">
                                                                 <span
